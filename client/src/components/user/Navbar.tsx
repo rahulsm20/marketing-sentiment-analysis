@@ -1,5 +1,5 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import { GanttChart, Info } from "lucide-react";
+import { GanttChart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { LoginButton, LogoutButton } from "./ActionButtons";
 import { ModeToggle } from "./ModeToggle";
@@ -45,7 +45,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="md:flex justify-between items-center text-sm top-0 backdrop-blur-lg bg-background/30 z-50 border-b flex-wrap hidden md:flex-row md:gap-0 gap-2 sticky">
+    <nav className="md:flex justify-between items-center text-sm top-0 bg-transparent z-50  border-b flex-wrap hidden md:flex-row md:gap-0 gap-2 sticky">
       <div className="flex items-center gap-5">
         <ul className="flex justify-end p-3 gap-5">
           {!user && <PublicNavItems />}

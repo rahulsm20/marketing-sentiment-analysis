@@ -11,9 +11,29 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
+import { useState } from "react";
 
-export function DeleteDialog({ _id }: { _id: string }) {
+export function DeleteDialog({
+  _id,
+  refetch = () => Promise.resolve(),
+}: {
+  _id: string;
+  refetch?: () => Promise<void>;
+}) {
+  const [enabled, setEnabled] = useState(false);
+  const { isLoading } = useQuery({
+    queryKey: [`individualConversationData`],
+    enabled,
+    retry: false,
+    queryFn: () =>
+      schedulerApi.deleteConversation(_id).then(() => {
+        setEnabled(false);
+        return refetch();
+      }),
+  });
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -32,8 +52,9 @@ export function DeleteDialog({ _id }: { _id: string }) {
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
+            disabled={isLoading}
             onClick={() => {
-              schedulerApi.deleteConversation(_id);
+              setEnabled(true);
             }}
           >
             Continue

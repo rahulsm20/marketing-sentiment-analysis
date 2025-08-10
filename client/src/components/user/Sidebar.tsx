@@ -29,19 +29,27 @@ const Sidebar = () => {
   const [loaded, setLoaded] = useState(false);
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const id = useParams()?.id;
+
+  const fetchConversations = async () => {
+    return schedulerApi.getConversations().then((res) => {
+      setConversations(res);
+      setLoaded(true);
+      return res;
+    });
+  };
+
   const { isLoading, error } = useQuery({
     queryKey: [`conversationData`],
     enabled: !loaded,
     retry: false,
     queryFn: () =>
-      schedulerApi.getConversations().then((res) => {
-        setConversations(res);
-        setLoaded(true);
+      fetchConversations().then((res) => {
         return res;
       }),
   });
 
   if (error) {
+    console.error("Failed to fetch conversations", error);
     toast(`Failed to fetch conversations`, {
       position: "top-center",
       action: {
@@ -193,7 +201,10 @@ const Sidebar = () => {
                     <PopoverContent className="text-xs w-full">
                       <ul>
                         <li className="flex items-center gap-1">
-                          <DeleteDialog _id={_id} />
+                          <DeleteDialog
+                            _id={_id}
+                            refetch={fetchConversations}
+                          />
                         </li>
                       </ul>
                     </PopoverContent>
