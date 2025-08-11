@@ -8,10 +8,14 @@ import os
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 import pprint
+from openai import OpenAI
+
 
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 PROMPT = os.getenv("PROMPT")
+openAIClient = OpenAI(api_key=OPENAI_API_KEY)
 genai.configure(api_key=GEMINI_API_KEY)
 gemini_model = genai.GenerativeModel('gemini-2.0-flash')
 
@@ -73,6 +77,11 @@ async def generate_strategies(request: Request):
     prompt = prompt.replace("{category}", category)
 
     full_prompt = prompt + " " + company + " " + category + " reviews: " + joined_reviews
+    message = openAIClient.responses.create(
+        model='gpt-4.1',
+        input=full_prompt
+    )
     print(full_prompt)
+    
     response = llm.generate_text(full_prompt)
-    return {"sentiments": sentiments, "response": response}
+    return {"sentiments": sentiments, "response": message}
