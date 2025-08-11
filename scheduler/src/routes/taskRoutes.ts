@@ -7,23 +7,27 @@
 import express from "express";
 import { addTaskToQueue } from "../controllers/index";
 import { taskQueue } from "../lib/bullmq";
-
-// ----------------------------------------------------------------------------------
+import { rabbitMQ } from "../lib/rabbitmq";
 
 const router = express.Router();
 
-router.post("/tasks", addTaskToQueue);
+// ----------------------------------------------------------------------------------
 
-router.get("/tasks", async (_req, res) => {
+router.post("/", addTaskToQueue);
+
+router.get("/", async (_req, res) => {
   try {
     const jobs = await taskQueue.getJobs();
-    return res.status(200).json(jobs);
+    const rabbitMQJobs = await rabbitMQ.getJobs();
+    return res.status(200).json({ jobs, rabbitMQJobs });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error", error });
   }
 });
 
-router.get("/tasks/:id", async (req, res) => {
+// ----------------------------------------------------------------------------------
+
+router.get("/:id", async (req, res) => {
   try {
     const job = await taskQueue.getJob(req.params.id);
     if (!job) {
@@ -34,5 +38,7 @@ router.get("/tasks/:id", async (req, res) => {
     return res.status(500).json({ message: "Internal server error", error });
   }
 });
+
+// ----------------------------------------------------------------------------------
 
 export { router as taskRoutes };

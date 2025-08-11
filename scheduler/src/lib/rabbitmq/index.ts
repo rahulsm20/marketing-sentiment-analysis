@@ -1,4 +1,4 @@
-import { connect } from "amqplib";
+import { Channel, ChannelModel, connect } from "amqplib";
 import { config } from "../../utils/config";
 
 /**
@@ -6,8 +6,8 @@ import { config } from "../../utils/config";
  * Handles connection to RabbitMQ and sending messages to a queue
  */
 class RabbitMQClient {
-  private connection: any;
-  private channel: any;
+  private connection: ChannelModel | null;
+  private channel: Channel | null;
 
   constructor() {
     this.connection = null;
@@ -26,12 +26,31 @@ class RabbitMQClient {
   }
   async sendToQueue(queue: string, message: string) {
     try {
+      if (!this.channel) {
+        throw new Error("Channel is not initialized. Call connect() first.");
+      }
       this.channel.sendToQueue(queue, Buffer.from(message), {
         persistent: true,
       });
       console.log("Message sent to queue:", message);
     } catch (error) {
       console.error("Error sending message to queue:", error);
+    }
+  }
+  async getJobs() {
+    try {
+      if (!this.channel) {
+        throw new Error("Channel is not initialized. Call connect() first.");
+      }
+      const jobs = await this.channel.get("taskQueue", { noAck: true });
+      if (!jobs) {
+        console.log("No jobs in the queue");
+        return [];
+      }
+      return jobs.content.toString();
+    } catch (error) {
+      console.error("Error getting jobs from queue:", error);
+      return [];
     }
   }
 }
