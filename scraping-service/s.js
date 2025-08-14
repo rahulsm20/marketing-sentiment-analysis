@@ -12,7 +12,7 @@ async function handleCookiesPopup(page) {
   let browser;
   try {
     browser = await puppeteer.launch({
-      executablePath: '',
+      executablePath: "",
       headless: true,
       defaultViewport: null,
     });
@@ -107,28 +107,28 @@ async function handleCookiesPopup(page) {
               ? ratingsNumberElement
                   .getAttribute("aria-label")
                   .replace(/[\s.,]+/g, "")
-              : "N/A";
+              : 0;
             const ratingsNumber = numberRegex.test(numberFormated)
               ? numberFormated
-              : "N/A";
+              : 0;
 
             const boughtPastMonthElement = card.querySelector(
               ".a-row.a-size-base > .a-size-base.a-color-secondary"
             );
             const textContent = boughtPastMonthElement
               ? boughtPastMonthElement.textContent
-              : "N/A";
+              : 0;
             const plusSignRegex = /\b.*?\+/;
             const plusSignText = textContent.match(plusSignRegex);
             const boughtPastMonth = plusSignRegex.test(plusSignText)
               ? plusSignText[0]
-              : "N/A";
+              : 0;
 
             if (productName) {
               return {
                 cardURL,
-                company: "oneplus",
-                category: "mobiles",
+                company,
+                category,
                 productName,
                 sponsored,
                 badge,
