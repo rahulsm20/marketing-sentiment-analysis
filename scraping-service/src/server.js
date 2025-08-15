@@ -12,6 +12,7 @@ const app = express();
 const cors = require("cors");
 const mongoose = require("mongoose");
 const { rabbitMQ } = require("./lib/rabbitmq");
+const { config } = require("./utils/config");
 require("dotenv").config();
 
 //-------------------------------------------------------------
@@ -39,6 +40,6 @@ try {
   console.log(err);
 }
 
-app.listen(5000, () =>
+app.listen(config.PORT, () =>
   console.log(">> Scraping service is running on port 5000")
 );
