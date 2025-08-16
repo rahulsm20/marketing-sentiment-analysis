@@ -45,7 +45,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="md:flex justify-between items-center text-sm top-0 bg-transparent z-50  border-b flex-wrap hidden md:flex-row md:gap-0 gap-2 sticky">
+    <nav className="md:flex justify-between items-center text-sm top-0 bg-transparent z-50 backdrop-blur-lg border-b flex-wrap hidden md:flex-row md:gap-0 gap-2 sticky">
       <div className="flex items-center gap-5">
         <ul className="flex justify-end p-3 gap-5">
           {!user && <PublicNavItems />}

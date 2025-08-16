@@ -1,8 +1,20 @@
 //---------------------------------------------------------------------------------
 
 import { Request, Response } from "express";
+import { IUser } from "../../types";
+import { Message, User } from "../lib/models";
 import { Conversation } from "../lib/models/conversation.model";
 import { rabbitMQ } from "../lib/rabbitmq";
+
+//---------------------------------------------------------------------------------
+
+declare global {
+  namespace Express {
+    interface Request {
+      user: IUser;
+    }
+  }
+}
 
 //---------------------------------------------------------------------------------
 
@@ -22,17 +34,29 @@ export const addTaskToQueue = async (req: Request, res: Response) => {
   }
   const query = `${company}+${category}`;
 
+  const user = await User.findOne({
+    userId: req.auth?.payload.sub, // Assuming user ID is available in the request
+  });
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
   const conversation = new Conversation({
     query,
+    user: user?._id,
   });
 
   const saved = await conversation.save();
 
-  const message = {
-    conversationId: saved._id,
-    company,
-    category,
-  };
-  await rabbitMQ.sendToQueue("taskQueue", JSON.stringify(message));
+  const message = new Message({
+    conversation: saved._id,
+    author: "system",
+    data: "Generating analysis for the query: " + query.split("+").join(" "),
+  });
+
+  await message.save();
+
+  await rabbitMQ.sendToQueue("taskQueue", JSON.stringify({ query }));
   return res.status(201).json({ conversationId: saved._id });
 };

@@ -10,8 +10,10 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 import { auth } from "express-oauth2-jwt-bearer";
-import mongoose from "mongoose";
+import { db } from "./lib/db/mongo";
 import { rabbitMQ } from "./lib/rabbitmq";
+import { checkUser } from "./middleware";
+import { conversationRoutes } from "./routes/conversationRoutes";
 import { taskRoutes } from "./routes/taskRoutes";
 import { config } from "./utils/config";
 dotenv.config();
@@ -34,25 +36,36 @@ app.use(
   })
 );
 
+//----------------------------------------------------------
+
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static("public"));
 app.use(jwtCheck);
-
-app.use("/v1", taskRoutes);
-app.get("/", async (req: Request, res: Response) => {
+app.use(checkUser);
+app.use("/v1/tasks", taskRoutes);
+app.use("/v1/conversation", conversationRoutes);
+app.get("/", async (_req: Request, res: Response) => {
   return res.status(200).json({ message: "Service running", status: "ok" });
 });
 
+//----------------------------------------------------------
+
 try {
-  mongoose
-    .connect(config.MONGO_URL)
+  db.connect(config.MONGO_URL)
     .then(() => console.log(">> Connected to MongoDB"))
     .catch((err) => console.log(err));
 
-  rabbitMQ.connect();
+  rabbitMQ
+    .connect()
+    .then(() => {
+      console.log(">> Connection to RabbitMQ established");
+    })
+    .catch((err) => {
+      console.error(">> Failed to connect to RabbitMQ", err);
+    });
 } catch (err) {
   console.log(err);
 }
@@ -64,3 +77,5 @@ app.get("*", async (_req: Request, res: Response) => {
 app.listen(port, () => {
   console.log(`>> Scheduler service is running at port ${port}`);
 });
+
+//----------------------------------------------------------

@@ -7,9 +7,16 @@ services:
       dockerfile: Dockerfile
     image: client:latest
     environment:
-      - VITE_CLIENT_URL=http://localhost:3000
+      - VITE_CLIENT_URL=http://localhost:5173
     ports:
-      - 3000:3000
+      - 5173:5173
+  embedding-service:
+    build:
+      context: ./embedding-service
+      dockerfile: Dockerfile
+    image: embedding-service:latest
+    ports:
+      - 4000:4000
   generation-service:
     build:
       context: ./generation-service
@@ -24,3 +31,13 @@ services:
     image: scraping-service:latest
     ports:
       - 5000:5000
+  scheduler:
+    build:
+      context: ./scheduler
+      dockerfile: Dockerfile
+    image: scheduler:latest
+    ports:
+      - 3000:3000
+    depends_on:
+      - generation-service
+      - scraping-service

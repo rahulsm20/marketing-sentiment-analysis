@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/pubsub": "^5.0.0",
     "@neondatabase/serverless": "^0.9.3",
     "@prisma/adapter-neon": "^5.15.0",
     "@prisma/client": "^5.15.0",
