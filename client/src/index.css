@@ -77,7 +77,7 @@
 
 @layer base {
   * {
-    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+    font-family: -apple-system, BlinkMacSystemFont,"Inter", system-ui, 
       "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
       "Helvetica Neue", sans-serif;
     @apply border-border;
