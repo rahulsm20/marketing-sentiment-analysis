@@ -10,10 +10,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../ui/button";
+
+//--------------------------------------------
 
 export function DeleteDialog({
   _id,
@@ -22,6 +25,7 @@ export function DeleteDialog({
   _id: string;
   refetch?: () => Promise<void>;
 }) {
+  const navigate = useNavigate();
   const [enabled, setEnabled] = useState(false);
   const { isLoading } = useQuery({
     queryKey: [`individualConversationData`],
@@ -30,15 +34,22 @@ export function DeleteDialog({
     queryFn: () =>
       schedulerApi.deleteConversation(_id).then(() => {
         setEnabled(false);
-        return refetch();
+        refetch();
+        navigate("/");
+        return null;
       }),
   });
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline">
-          Delete <Trash2 className="h-3 w-3" />
+        <Button
+          variant="ghost"
+          className="text-red-500 hover:text-red-500 flex gap-1 items-center p-0 h-5"
+          title="Click to delete this conversation"
+        >
+          <Trash2 className="h-3 w-3" />
+          <span>Delete</span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

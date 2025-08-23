@@ -63,7 +63,7 @@ const Landing = () => {
     <div className="hero">
       <Navbar />
       <Layout className="flex px-20 items-center mb-20">
-        <div className="flex items-center justify-between flex-col lg:flex-row gap-2 lg:gap-5  lg:w-1/2">
+        <div className="flex items-center justify-between flex-col lg:flex-row gap-2 lg:gap-5  lg:w-2/3">
           <div className="flex flex-col">
             <h1 className="text-4xl font-bold mb-4">
               <GanttChart className="inline-block mr-2" />
@@ -81,7 +81,7 @@ const Landing = () => {
             <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
           {features.map((feature, index) => (
             <Card
               key={index}

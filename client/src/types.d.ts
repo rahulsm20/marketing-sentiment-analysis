@@ -17,5 +17,6 @@ export type MessageType = {
 export type ConversationItem = {
   _id: string;
   query: string;
+  status: "pending" | "completed" | "failed";
   messages: MessageType[];
 };

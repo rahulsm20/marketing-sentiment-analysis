@@ -1,9 +1,6 @@
-import { generateStrategies } from "@/api";
 import { schedulerApi } from "@/api/auth0";
-import { Loader2, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Search } from "lucide-react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
-import Markdown from "react-markdown";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
@@ -15,24 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import Analytics from "./Analytics";
 import Layout from "./Layout";
-
-//-------------------------------------------------------------------------------
-
-const Stopwatch = () => {
-  const [seconds, setSeconds] = useState(0);
-
-  // Update the stopwatch every second
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSeconds((prevSeconds) => prevSeconds + 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return <span className="text-sm">Elapsed Time: {seconds} seconds</span>;
-};
 
 //-------------------------------------------------------------------------------
 
@@ -46,32 +26,34 @@ const Body = () => {
     "Headphones",
   ];
 
-  const [loading, setLoading] = useState(false);
-  const [showStopwatch, setShowStopwatch] = useState(false);
-  const [strategies, setStrategies] = useState("");
-  const [productData, setProductData] = useState([]);
-  const [sentiments, setSentiments] = useState([]);
+  // const [loading, setLoading] = useState(false);
+  // const [showStopwatch, setShowStopwatch] = useState(false);
+  // const [strategies, setStrategies] = useState("");
+  // const [productData, setProductData] = useState([]);
+  // const [sentiments, setSentiments] = useState([]);
   const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    setLoading(true);
-    setShowStopwatch(true);
+    // setLoading(true);
+    // setShowStopwatch(true);
+    console.log("Submitting task", data);
+
     try {
       const task = await schedulerApi.addTask(data.company, data.category);
       if (task && task.conversationId) {
         navigate(`/conversation/${task.conversationId}`);
-        const res = await generateStrategies(data.company, data.category);
-        const { data: result, productData } = res;
-        setStrategies(result?.response?.output?.[0]?.content?.[0]?.text || "");
-        setProductData(productData);
-        setSentiments(result?.sentiments);
+        // const res = await generateStrategies(data.company, data.category);
+        // const { data: result, productData } = res;
+        // setStrategies(result?.response?.output?.[0]?.content?.[0]?.text || "");
+        // setProductData(productData);
+        // setSentiments(result?.sentiments);
       }
     } catch (err) {
       alert("An error occurred. Please try again.");
       console.log(err);
     } finally {
-      setLoading(false);
-      setShowStopwatch(false);
+      // setLoading(false);
+      // setShowStopwatch(false);
     }
   };
 
@@ -125,7 +107,7 @@ const Body = () => {
           <Button type="submit">Submit</Button>
         </form>
       </Form>
-      <div className="flex flex-col gap-2 w-full lg:w-2/3 overflow-x-clip">
+      {/* <div className="flex flex-col gap-2 w-full lg:w-2/3 overflow-x-clip">
         {loading && <Loader2 className="animate-spin" />}
         {showStopwatch && <Stopwatch />}
         <div className="flex flex-col flex-wrap gap-5 w-full">
@@ -138,7 +120,7 @@ const Body = () => {
             </Markdown>
           )}
         </div>
-      </div>
+      </div> */}
     </Layout>
   );
 };
