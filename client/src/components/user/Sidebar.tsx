@@ -229,7 +229,7 @@ const Sidebar = () => {
                     <DropdownMenuContent>
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                         <DeleteDialog _id={_id} refetch={fetchConversations} />
                       </DropdownMenuItem>
                     </DropdownMenuContent>
