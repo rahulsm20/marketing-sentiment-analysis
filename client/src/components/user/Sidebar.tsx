@@ -185,7 +185,7 @@ const Sidebar = () => {
           <h3 className="dark:text-zinc-300 underline underline-offset-8">
             Chats
           </h3>
-          <Link to="/">
+          <Link to="/home">
             <Button variant={"ghost"} size={"sm"}>
               <PlusCircle className="h-4 w-4" />
             </Button>

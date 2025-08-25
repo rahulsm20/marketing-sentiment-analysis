@@ -9,14 +9,20 @@ async function handleCookiesPopup(page) {
   }
 }
 
-async function scrapeProducts(req, res) {
+/**
+ * Scrapes product data from a given input
+ * @param {{company: string, category: string, conversationId: string}} input
+ * @returns {Promise<{data?: {products: Array, conversationId: string}, error?: string, message?: string, status: number}>}
+ */
+async function scrapeProducts(input) {
   let browser;
-  const { company, category, conversationId } = req.query;
+  const { company, category, conversationId } = input;
 
   if (!company || !category) {
-    return res
-      .status(400)
-      .json({ error: "Please provide both company and category parameters." });
+    return {
+      error: "Please provide both company and category parameters.",
+      status: 400,
+    };
   }
 
   const query = `${company.toLowerCase()}+${category}`;
@@ -25,7 +31,7 @@ async function scrapeProducts(req, res) {
   });
 
   if (items.length > 0) {
-    return res.status(200).json({ products: items, conversationId });
+    return { data: { products: items, conversationId }, status: 200 };
   }
 
   try {
@@ -165,7 +171,7 @@ async function scrapeProducts(req, res) {
 
         return cardInfo;
       }, query);
-      console.log("outside: ", { company, category });
+      // console.log("outside: ", { company, category });
       pageCardData = pageCardData.filter(
         (card) =>
           card.productName &&
@@ -252,18 +258,18 @@ async function scrapeProducts(req, res) {
       try {
         const newProduct = new Product(product);
         await newProduct.save();
-      } catch (err) {
-        console.log(err);
-        return res.status(400).json(err);
+      } catch (error) {
+        console.log(error);
+        return { error: error, status: 500 };
       }
     }
     if (cardData.length === 0) {
-      return res.status(404).json({ message: "No products found." });
+      return { message: "No products found.", status: 404 };
     }
-    return res.status(200).json({ products: cardData, conversationId });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({ error: err.message || "An error occurred." });
+    return { data: { products: cardData, conversationId }, status: 200 };
+  } catch (error) {
+    console.log(error);
+    return { error: error.message || "An error occurred.", status: 500 };
   } finally {
     if (browser) {
       await browser.close();
@@ -271,4 +277,4 @@ async function scrapeProducts(req, res) {
   }
 }
 
-module.exports = scrapeProducts;
+module.exports = { scrapeProducts };

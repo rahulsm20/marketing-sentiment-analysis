@@ -23,21 +23,21 @@ services:
       dockerfile: Dockerfile
     image: generation-service:latest
     ports:
-      - 8000:8000
+      - 4001:4001
   scraping-service:
     build:
       context: ./scraping-service
       dockerfile: Dockerfile
     image: scraping-service:latest
     ports:
-      - 5000:5000
+      - 4002:4002
   scheduler:
     build:
       context: ./scheduler
       dockerfile: Dockerfile
     image: scheduler:latest
     ports:
-      - 3000:3000
+      - 4003:4003
     depends_on:
       - generation-service
       - scraping-service

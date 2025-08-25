@@ -4,8 +4,8 @@ dotenvConfig();
 export const config = {
   MONGO_URL: process.env.MONGO_URL || "mongodb://localhost:27017/marketing",
   RABBITMQ_URL: process.env.RABBITMQ_URL || "amqp://localhost",
-  CLIENT_URL: process.env.CLIENT_URL || "http://localhost:3000",
-  PORT: process.env.PORT || 3000,
+  CLIENT_URL: process.env.CLIENT_URL || "http://localhost:5173",
+  PORT: process.env.PORT || 4003,
   AUTH0_AUDIENCE:
     process.env.AUTH0_AUDIENCE || "https://dev-123456.us.auth0.com/api/v2/",
   AUTH0_BASE_URL:
@@ -16,4 +16,5 @@ export const config = {
   GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || "your-google-api-key",
   MONGO_URI:
     process.env.MONGO_URI || "mongodb://localhost:27017/market-sentience",
+  RABBITMQ_TOPIC: process.env.RABBITMQ_TOPIC || "scraping",
 };
