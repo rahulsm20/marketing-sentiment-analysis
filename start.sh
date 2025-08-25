@@ -5,9 +5,9 @@ cd scheduler && npm run dev &
 scheduler_pid=$!
 cd scraping-service && npm run dev &
 scraping_pid=$!
-(cd generation-service && source venv/Scripts/activate && fastapi dev main.py) &
+(cd generation-service && source venv/bin/activate && fastapi dev main.py --port 4001) &
 generation_pid=$!
-(cd embedding-service && source venv/Scripts/activate && fastapi dev app/main.py --port 4000) &
+(cd embedding-service && source venv/bin/activate && fastapi dev app/main.py --port 4000) &
 embedding_pid=$!
 
 echo "Client PID: $client_pid"

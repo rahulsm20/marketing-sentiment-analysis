@@ -7,7 +7,9 @@ const ChatMessage = ({ message }: { message: MessageType }) => {
     <div
       className={`flex justify-${message.sender === "user" ? "end" : "start"}`}
     >
-      <div className={`p-4 border border-border w-fit`}>{message.data}</div>
+      <div className={`p-4 border rounded-[var(--radius)] w-fit`}>
+        {message.data}
+      </div>
     </div>
   );
 };

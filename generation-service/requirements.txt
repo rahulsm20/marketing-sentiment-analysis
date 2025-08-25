@@ -100,7 +100,7 @@ python-dateutil==2.8.2
 python-dotenv==1.0.1
 python-multipart==0.0.20
 pytz==2023.3.post1
-pywin32==310
+# pywin32==310
 PyYAML==6.0.1
 pyzmq==25.1.2
 redis==5.0.3
@@ -125,8 +125,8 @@ tensorboard==2.15.2
 tensorboard-data-server==0.7.2
 tensorflow==2.15.0
 tensorflow-estimator==2.15.0
-tensorflow-intel==2.15.0
-tensorflow-io-gcs-filesystem==0.31.0
+# tensorflow-intel==2.15.0
+# tensorflow-io-gcs-filesystem==0.31.0
 termcolor==2.4.0
 threadpoolctl==3.2.0
 tokenizers==0.15.2

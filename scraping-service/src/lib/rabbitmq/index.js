@@ -1,5 +1,6 @@
 const { connect } = require("amqplib");
 const { config } = require("../../utils/config");
+const { scrapeProducts } = require("../../controllers/scrape");
 
 /**
  * RabbitMQClient class
@@ -18,13 +19,28 @@ class RabbitMQClient {
       this.channel.on("error", (error) => {
         console.error("RabbitMQ channel error:", error);
       });
-      this.channel.consume("taskQueue", (msg) => {
-        console.log("Received message:", msg.content.toString());
-        // Process the message here
-        this.channel.ack(msg);
+
+      console.log(">> Scraping service connected to RabbitMQ");
+      await this.channel.assertQueue(config.RABBITMQ_TOPIC.SCRAPING, {
+        durable: true, // survives broker restarts
       });
-      await this.channel.assertQueue("taskQueue", { durable: true });
-      console.log(">> Connected to RabbitMQ");
+
+      this.channel.consume(config.RABBITMQ_TOPIC.SCRAPING, async (msg) => {
+        try {
+          const input = JSON.parse(msg.content.toString());
+          console.log("Received message:", input);
+          await scrapeProducts(input);
+          console.log("Processed message:", input);
+          await rabbitMQ.sendToQueue(
+            config.RABBITMQ_TOPIC.EMBEDDING,
+            JSON.stringify(input)
+          );
+          // Process the message here
+          this.channel.ack(msg);
+        } catch (err) {
+          return this.channel.nack(msg);
+        }
+      });
     } catch (error) {
       console.error("Error connecting to RabbitMQ:", error);
     }

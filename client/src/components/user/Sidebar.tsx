@@ -1,10 +1,13 @@
 import { schedulerApi } from "@/api/auth0";
 import { Button } from "@/components/ui/button";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ConversationItem } from "@/types";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -15,14 +18,17 @@ import {
   Home,
   Info,
   LineChart,
+  PlusCircle,
   SidebarOpen,
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { LoginButton, LogoutButton } from "./ActionButtons";
-import { DeleteDialog } from "./AlertDialog";
+import { DeleteDialog } from "./DeleteDialog";
 import { ModeToggle } from "./ModeToggle";
+
+//--------------------------------------------
 
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
@@ -175,9 +181,16 @@ const Sidebar = () => {
 
       {/* Desktop Sidebar */}
       <div className="hidden md:flex md:flex-col md:w-60 h-full border-r p-4 space-y-2 gap-2">
-        <h3 className="dark:text-zinc-300 underline underline-offset-8">
-          Chats
-        </h3>
+        <div className="flex justify-between items-center">
+          <h3 className="dark:text-zinc-300 underline underline-offset-8">
+            Chats
+          </h3>
+          <Link to="/home">
+            <Button variant={"ghost"} size={"sm"}>
+              <PlusCircle className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
         {isLoading ? (
           <Ellipsis className="animate-pulse" />
         ) : (
@@ -194,7 +207,7 @@ const Sidebar = () => {
                   <Link key={_id} to={`/conversation/${_id}`}>
                     {query ? query.split("+").join(" ") : "No Query"}
                   </Link>
-                  <Popover>
+                  {/* <Popover>
                     <PopoverTrigger onClick={(e) => e.stopPropagation()}>
                       <Ellipsis className="h-4 w-4" />
                     </PopoverTrigger>
@@ -208,7 +221,19 @@ const Sidebar = () => {
                         </li>
                       </ul>
                     </PopoverContent>
-                  </Popover>
+                  </Popover> */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <Ellipsis className="h-4 w-4" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        <DeleteDialog _id={_id} refetch={fetchConversations} />
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               ))
             ) : (

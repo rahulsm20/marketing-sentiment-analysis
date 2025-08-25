@@ -19,17 +19,21 @@ require("dotenv").config();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: config.CLIENT_URL,
     credentials: true,
   })
 );
 
 app.use(express.json());
 app.get("/", (req, res) => {
-  res.json("Sentiment Analysis API");
+  res.json({ message: "market sentience scraping service", status: "ok" });
 });
 
-app.get("/scrape", scrapeProducts);
+// app.get("/scrape", scrapeProducts);
+app.get("*", (req, res) => {
+  res.status(404).json({ message: "Not Found" });
+});
+
 try {
   mongoose
     .connect(process.env.MONGO_URL)
@@ -41,5 +45,5 @@ try {
 }
 
 app.listen(config.PORT, () =>
-  console.log(">> Scraping service is running on port 5000")
+  console.log(`>> Scraping service is running on port ${config.PORT}`)
 );

@@ -1,10 +1,10 @@
 import { updateHistory } from "@/utils";
-import { LOCAL_CACHE_KEYS } from "@/utils/constants";
+import { LOCAL_CACHE_KEYS, serverUrl } from "@/utils/constants";
 import axios from "axios";
 import { schedulerApi } from "./auth0";
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_SERVER_URL,
+  baseURL: serverUrl,
 });
 
 export const generateStrategies = async (company: string, category: string) => {
@@ -20,7 +20,7 @@ export const generateStrategies = async (company: string, category: string) => {
         LOCAL_CACHE_KEYS.PRODUCT_DATA(company, category)
       ) as string
     );
-    console.log({ key: LOCAL_CACHE_KEYS.PRODUCT_DATA(company, category) });
+    // console.log({ key: LOCAL_CACHE_KEYS.PRODUCT_DATA(company, category) });
     if (productData && productData.length === 0) {
       localStorage.removeItem(LOCAL_CACHE_KEYS.PRODUCT_DATA(company, category));
     }
@@ -38,8 +38,8 @@ export const generateStrategies = async (company: string, category: string) => {
     );
 
     productData = data.products;
-    const conversationId = data.conversationId;
-    console.log({ productData, conversationId });
+    // const conversationId = data.conversationId;
+    // console.log({ productData, conversationId });
 
     if (productData && productData.length > 0) {
       localStorage.setItem(

@@ -18,7 +18,7 @@ class RabbitMQClient {
     try {
       this.connection = await connect(config.RABBITMQ_URL);
       this.channel = await this.connection.createChannel();
-      await this.channel.assertQueue("taskQueue", { durable: true });
+      await this.channel.assertQueue(config.RABBITMQ_TOPIC, { durable: true });
       console.log(">> Connected to RabbitMQ");
     } catch (error) {
       console.error("Error connecting to RabbitMQ:", error);
@@ -32,6 +32,7 @@ class RabbitMQClient {
       this.channel.sendToQueue(queue, Buffer.from(message), {
         persistent: true,
       });
+      console.log({ queue });
       console.log("Message sent to queue:", message);
     } catch (error) {
       console.error("Error sending message to queue:", error);
@@ -42,7 +43,9 @@ class RabbitMQClient {
       if (!this.channel) {
         throw new Error("Channel is not initialized. Call connect() first.");
       }
-      const jobs = await this.channel.get("taskQueue", { noAck: true });
+      const jobs = await this.channel.get(config.RABBITMQ_TOPIC, {
+        noAck: true,
+      });
       if (!jobs) {
         console.log("No jobs in the queue");
         return [];

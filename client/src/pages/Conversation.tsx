@@ -2,9 +2,9 @@ import { schedulerApi } from "@/api/auth0";
 import ChatUI from "@/components/user/ChatUI";
 import Navbar from "@/components/user/Navbar";
 import Sidebar from "@/components/user/Sidebar";
+import { Stopwatch } from "@/components/user/Stopwatch";
 import { ConversationItem } from "@/types";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -47,9 +47,9 @@ const Conversation = () => {
           <Sidebar />
         </div>
         <div className="flex-1 overflow-y-auto custom-scroll">
-          {isPending ? (
-            <div className="flex items-center justify-center min-h-screen w-full">
-              <Loader2 className="animate-spin" />
+          {isPending || conversation?.status == "pending" ? (
+            <div className="flex gap-5 items-center justify-center min-h-screen w-full">
+              <Stopwatch />
             </div>
           ) : (
             <ChatUI messages={conversation?.messages || []} />
