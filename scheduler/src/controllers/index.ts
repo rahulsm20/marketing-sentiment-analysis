@@ -5,6 +5,7 @@ import { IUser } from "../../types";
 import { Message, User } from "../lib/models";
 import { Conversation } from "../lib/models/conversation.model";
 import { rabbitMQ } from "../lib/rabbitmq";
+import { config } from "../utils/config";
 
 //---------------------------------------------------------------------------------
 
@@ -52,11 +53,14 @@ export const addTaskToQueue = async (req: Request, res: Response) => {
   const message = new Message({
     conversation: saved._id,
     author: "system",
-    data: "Generating analysis for the query: " + query.split("+").join(" "),
+    data: "Generating analysis for " + query.split("+").join(" "),
   });
 
   await message.save();
 
-  await rabbitMQ.sendToQueue("taskQueue", JSON.stringify({ query }));
+  await rabbitMQ.sendToQueue(
+    config.RABBITMQ_TOPIC,
+    JSON.stringify({ company, category, conversationId: saved._id })
+  );
   return res.status(201).json({ conversationId: saved._id });
 };
