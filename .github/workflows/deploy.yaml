@@ -1,0 +1,30 @@
+# This workflow deploys all services to Production
+# Deploying all services together ensures any changes in one service are reflected in others.
+# This helps maintain consistency and reduces the risk of integration issues.
+
+name: Deploy all services to Production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy_scraping_service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - name: Shell into dir
+        run: cd scraping-service
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+      - name: Deploy to production
+        run: npm run deploy
