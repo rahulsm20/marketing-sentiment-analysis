@@ -1,24 +1,43 @@
 # Marketing Sentience
 
-### Introduction
+## Introduction
 
-Market Sentience is a sentiment analysis platform powered by real-time data collection and a microservices architecture. It leverages a CNN-LSTM deep learning model to analyze market sentiment from scraped data. The system orchestrates asynchronous tasks through a scheduler service and RabbitMQ, with dedicated services for scraping, embedding, and generation. MongoDB stores conversation and message data, while Pinecone manages semantic embeddings for efficient retrieval. The generation service uses LLM-powered reasoning to produce actionable insights, delivered back to the client in real time.
+Market Sentience is a sentiment analysis platform powered by real-time data collection and a microservices architecture.
 
-### Index
+It leverages a CNN-LSTM deep learning model to analyze market sentiment from scraped data. The system orchestrates asynchronous tasks through a scheduler service and RabbitMQ, with dedicated services for scraping, embedding, and generation.
 
-- [Pre-requisites](#prerequisites)
+MongoDB stores conversation and message data, while Pinecone manages semantic embeddings for efficient retrieval. The generation service uses LLM-powered reasoning to produce actionable insights, delivered back to the client in real time.
+
+## Index
+
+- [Tech Stack](#tech-stack)
 - [Setup](#setup)
 - [System Design](#system-design)
 
-### Prerequisites
+## Tech Stack
 
-- [Node](https://nodejs.org/en/download/current)
-- [Python (>=3.10)](https://www.python.org/downloads/)
-- [Python Extension (VSCode)](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
-- [Jupyter Notebook Extension (VSCode)](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter)
-- [Docker (Optional)](https://www.docker.com/)
+- Frontend
 
-### Setup
+  - Vite
+  - React
+  - Shadcn
+  - Vercel
+
+- Backend
+  - Node
+  - Typescript
+  - Express
+  - PostgreSQL
+  - Python
+  - FastAPI
+  - Pinecone
+  - LangChain
+  - MongoDB
+  - RabbitMQ
+  - Puppeteer
+  - Docker
+
+## Setup
 
 - Add .env variables according to .env.example files
 
@@ -34,6 +53,6 @@ Market Sentience is a sentiment analysis platform powered by real-time data coll
   docker compose up
   ```
 
-### System Design
+## System Design
 
 ![system](client/public/market_sentience_arch.png)

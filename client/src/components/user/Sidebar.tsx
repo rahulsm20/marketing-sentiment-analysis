@@ -21,7 +21,7 @@ import {
   PlusCircle,
   SidebarOpen,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { LoginButton, LogoutButton } from "./ActionButtons";
@@ -35,6 +35,22 @@ const Sidebar = () => {
   const [loaded, setLoaded] = useState(false);
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const id = useParams()?.id;
+
+  const {
+    logout,
+    isAuthenticated,
+    isLoading: isFetchingAuth,
+    user,
+  } = useAuth0();
+
+  useEffect(() => {
+    const handleLogout = async () => {
+      await logout({ logoutParams: { returnTo: window.location.origin } });
+    };
+    if (!isFetchingAuth && !isAuthenticated) {
+      handleLogout();
+    }
+  }, [isFetchingAuth, logout, isAuthenticated]);
 
   const fetchConversations = async () => {
     return schedulerApi.getConversations().then((res) => {
@@ -64,8 +80,6 @@ const Sidebar = () => {
       },
     });
   }
-
-  const { user } = useAuth0();
 
   return (
     <>
@@ -191,61 +205,65 @@ const Sidebar = () => {
             </Button>
           </Link>
         </div>
-        {isLoading ? (
-          <Ellipsis className="animate-pulse" />
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {conversations.length > 0 ? (
-              conversations.map(({ query, _id }) => (
-                <div
-                  className={`flex items-center justify-between text-sm px-2 py-1 rounded ${
-                    _id == id
-                      ? "bg-zinc-100 dark:bg-zinc-800"
-                      : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                  }`}
-                >
-                  <Link key={_id} to={`/conversation/${_id}`}>
-                    {query ? query.split("+").join(" ") : "No Query"}
-                  </Link>
-                  {/* <Popover>
-                    <PopoverTrigger onClick={(e) => e.stopPropagation()}>
-                      <Ellipsis className="h-4 w-4" />
-                    </PopoverTrigger>
-                    <PopoverContent className="text-xs w-full">
-                      <ul>
-                        <li className="flex items-center gap-1">
-                          <DeleteDialog
-                            _id={_id}
-                            refetch={fetchConversations}
-                          />
-                        </li>
-                      </ul>
-                    </PopoverContent>
-                  </Popover> */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger>
-                      <Ellipsis className="h-4 w-4" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                        <DeleteDialog _id={_id} refetch={fetchConversations} />
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              ))
-            ) : (
-              <li className="text-muted-foreground text-sm">
-                No conversations found.
-              </li>
-            )}
-          </ul>
-        )}
+        <ConversationItems
+          conversations={conversations}
+          refetch={fetchConversations}
+          isLoading={isLoading}
+          id={id}
+        />
       </div>
     </>
   );
 };
 
+const ConversationItems = ({
+  conversations,
+  refetch,
+  isLoading,
+  id,
+}: {
+  conversations: ConversationItem[];
+  refetch: () => Promise<void>;
+  isLoading: boolean;
+  id: string | undefined;
+}) => {
+  return isLoading ? (
+    <Ellipsis className="animate-pulse" />
+  ) : (
+    <ul className="flex flex-col gap-2">
+      {conversations.length > 0 ? (
+        conversations.map(({ query, _id }) => (
+          <Link to={`/conversation/${_id}`}>
+            <div
+              key={_id}
+              className={`flex items-center justify-between text-sm px-2 py-1 rounded ${
+                _id == id
+                  ? "bg-zinc-100 dark:bg-zinc-800"
+                  : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              }`}
+            >
+              {query ? query.split("+").join(" ") : "No Query"}
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <Ellipsis className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <DeleteDialog _id={_id} refetch={refetch} />
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </Link>
+        ))
+      ) : (
+        <li className="text-muted-foreground text-sm">
+          No conversations found.
+        </li>
+      )}
+    </ul>
+  );
+};
 export default Sidebar;

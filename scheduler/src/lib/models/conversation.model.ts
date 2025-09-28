@@ -5,6 +5,9 @@ const ConversationStatus = {
   PENDING: "pending",
   IN_PROGRESS: "in_progress",
   COMPLETED: "completed",
+  SCRAPING: "scraping",
+  GENERATION: "generation",
+  EMBEDDING: "embedding",
 };
 
 export const ConversationStatusEnum = Object.freeze(ConversationStatus);

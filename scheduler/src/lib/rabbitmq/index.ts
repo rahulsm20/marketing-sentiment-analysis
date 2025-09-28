@@ -33,7 +33,7 @@ class RabbitMQClient {
         persistent: true,
       });
       console.log({ queue });
-      console.log("Message sent to queue:", message);
+      console.log("Message sent to queue from scheduler:", message);
     } catch (error) {
       console.error("Error sending message to queue:", error);
     }
