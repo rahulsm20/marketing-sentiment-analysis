@@ -9,3 +9,5 @@ env
 __pycache__
 windows-venv
 analysis/
+for_me.md
+logs.txt

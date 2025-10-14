@@ -3,12 +3,14 @@ Embedding Service API
 This service provides an API for generating embeddings from text inputs.
 """
 
-from fastapi import APIRouter, FastAPI, FastAPI  
-from fastapi.security import HTTPBearer 
+from fastapi import APIRouter, FastAPI, FastAPI
+from fastapi.security import HTTPBearer
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.embeddings import embed
+import threading
+from app.lib.rabbitmq import RabbitMQConsumer, handle_embedding_task
 
-token_auth_scheme = HTTPBearer()  
+token_auth_scheme = HTTPBearer()
 
 app = FastAPI()
 app_router = APIRouter()
@@ -21,12 +23,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app_router.get("/")
 async def read_root():
-    return {"message": "Embedding Service API",
-            "version": "1.0.0",
-            "documentation_url": "/docs"
-            }
+    return {
+        "message": "Embedding Service API",
+        "version": "1.0.0",
+        "documentation_url": "/docs",
+    }
+
 
 @app_router.get("/create-embedding-index")
 async def create_embedding_index():
@@ -36,12 +41,14 @@ async def create_embedding_index():
     response = await embed()
     return response
 
+
 @app_router.get("/health")
 async def health_check():
     """
     Health check endpoint to verify the service is running.
     """
     return {"status": "ok", "message": "Embedding Service is running."}
+
 
 @app_router.get("/embed/{conversation_id}")
 async def create_embedding(conversation_id: str):
@@ -51,4 +58,17 @@ async def create_embedding(conversation_id: str):
     response = await embed(conversation_id)
     return response
 
+
 app.include_router(app_router)
+
+
+@app.on_event("startup")
+def start_rabbit_listener():
+    consumer = RabbitMQConsumer(queue_name="embedding", host="localhost")
+
+    def run_consumer():
+        consumer.start_consuming(handle_embedding_task)
+
+    thread = threading.Thread(target=run_consumer, daemon=True)
+    thread.start()
+    print(" [*] RabbitMQ consumer started in background.")

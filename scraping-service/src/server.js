@@ -37,7 +37,7 @@ app.get("*", (req, res) => {
 try {
   mongoose
     .connect(process.env.MONGO_URL)
-    .then(() => console.log(">> Connected to MongoDB"))
+    .then(() => console.log(">> Scraping service connected to MongoDB"))
     .catch((err) => console.log(err));
   rabbitMQ.connect();
 } catch (err) {

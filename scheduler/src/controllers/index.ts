@@ -5,7 +5,7 @@ import { IUser } from "../../types";
 import { Message, User } from "../lib/models";
 import { Conversation } from "../lib/models/conversation.model";
 import { rabbitMQ } from "../lib/rabbitmq";
-import { config } from "../utils/config";
+import { RABBITMQ_TOPIC } from "../utils/constants";
 
 //---------------------------------------------------------------------------------
 
@@ -59,7 +59,7 @@ export const addTaskToQueue = async (req: Request, res: Response) => {
   await message.save();
 
   await rabbitMQ.sendToQueue(
-    config.RABBITMQ_TOPIC,
+    RABBITMQ_TOPIC.SCRAPING,
     JSON.stringify({ company, category, conversationId: saved._id })
   );
   return res.status(201).json({ conversationId: saved._id });

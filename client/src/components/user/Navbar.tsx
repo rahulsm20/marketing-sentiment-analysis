@@ -11,18 +11,22 @@ const Navbar = () => {
     return (
       <>
         <li>
-          <Link to="/home" title='Home' className="flex gap-1 items-center justify-center">
+          <Link
+            to="/home"
+            title="Home"
+            className="flex gap-1 items-center justify-center"
+          >
             <GanttChart />
           </Link>
         </li>
-        {/* <li> */}
-        {/*   <Link */}
-        {/*     to="/analytics" */}
-        {/*     className="flex gap-1 items-center justify-center" */}
-        {/*   > */}
-        {/*     <span>Analytics</span> */}
-        {/*   </Link> */}
-        {/* </li> */}
+        {/* <li>
+          <Link
+            to="/analytics"
+            className="flex gap-1 items-center justify-center"
+          >
+            <span>Analytics</span>
+          </Link>
+        </li> */}
       </>
     );
   };
