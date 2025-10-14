@@ -1,4 +1,4 @@
-from app.core.db import mongodb, pc
+from app.core.db import pc
 from bson import ObjectId
 from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
@@ -79,9 +79,9 @@ async def embed(conversation_id: str = None):
             )
 
             # mark product as embedded in Mongo
-            mongodb.products.update_one(
-                {"_id": product["_id"]}, {"$set": {"embedded": True}}
-            )
+            # mongodb.products.update_one(
+            #     {"_id": product["_id"]}, {"$set": {"embedded": True}}
+            # )
 
         index = pc.Index(name=index_name)
         # upsert all vectors to Pinecone
