@@ -8,6 +8,7 @@ import express from "express";
 import { User } from "../lib/models";
 import { Conversation } from "../lib/models/conversation.model";
 import { rabbitMQ } from "../lib/rabbitmq";
+import { RABBITMQ_TOPIC } from "../utils/constants";
 
 // ----------------------------------------------------------------------------------
 
@@ -26,11 +27,22 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ message: "Conversation not found" });
     }
 
-    if (conversation.status == "pending") {
-      // send to queue for processing
-      await rabbitMQ.sendToQueue("scraping", JSON.stringify(conversation));
-      conversation.status = "scraping";
-      await conversation.save();
+    switch (conversation.status) {
+      case "pending":
+        await rabbitMQ.sendToQueue(
+          RABBITMQ_TOPIC.SCRAPING,
+          JSON.stringify(conversation)
+        );
+        conversation.status = RABBITMQ_TOPIC.SCRAPING;
+        await conversation.save();
+        break;
+      default:
+        await rabbitMQ.sendToQueue(
+          conversation.status,
+          JSON.stringify(conversation)
+        );
+        await conversation.save();
+        break;
     }
 
     return res.status(200).json(conversation);
