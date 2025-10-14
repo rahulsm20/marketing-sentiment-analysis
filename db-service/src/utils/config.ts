@@ -3,4 +3,8 @@ export const config = {
   DATABASE_URL:
     process.env.DATABASE_URL ||
     "postgres://postgres:postgres@localhost:5432/postgres",
+  MONGO_URL: process.env.MONGO_URL || "mongodb://localhost:27017/marketing",
+  REDIS_HOST: process.env.REDIS_HOST || "localhost",
+  REDIS_PORT: process.env.REDIS_PORT || "6379",
+  REDIS_PASS: process.env.REDIS_PASS || "",
 };
