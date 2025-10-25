@@ -1,3 +1,4 @@
+import { config } from "@/utils/config";
 import { Auth0Client } from "@auth0/auth0-spa-js";
 import axios, { AxiosInstance } from "axios";
 
@@ -27,7 +28,12 @@ export class ApiService {
 
   private async getToken(): Promise<string | null> {
     try {
-      return await this.auth0Client.getTokenSilently();
+      return await this.auth0Client.getTokenSilently({
+        authorizationParams: {
+          scope: "openid profile email offline_access",
+          audience: config.VITE_AUTH0_AUDIENCE,
+        },
+      });
     } catch (error) {
       console.error("Error fetching token:", error);
       return null;

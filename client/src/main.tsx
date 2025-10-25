@@ -15,6 +15,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     authorizationParams={{
       redirect_uri: import.meta.env.VITE_CLIENT_URL,
       audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+      scope: "openid profile email offline_access",
     }}
     useRefreshTokens={true}
     cacheLocation={

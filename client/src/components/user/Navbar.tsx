@@ -58,15 +58,7 @@ const Navbar = () => {
       </div>
       {user ? (
         <ul className="flex p-3 gap-5 items-center justify-center">
-          {user?.picture && (
-            <li>
-              <img
-                src={user?.picture}
-                alt="Profile"
-                className="w-8 h-8 rounded-full"
-              />
-            </li>
-          )}
+          {user?.name && <li>{user?.name}</li>}
           <li>
             <LogoutButton />
           </li>
