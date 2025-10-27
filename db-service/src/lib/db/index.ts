@@ -6,7 +6,7 @@ mongoose.connection.on("error", (err) => {
 });
 
 mongoose.connection.once("open", () => {
-  console.log("MongoDB connected successfully");
+  console.log(">> DB Service connected successfully to MongoDB");
 });
 
-export { mongoose as db };
+export { mongoose as mongodb };
