@@ -53,7 +53,7 @@ export const addTaskToQueue = async (req: Request, res: Response) => {
   const message = new Message({
     conversation: saved._id,
     author: "system",
-    data: "Generating analysis for " + query.split("+").join(" "),
+    data: "Generating analysis for " + query.split("+").join(" ") + "...",
   });
 
   await message.save();
