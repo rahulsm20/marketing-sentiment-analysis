@@ -24,6 +24,7 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { Skeleton } from "../ui/skeleton";
 import { LoginButton, LogoutButton } from "./ActionButtons";
 import { DeleteDialog } from "./DeleteDialog";
 import { ModeToggle } from "./ModeToggle";
@@ -95,7 +96,7 @@ const Sidebar = () => {
               <span className="text-lg font-semibold">Menu</span>
             </div>
             <ul className="space-y-2 p-4 list-none">
-              <div className="flex flex-col items-center justify-between border-b">
+              <div className="flex flex-col items-start justify-between border-b">
                 <ul className="flex justify-end p-3 gap-5">
                   {!user && (
                     <>
@@ -170,19 +171,14 @@ const Sidebar = () => {
                 )}
               </div>
               {isLoading ? (
-                <Ellipsis className="animate-pulse" />
+                <Skeleton className="h-4 w-[250px]" />
               ) : conversations.length > 0 ? (
-                conversations.map(({ query, _id }) => (
-                  <li key={_id}>
-                    <Link
-                      to={`/conversation/${_id}`}
-                      className="block px-2 py-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                      onClick={() => setOpen(false)}
-                    >
-                      {query}
-                    </Link>
-                  </li>
-                ))
+                <ConversationItems
+                  conversations={conversations}
+                  refetch={fetchConversations}
+                  isLoading={isLoading}
+                  id={id}
+                />
               ) : (
                 <li className="text-muted-foreground text-sm">
                   No conversations found.
@@ -228,7 +224,7 @@ const ConversationItems = ({
   id: string | undefined;
 }) => {
   return isLoading ? (
-    <Ellipsis className="animate-pulse" />
+    <Skeleton className="h-4 w-full" />
   ) : (
     <ul className="flex flex-col gap-2">
       {conversations.length > 0 ? (
