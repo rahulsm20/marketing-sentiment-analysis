@@ -1,14 +1,19 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { ConversationStatusType } from "../../types";
 import { conversationsTable } from "../lib/db/schema";
 import { db } from "../lib/db/tracking";
 
 export const conversationController = {
-  getById: async (id: string) => {
+  getById: async (id: string, userId: string) => {
     const conv = await db
       .select()
       .from(conversationsTable)
-      .where(eq(conversationsTable.id, id));
+      .where(
+        and(
+          eq(conversationsTable.userId, userId),
+          eq(conversationsTable.id, id)
+        )
+      );
     return conv;
   },
   createUpdate: async ({

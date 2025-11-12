@@ -4,7 +4,29 @@ import { conversationController } from "../controllers/conversation";
 const router = express.Router();
 
 router.post("/", async (req, res) => {
-  const { id, query, status, userId } = req.body;
+  const user = req.user;
+  if (!user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  const userId = user.login;
+  const { query, status } = req.body;
+  const conv = await conversationController.createUpdate({
+    query,
+    status,
+    userId,
+  });
+  return res.json(conv);
+});
+
+router.post("/:id", async (req, res) => {
+  const { id } = req.params;
+  const user = req.user;
+  if (!user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  const userId = user.login;
+
+  const { query, status } = req.body;
   const conv = await conversationController.createUpdate({
     id,
     query,
@@ -17,7 +39,12 @@ router.post("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const conv = await conversationController.getById(id);
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const userId = user.login;
+    const conv = await conversationController.getById(id, userId);
     return res.json(conv);
   } catch (err) {
     if (err instanceof NeonDbError) {
