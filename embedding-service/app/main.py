@@ -24,15 +24,6 @@ app.add_middleware(
 )
 
 
-@app_router.get("/")
-async def read_root():
-    return {
-        "message": "Embedding Service API",
-        "version": "1.0.0",
-        "documentation_url": "/docs",
-    }
-
-
 @app_router.get("/create-embedding-index")
 async def create_embedding_index():
     """
@@ -50,25 +41,34 @@ async def health_check():
     return {"status": "ok", "message": "Embedding Service is running."}
 
 
-@app_router.get("/embed/{conversation_id}")
-async def create_embedding(conversation_id: str):
+@app_router.get("/embed")
+async def create_embedding(query: str):
     """
-    Endpoint to create an embedding for a specific conversation.
+    Endpoint to create an embedding for a specific query.
     """
-    response = await embed(conversation_id)
+    response = await embed(query)
     return response
+
+
+@app_router.get("/")
+async def read_root():
+    return {
+        "message": "Embedding Service API",
+        "version": "1.0.0",
+        "documentation_url": "/docs",
+    }
 
 
 app.include_router(app_router)
 
 
-@app.on_event("startup")
-def start_rabbit_listener():
-    consumer = RabbitMQConsumer(queue_name="embedding", host="localhost")
+# @app.on_event("startup")
+# def start_rabbit_listener():
+#     consumer = RabbitMQConsumer(queue_name="embedding", host="localhost")
 
-    def run_consumer():
-        consumer.start_consuming(handle_embedding_task)
+#     def run_consumer():
+#         consumer.start_consuming(handle_embedding_task)
 
-    thread = threading.Thread(target=run_consumer, daemon=True)
-    thread.start()
-    print(" [*] RabbitMQ consumer started in background.")
+#     thread = threading.Thread(target=run_consumer, daemon=True)
+#     thread.start()
+#     print(" [*] RabbitMQ consumer started in background.")

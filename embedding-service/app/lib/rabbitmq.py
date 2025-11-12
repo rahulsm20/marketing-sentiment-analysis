@@ -1,9 +1,9 @@
 import pika
 import json
 from app.api.v1.embeddings import embed
-
 import pika
-import threading
+
+import asyncio
 
 
 class RabbitMQConsumer:
@@ -45,9 +45,6 @@ def handle_embedding_task(ch, method, properties, body):
         conversation_id = data.get("conversation_id")
         if conversation_id:
             print(f" [x] Received embedding task for conversation_id={conversation_id}")
-
-            # Call your existing async embed() logic in a thread-safe way
-            import asyncio
 
             asyncio.run(embed(conversation_id))
 

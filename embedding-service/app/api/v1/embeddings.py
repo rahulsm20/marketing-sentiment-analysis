@@ -1,11 +1,11 @@
+from datetime import datetime
 from app.core.db import pc
-from bson import ObjectId
-from langchain_openai import OpenAIEmbeddings
-from langchain_pinecone import PineconeVectorStore
+from langchain_pinecone import PineconeEmbeddings
+from app.lib.db_service import db_service
 
 # ---------------------------------------------------------------------------
 
-embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+embeddings = PineconeEmbeddings(model="llama-text-embed-v2")
 index_name = "market-sentience-product-embeddings"
 
 # ---------------------------------------------------------------------------
@@ -18,9 +18,10 @@ async def embed_text(text: str) -> list[float]:
 # ---------------------------------------------------------------------------
 
 
-async def embed(conversation_id: str = None):
-    print(f"Embedding products for conversation ID: {conversation_id}")
-    if not conversation_id:
+async def embed(query: str = None):
+    print(f"Embedding products for query: {query}")
+    start = datetime.now()
+    if not query:
         """
         Function to create an index for embedding if it does not exist.
         """
@@ -43,25 +44,13 @@ async def embed(conversation_id: str = None):
             "stats": index.describe_index_stats().to_dict(),
         }
     else:
-        # fetch all query data related to the conversation_id
-        print(f"Fetching conversation with ID: {conversation_id}")
-        conversation = mongodb.conversations.find_one(
-            {"_id": ObjectId(conversation_id)}
-        )
-
-        if not conversation:
-            return {"error": "Conversation not found."}
-
-        query = conversation.get("query", "")
-        if not query:
-            return {"message": "No query found for the conversation."}
-
-        products = list(mongodb.products.find({"query": query.lower()}))
-        # print(products)
+        products = await db_service.get_products_by_query(query)
+        if "error" in products:
+            return {"message": "Error fetching products.", "details": products}
         if not products:
             return {"message": "No new products to embed."}
-
         vectors = []
+
         for product in products:
             text = f"{product['productName']}"
             for review in product.get("reviews", []):
@@ -72,21 +61,23 @@ async def embed(conversation_id: str = None):
                     "id": str(product["_id"]),
                     "values": vector,
                     "metadata": {
-                        "conversationId": conversation_id,
+                        "query": query,
                         "title": product["productName"],
+                        "reviews": product.get("reviews", []),
+                        "price": product.get("price", 0),
+                        "url": product.get("productUrl", ""),
                     },
                 }
             )
 
-            # mark product as embedded in Mongo
-            # mongodb.products.update_one(
-            #     {"_id": product["_id"]}, {"$set": {"embedded": True}}
-            # )
-
         index = pc.Index(name=index_name)
-        # upsert all vectors to Pinecone
         index.upsert(vectors)
 
+        end = datetime.now()
+        duration = end - start
+
         return {
-            "message": f"Embedded {len(vectors)} products for conversation {conversation_id}."
+            "message": f"Embedded {len(vectors)} products for query {query}.",
+            "duration": duration.total_seconds(),
+            "embedded_count": len(vectors),
         }
