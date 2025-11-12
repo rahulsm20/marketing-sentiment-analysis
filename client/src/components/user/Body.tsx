@@ -1,8 +1,11 @@
 import { schedulerApi } from "@/api/auth0";
+import { ChatInputValidation } from "@/utils/validators";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Search } from "lucide-react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
+import { FieldError } from "../ui/field";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { Input } from "../ui/input";
 import {
@@ -13,11 +16,11 @@ import {
   SelectValue,
 } from "../ui/select";
 import Layout from "./Layout";
-
-//-------------------------------------------------------------------------------
-
 const Body = () => {
-  const form = useForm<FieldValues>();
+  const form = useForm<FieldValues>({
+    resolver: zodResolver(ChatInputValidation),
+  });
+
   const categories = [
     "Mobiles",
     "Television",
@@ -73,11 +76,24 @@ const Body = () => {
           className="w-full md:w-1/2 lg:w-1/3 flex flex-col gap-5"
           onSubmit={form.handleSubmit(onSubmit)}
         >
-          <FormLabel>Company</FormLabel>
-          <Input
-            placeholder="Enter Company Name"
-            {...form.register("company")}
+          <FormField
+            control={form.control}
+            name="company"
+            render={({ field, fieldState }) => (
+              <FormItem>
+                <FormLabel>Company</FormLabel>
+                <Input
+                  onChange={field.onChange}
+                  defaultValue={field.value}
+                  placeholder="Enter Company Name"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </FormItem>
+            )}
           />
+
           <FormField
             control={form.control}
             name="category"
