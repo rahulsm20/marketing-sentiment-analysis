@@ -1,0 +1,85 @@
+openapi: 3.1.0
+info:
+  title: Storage Service API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:4006
+    description: Storage Service
+
+paths:
+  /:
+    post:
+      summary: Upload file
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadFileRequest"
+      responses:
+        "201":
+          description: File uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/File"
+  /{id}:
+    get:
+      summary: Get a file by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: File retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/File"
+        "404":
+          description: Not found
+components:
+  schemas:
+    File:
+      type: object
+      required: [id, filename, filetype, signedUrl]
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uuid
+        filename:
+          type: string
+        signedUrl:
+          type: string
+        filetype:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        user_id:
+          type: string
+          format: uuid
+
+    UploadFileRequest:
+      type: object
+      required: [filename, filetype, data]
+      properties:
+        filename:
+          type: string
+          format: uuid
+        filetype:
+          type: string
+        data:
+          type: string
+          format: binary
