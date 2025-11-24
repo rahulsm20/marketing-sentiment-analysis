@@ -6,6 +6,9 @@ export const productController = {
     return product;
   },
   getByQuery: async (query: string) => {
+    if (!query) {
+      throw new Error("Query parameter is required");
+    }
     const joinedQuery = query.split(" ").join("+");
     const products = await Product.find({
       query: joinedQuery,

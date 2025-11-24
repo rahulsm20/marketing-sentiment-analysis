@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 import { mongodb } from "./lib/db";
 import { ConversationRoutes } from "./routes/conversation";
+import { MessageRoutes } from "./routes/messages";
 import { ProductRoutes } from "./routes/products";
 import { config } from "./utils/config";
 dotenv.config();
@@ -40,6 +41,7 @@ try {
 
 app.use("/conversation", ConversationRoutes);
 app.use("/products", ProductRoutes);
+app.use("/messages", MessageRoutes);
 app.get("/", async (_req: Request, res: Response) => {
   return res.status(200).json({ message: "DB Service running", status: "ok" });
 });

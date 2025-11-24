@@ -8,6 +8,34 @@
       "when": 1761479367055,
       "tag": "0000_striped_spiral",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1763628860903,
+      "tag": "0001_famous_randall",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1763629276555,
+      "tag": "0002_living_black_tom",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1763629444418,
+      "tag": "0003_lonely_echo",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1763634627749,
+      "tag": "0004_colossal_aaron_stack",
+      "breakpoints": true
     }
   ]
 }

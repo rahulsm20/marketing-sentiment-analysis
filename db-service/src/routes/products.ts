@@ -6,12 +6,12 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const { query } = req.query;
-    const user = req.user;
-    if (!user) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-    const conv = await productController.getByQuery(query as string);
-    return res.json(conv);
+    // const user = req.user;
+    // if (!user) {
+    //   return res.status(401).json({ error: "Unauthorized" });
+    // }
+    const products = await productController.getByQuery(query as string);
+    return res.json(products);
   } catch (err) {
     if (err instanceof MongooseError) {
       return res
