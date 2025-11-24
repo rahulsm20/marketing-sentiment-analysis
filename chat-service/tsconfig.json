@@ -2,7 +2,11 @@
   "compilerOptions": {
     "target": "ES6",
     "module": "commonjs",
+    "baseUrl": ".",
     "strict": true,
+    "paths": {
+      "@/*": ["src/*"]
+    },
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
