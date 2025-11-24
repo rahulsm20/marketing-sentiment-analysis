@@ -18,4 +18,5 @@ export const config = {
     process.env.MONGO_URI || "mongodb://localhost:27017/market-sentience",
   RABBITMQ_TOPIC: process.env.RABBITMQ_TOPIC || "scraping",
   NODE_ENV: process.env.NODE_ENV || "development",
+  REDIS_URL: process.env.REDIS_URL || "redis://localhost:6379",
 };

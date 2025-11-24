@@ -1,6 +1,13 @@
 node_modules
 .env
 dist
+.env.json
+logs
+# sst
+.sst
+node_modules
+.env
+dist
 
 # sst
 .sst

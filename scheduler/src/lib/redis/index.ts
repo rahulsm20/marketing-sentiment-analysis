@@ -1,64 +1,71 @@
-import { config } from "dotenv";
-import Redis from "ioredis";
-config(); // Load environment variables from .env file
+import { config } from "@/utils/config";
+import dotenv from "dotenv";
+import { createClient } from "redis";
+dotenv.config();
 
-//-----------------------------------------------------------------
+//-----------------------------------------------------------
 
-export const redisClient = new Redis({
-  password: process.env.REDIS_PASS,
-  host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 10305,
+export const redisClient = createClient({
+  url: config.REDIS_URL,
 });
 
-redisClient.on("connect", () => console.log(">> Connected to Redis"));
-redisClient.on("disconnect", () => console.log(">> Disconnected from Redis"));
+//-----------------------------------------------------------
+
+redisClient.on("connect", () => console.log("Connected to Redis"));
+redisClient.on("disconnect", () => console.log("Disconnected from Redis"));
 redisClient.on("error", function (error) {
   console.error(error);
 });
 
 const connectRedis = async () => {
-  await redisClient.connect();
+  if (!redisClient.isOpen) {
+    await redisClient.connect();
+  }
 };
 
-const disconnectRedis = async () => {
-  redisClient.disconnect();
+export const disconnectRedis = async () => {
+  if (redisClient.isOpen) {
+    await redisClient.disconnect();
+  }
 };
 
-//-----------------------------------------------------------------
+//-----------------------------------------------------------
 
 /**
- * Caches data in Redis
- * @param key The key to cache the data under
- * @param data The data to cache
+ * Function to cache data in Redis
+ * @param key
+ * @param data
+ * @param lifetime
+ * @returns Promise<string>
  */
-export const cacheData = async (key: string, data: any) => {
+export const cacheData = async (
+  key: string,
+  data: string,
+  lifetime?: "5 mins" | "1 day" | "1 minute" | "1 hour"
+) => {
   await connectRedis();
-  await redisClient.set(key, JSON.stringify(data));
-  await disconnectRedis();
+  const cached = await redisClient.set(key, data, {
+    EX:
+      !lifetime || lifetime == "1 hour"
+        ? 60 * 60
+        : lifetime == "5 mins"
+        ? 60 * 5
+        : lifetime == "1 minute"
+        ? 60 * 1
+        : 60 * 60 * 24,
+  });
+  return cached;
 };
+
+//-----------------------------------------------------------
 
 /**
  * Retrieves cached data from Redis
  * @param key The key to retrieve the data from
  * @returns The cached data or null if not found
  */
-export const getCachedData = async (key: string) => {
+export const retrieveCachedData = async (key: string) => {
   await connectRedis();
-  const data = await redisClient.get(key);
-  await disconnectRedis();
-
-  if (data) {
-    return JSON.parse(data);
-  }
-  return null;
-};
-
-/**
- * Deletes cached data from Redis
- * @param key The key to delete the cached data from
- */
-export const deleteCachedData = async (key: string) => {
-  await connectRedis();
-  await redisClient.del(key);
-  await disconnectRedis();
+  const cached = await redisClient.get(key);
+  return cached;
 };

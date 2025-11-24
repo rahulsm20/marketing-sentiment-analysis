@@ -12,9 +12,9 @@ import express, { Request, Response } from "express";
 import { auth } from "express-oauth2-jwt-bearer";
 import { db } from "./lib/db/mongo";
 import { logger } from "./lib/logger";
-import { rabbitMQ } from "./lib/rabbitmq";
 import { checkUser } from "./middleware";
 import { requestLogger } from "./middleware/loggerMiddleware";
+import { rateLimiter } from "./middleware/ratelimiter";
 import { conversationRoutes } from "./routes/conversationRoutes";
 import { taskRoutes } from "./routes/taskRoutes";
 import { config } from "./utils/config";
@@ -49,6 +49,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(jwtCheck);
 app.use(checkUser);
+app.use(rateLimiter);
 app.use("/v1/tasks", taskRoutes);
 app.use("/v1/conversation", conversationRoutes);
 app.get("/", async (_req: Request, res: Response) => {
@@ -61,15 +62,6 @@ try {
   db.connect(config.MONGO_URL)
     .then(() => logger.info(">> Connected to MongoDB"))
     .catch((err) => logger.error(err));
-
-  rabbitMQ
-    .connect()
-    .then(() => {
-      logger.info(">> Connection to RabbitMQ established");
-    })
-    .catch((err) => {
-      logger.error(">> Failed to connect to RabbitMQ", err);
-    });
 } catch (err) {
   logger.error(err);
 }
