@@ -1,0 +1,300 @@
+openapi: 3.1.0
+info:
+  title: DB Service API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:4004
+    description: Local DB Service
+
+paths:
+  /conversations:
+    post:
+      summary: Create a new conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateConversationRequest"
+      responses:
+        "201":
+          description: Conversation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+
+    get:
+      summary: List conversations
+      parameters:
+        - name: userId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Conversation"
+
+  /conversations/{id}:
+    get:
+      summary: Get a conversation by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Conversation retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "404":
+          description: Not found
+
+    patch:
+      summary: Update a conversation status or metadata
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/ConversationStatus"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateConversationRequest"
+      responses:
+        "200":
+          description: Conversation updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+
+  /messages:
+    post:
+      summary: Create a new message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMessageRequest"
+      responses:
+        "201":
+          description: Message created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
+  /messages/{conversationId}:
+    get:
+      summary: Get messages in a conversation
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+        "404":
+          description: Not found
+  /products:
+    get:
+      summary: Get products by query
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        "404":
+          description: Not found
+components:
+  schemas:
+    User:
+      type: object
+      required: [id, email, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          nullable: true
+        email:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Conversation:
+      type: object
+      required: [id, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        openai_conv_id:
+          type: string
+          nullable: true
+        query:
+          type: string
+          nullable: true
+        user_id:
+          type: string
+          format: uuid
+          nullable: true
+        status:
+          $ref: "#/components/schemas/ConversationStatus"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Message:
+      type: object
+      required: [id, role, content, createdAt, updatedAt, conversationId]
+      properties:
+        id:
+          type: string
+          format: uuid
+        conversation_id:
+          type: string
+          format: uuid
+        content:
+          type: string
+        role:
+          $ref: "#/components/schemas/MessageRole"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        user_id:
+          type: string
+          format: uuid
+
+    Product:
+      type: object
+      required: [id, productName, reviews]
+      properties:
+        id:
+          type: string
+          format: uuid
+        productName:
+          type: string
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        reviews:
+          type: array
+          items:
+            type: object
+
+    CreateConversationRequest:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        query:
+          type: string
+          nullable: true
+
+    UpdateConversationRequest:
+      type: object
+      properties:
+        status:
+          $ref: "#/components/schemas/ConversationStatus"
+        openai_conv_id:
+          type: string
+          nullable: true
+
+    CreateMessageRequest:
+      type: object
+      required: [conversation_id, content, role]
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        conversation_id:
+          type: string
+          format: uuid
+        content:
+          type: string
+        role:
+          $ref: "#/components/schemas/MessageRole"
+
+    ConversationStatus:
+      type: string
+      enum:
+        - pending
+        - in_progress
+        - completed
+        - scraping
+        - generation
+        - embedding
+
+    MessageRole:
+      type: string
+      enum:
+        - user
+        - assistant
