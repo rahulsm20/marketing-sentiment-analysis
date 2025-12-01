@@ -1,14 +1,5 @@
-import os
 from google.cloud import pubsub_v1
-
-publisher = pubsub_v1.PublisherClient()
-publish_topic_name = "projects/{project_id}/topics/{topic}".format(
-    project_id=os.getenv("GOOGLE_CLOUD_PROJECT"),
-    topic="GENERATION",  # Set this to something appropriate.
-)
-publisher.create_topic(name=topic_name)
-future = publisher.publish(topic_name, b"My first message!", spam="eggs")
-future.result()
+from app.core.config import config
 
 
 class PubSubClient:
@@ -17,7 +8,14 @@ class PubSubClient:
         self.topic_path = self.publisher.topic_path(project_id, topic_name)
 
     def publish_message(self, message, **attributes):
+        print("sending message to pubsub: ", type(message.encode("utf-8")))
         future = self.publisher.publish(
             self.topic_path, message.encode("utf-8"), **attributes
         )
         return future.result()
+
+
+pubsub_client = PubSubClient(
+    project_id=config["GOOGLE_CLOUD_PROJECT_ID"],
+    topic_name="market_sentience_generation",
+)

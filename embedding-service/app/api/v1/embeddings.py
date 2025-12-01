@@ -1,7 +1,18 @@
 from datetime import datetime
+import json
+from re import search
+import stat
 from app.core.db import pc
 from langchain_pinecone import PineconeEmbeddings
-from app.lib.db_service import db_service
+
+# from app.lib.db_service import db_service
+from app.lib.pub_sub import pubsub_client
+from app.core.db import pc
+from fastapi.responses import JSONResponse
+
+from app.db_service.openapi_client.api.default_api import (
+    DefaultApi as db_service,
+)
 
 # ---------------------------------------------------------------------------
 
@@ -19,7 +30,6 @@ async def embed_text(text: str) -> list[float]:
 
 
 async def embed(query: str = None):
-    print(f"Embedding products for query: {query}")
     start = datetime.now()
     if not query:
         """
@@ -44,7 +54,53 @@ async def embed(query: str = None):
             "stats": index.describe_index_stats().to_dict(),
         }
     else:
-        products = await db_service.get_products_by_query(query)
+        if pc:
+            index = pc.Index(name=index_name)
+            search_with_text = index.search(
+                namespace="__default__",
+                query={"inputs": {"text": query}, "top_k": 4},
+                fields=["query", "title", "reviews", "price", "url"],
+                rerank={
+                    "model": "bge-reranker-v2-m3",
+                    "top_n": 2,
+                    "rank_fields": ["query"],
+                },
+            )
+            if (
+                search_with_text["result"]["hits"]
+                and len(search_with_text["result"]["hits"]) > 0
+            ):
+                hits = [
+                    {
+                        "id": hit._id,
+                        "title": hit.fields.get("title", ""),
+                        "score": hit._score,
+                        "reviews": hit.fields.get("reviews", []),
+                        "price": int("".join(hit.fields.get("price", "0").split(","))),
+                        "url": hit.fields.get("url", ""),
+                    }
+                    for hit in search_with_text["result"]["hits"]
+                ]
+                message = (
+                    '{"message": "Embeddings found.", "data": ' + json.dumps(hits) + "}"
+                )
+                end = datetime.now()
+                duration = end - start
+                pubsub_client.publish_message(
+                    message=f"{message}",
+                    query=f"{query}".encode("utf-8"),
+                    embedded_count=f"{len(hits)}".encode("utf-8"),
+                    duration=f"{duration.total_seconds()}".encode("utf-8"),
+                )
+                return JSONResponse(
+                    content={"message": "Embeddings found.", "data": hits},
+                    status_code=200,
+                )
+            return JSONResponse(
+                content={"message": "No embeddings found."},
+                status_code=404,
+            )
+        products = await db_service.products_get(query=query)
         if "error" in products:
             return {"message": "Error fetching products.", "details": products}
         if not products:
@@ -75,6 +131,12 @@ async def embed(query: str = None):
 
         end = datetime.now()
         duration = end - start
+        pubsub_client.publish_message(
+            message=f"Embedded {len(vectors)} products for query {query}.",
+            query=query,
+            embedded_count=len(vectors),
+            duration=duration.total_seconds(),
+        )
 
         return {
             "message": f"Embedded {len(vectors)} products for query {query}.",

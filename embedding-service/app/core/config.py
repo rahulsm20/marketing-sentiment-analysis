@@ -13,6 +13,13 @@ def load_config():
         "MONGO_DB_NAME": os.getenv("MONGO_DB_NAME"),
         "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"),
         "DB_SERVICE_URL": os.getenv("DB_SERVICE_URL"),
+        "GOOGLE_CLOUD_PROJECT_ID": os.getenv("GOOGLE_CLOUD_PROJECT_ID"),
+        "PUBSUB_TOPIC": os.getenv("PUBSUB_TOPIC"),
+        "CORS_ORIGINS": (
+            os.getenv("CORS_ORIGINS", "").split(",")
+            if os.getenv("CORS_ORIGINS")
+            else "*"
+        ),
     }
 
 
