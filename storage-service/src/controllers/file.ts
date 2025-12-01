@@ -7,7 +7,9 @@ import { Request, Response } from "express";
  */
 export const fileController = {
   async uploadFile(req: Request, res: Response) {
-    const { file } = req.body;
+    const { filename, filetype, data } = req.body;
+    const file = { name: filename, type: filetype, data };
+
     if (!file) {
       return res.status(400).json({ message: "No file provided" });
     }
@@ -16,13 +18,16 @@ export const fileController = {
       if (cachedData) {
         return res
           .status(200)
-          .json({ message: "File retrieved from cache", data: cachedData });
+          .json({ message: "File retrieved from cache", url: cachedData });
       }
-      const data = await s3Client.uploadToS3(file.name, file.data);
-      await setKey(file.name, file.data, 3600);
+      const buffer = Buffer.from(file.data, "base64");
+
+      await s3Client.uploadToS3(file.name, buffer);
+      const url = await s3Client.getFileFromS3({ key: file.name });
+      await setKey(file.name, url, 3600);
       return res
         .status(200)
-        .json({ message: "File uploaded successfully", data });
+        .json({ message: "File uploaded successfully", url });
     } catch (error) {
       return res.status(500).json({ message: "Error uploading file", error });
     }

@@ -34,7 +34,7 @@ class S3ClientClass extends S3Client {
   };
 
   getFileFromS3 = async ({
-    bucketName,
+    bucketName = this.bucketName,
     key,
     expiresInSeconds = 3600,
   }: {
