@@ -35,21 +35,13 @@ class TestFile(unittest.TestCase):
         model = File()
         if include_optional:
             return File(
-                id = '',
-                url = '',
-                filename = '',
-                signed_url = '',
-                filetype = '',
-                created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                user_id = ''
+                message = '',
+                url = ''
             )
         else:
             return File(
-                id = '',
-                filename = '',
-                signed_url = '',
-                filetype = '',
+                message = '',
+                url = '',
         )
         """
 

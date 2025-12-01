@@ -158,5 +158,9 @@ dependencies = [
     "werkzeug==3.0.1",
     "wrapt==1.14.1",
     "zipp==3.17.0",
-    "fpdf>=1.7.2",
+    "bs4>=0.0.2",
+    "openai>=2.8.1",
+    "fpdf",
+    "mistletoe>=1.5.0",
+    "fpdf2",
 ]

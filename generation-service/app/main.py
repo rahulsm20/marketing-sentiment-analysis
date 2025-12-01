@@ -1,3 +1,4 @@
+import json
 import re
 from fastapi import FastAPI, Request, FastAPI
 from fastapi.security import HTTPBearer
@@ -15,11 +16,13 @@ from fpdf import FPDF
 from app.storage_service.storage_service_client.api import (
     DefaultApi as StorageService,
 )
-
+import base64
 from app.storage_service.storage_service_client.models.upload_file_request import (
     UploadFileRequest,
 )
 from app.core.pdf import PDFGenerator
+from app.core.redis import redis_client
+from app.utils.constants import CACHE_KEY
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -47,6 +50,14 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
+
+
+def to_titlecase(s: str) -> str:
+    return re.sub(
+        r"[A-Za-z]+('[A-Za-z]+)?",
+        lambda mo: mo.group(0)[0].upper() + mo.group(0)[1:].lower(),
+        s,
+    )
 
 
 @app.get("/")
@@ -104,19 +115,51 @@ async def generate_strategies(request: Request):
     full_prompt = (
         prompt + " " + company + " " + category + " reviews: " + joined_reviews
     )
-    message = openAIClient.responses.create(model="gpt-4.1", input=full_prompt)
+    cache_key = CACHE_KEY["MARKETING_STRATEGIES"](company=company, category=category)
+    raw_cached_data = redis_client.get(cache_key)
+    cache_hit = False
+    if raw_cached_data:
+        print("Cache hit!!!")
+        cached_data = json.loads(raw_cached_data)
+        cache_hit = True
+    else:
+        print("Cache miss!!!")
+        message = openAIClient.responses.create(model="gpt-4.1", input=full_prompt)
+        redis_client.set(
+            cache_key,
+            json.dumps({"sentiments": sentiments, "response": message.output_text}),
+        )
+        response = {"output_text": message.output_text}
 
+    if cache_hit:
+        response = {
+            "sentiments": cached_data["sentiments"],
+            "output_text": cached_data["response"],
+        }
+    company = to_titlecase(company)
+    category = to_titlecase(category)
     pdf_generator = PDFGenerator(
-        title=f"{company} {category} Sentiment Analysis", content=message.output_text
+        title=f"{company} {category} Sentiment Analysis",
+        content=response["output_text"],
     )
     data = pdf_generator.generate_pdf()
-    print(data)
+    encoded_data = base64.b64encode(data).decode("utf-8")
+
     upload_file_request = UploadFileRequest(
         filename=f"{company}_{category}_sentiment_analysis.pdf",
         filetype="application/pdf",
-        data=data,
+        data=encoded_data,
     )
-    storage_service.root_post(
+
+    file = storage_service.file_post_with_http_info(
         upload_file_request=upload_file_request.to_dict(),
     )
-    return {"sentiments": sentiments, "response": message.output_text}
+    file_data = json.loads(file.raw_data)
+    if not file or not file_data:
+        raise Exception("File upload failed")
+
+    return {
+        "sentiments": response["sentiments"],
+        "response": response["output_text"],
+        "file": file_data["url"],
+    }

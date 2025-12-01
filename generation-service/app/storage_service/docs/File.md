@@ -5,14 +5,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **str** |  | 
-**url** | **str** |  | [optional] 
-**filename** | **str** |  | 
-**signed_url** | **str** |  | 
-**filetype** | **str** |  | 
-**created_at** | **datetime** |  | [optional] 
-**updated_at** | **datetime** |  | [optional] 
-**user_id** | **str** |  | [optional] 
+**message** | **str** |  | 
+**url** | **str** |  | 
 
 ## Example
 

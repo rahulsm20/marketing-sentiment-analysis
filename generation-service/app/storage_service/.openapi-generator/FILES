@@ -1,6 +1,7 @@
 .github/workflows/python.yml
 .gitignore
 .gitlab-ci.yml
+.openapi-generator-ignore
 .travis.yml
 README.md
 docs/DefaultApi.md
@@ -25,4 +26,7 @@ storage_service_client/py.typed
 storage_service_client/rest.py
 test-requirements.txt
 test/__init__.py
+test/test_default_api.py
+test/test_file.py
+test/test_upload_file_request.py
 tox.ini

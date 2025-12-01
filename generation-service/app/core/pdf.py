@@ -1,5 +1,7 @@
 from fpdf import FPDF
 from pathlib import Path
+from bs4 import BeautifulSoup
+from mistletoe import markdown
 
 """PDF generation utility.
 Provides functionality to create PDFs from text content.
@@ -19,11 +21,19 @@ class PDFGenerator:
     def generate_pdf(self) -> bytearray:
         pdf = FPDF()
         pdf.add_page()
-        font_path = Path(__file__).parent / "NotoSans.ttf"
-        pdf.add_font("NotoSans", "", str(font_path), uni=True)
+        font_dir = Path(__file__).parent
+        pdf.add_font("NotoSans", "", font_dir / "NotoSans-Regular.ttf", uni=True)
+        pdf.add_font("NotoSans", "B", font_dir / "NotoSans-Bold.ttf", uni=True)
+        pdf.add_font("NotoSans", "I", font_dir / "NotoSans-Italic.ttf", uni=True)
+        pdf.add_font("NotoSans", "BI", font_dir / "NotoSans-BoldItalic.ttf", uni=True)
         pdf.set_font("NotoSans", size=12)
+        assert font_dir.exists(), "Font missing!"
 
         pdf.cell(200, 10, txt=self.title, ln=True, align="C")
-        pdf.multi_cell(0, 10, txt=self.content)
+        html = markdown(self.content)
+        pdf.write_html(html)
 
-        return pdf.output(dest="S").encode("utf-8")
+        out = pdf.output(dest="S")
+        if isinstance(out, str):
+            out = out.encode("latin1")
+        return out

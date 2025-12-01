@@ -17,10 +17,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
-from uuid import UUID
+from pydantic import BaseModel, ConfigDict, StrictStr
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -28,15 +26,9 @@ class File(BaseModel):
     """
     File
     """ # noqa: E501
-    id: UUID
-    url: Optional[UUID] = None
-    filename: StrictStr
-    signed_url: StrictStr = Field(alias="signedUrl")
-    filetype: StrictStr
-    created_at: Optional[datetime] = Field(default=None, alias="createdAt")
-    updated_at: Optional[datetime] = Field(default=None, alias="updatedAt")
-    user_id: Optional[UUID] = None
-    __properties: ClassVar[List[str]] = ["id", "url", "filename", "signedUrl", "filetype", "createdAt", "updatedAt", "user_id"]
+    message: StrictStr
+    url: StrictStr
+    __properties: ClassVar[List[str]] = ["message", "url"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -89,14 +81,8 @@ class File(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "url": obj.get("url"),
-            "filename": obj.get("filename"),
-            "signedUrl": obj.get("signedUrl"),
-            "filetype": obj.get("filetype"),
-            "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt"),
-            "user_id": obj.get("user_id")
+            "message": obj.get("message"),
+            "url": obj.get("url")
         })
         return _obj
 

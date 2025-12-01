@@ -26,15 +26,15 @@ class TestDefaultApi(unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
-    def test_id_get(self) -> None:
-        """Test case for id_get
+    def test_file_id_get(self) -> None:
+        """Test case for file_id_get
 
         Get a file by id
         """
         pass
 
-    def test_root_post(self) -> None:
-        """Test case for root_post
+    def test_file_post(self) -> None:
+        """Test case for file_post
 
         Upload file
         """
