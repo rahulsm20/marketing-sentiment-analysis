@@ -51,5 +51,5 @@ app.get("*", async (_req: Request, res: Response) => {
 });
 
 app.listen(port, () => {
-  console.log(`DB Server is running at port ${port}`);
+  console.log(`>> DB Server is running at port ${port}`);
 });

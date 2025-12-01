@@ -1,11 +1,8 @@
 import { createClient } from "redis";
+import { config } from "./config";
 
 export const redisClient = createClient({
-  password: process.env.REDIS_PASS,
-  socket: {
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 10305,
-  },
+  url: config.REDIS_URL,
 });
 
 redisClient.on("connect", () => console.log("Connected to Redis"));
@@ -24,4 +21,19 @@ export const disconnectRedis = async () => {
   if (redisClient.isOpen) {
     await redisClient.disconnect();
   }
+};
+
+export const cacheData = async (
+  key: string,
+  value: string,
+  expirationInSec = 3600
+) => {
+  await connectRedis();
+  await redisClient.setEx(key, expirationInSec, value);
+};
+
+export const getCachedData = async (key: string): Promise<string | null> => {
+  await connectRedis();
+  const data = await redisClient.get(key);
+  return data;
 };
