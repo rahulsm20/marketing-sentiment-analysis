@@ -47,29 +47,13 @@ components:
   schemas:
     File:
       type: object
-      required: [id, filename, filetype, signedUrl]
+      required: [message, url]
       properties:
-        id:
+        message:
           type: string
-          format: uuid
         url:
           type: string
-          format: uuid
-        filename:
-          type: string
-        signedUrl:
-          type: string
-        filetype:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        user_id:
-          type: string
-          format: uuid
+          format: uri
 
     UploadFileRequest:
       type: object
