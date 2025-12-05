@@ -7,15 +7,13 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **str** |  | 
 **product_name** | **str** |  | 
-**description** | **str** |  | [optional] 
-**created_at** | **datetime** |  | [optional] 
-**updated_at** | **datetime** |  | [optional] 
-**reviews** | **List[object]** |  | 
+**price** | **str** |  | [optional] 
+**reviews** | **List[str]** |  | 
 
 ## Example
 
 ```python
-from openapi_client.models.product import Product
+from db_service_client.models.product import Product
 
 # TODO update the JSON string below
 json = "{}"

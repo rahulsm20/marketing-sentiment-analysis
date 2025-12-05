@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 import pprint
 from openai import OpenAI
-from app.db_service.openapi_client.api.default_api import DefaultApi as DBService
+from app.db_service.db_service_client.api.default_api import DefaultApi as DBService
 from fpdf import FPDF
 from app.storage_service.storage_service_client.api import (
     DefaultApi as StorageService,
@@ -72,18 +72,18 @@ async def generate_strategies(request: Request):
     company = body["company"]
     category = body["category"]
 
-    # fetch data from db instead of request body
     db_service = DBService()
     storage_service = StorageService()
     query = company + " " + category
-    productData = db_service.products_get(query)
+    product_data = db_service.products_get(query)
     reviews = []
     productWithReviews = {}
+    products = [product.to_dict() for product in product_data]
 
-    for item in productData:
-        if "reviews" in item.keys():
-            reviews.append(item["reviews"])
-            productWithReviews[item["productName"]] = item["reviews"]
+    for product in products:
+        product_reviews = product.get("reviews", "")
+        reviews.append(product_reviews)
+        productWithReviews[product["productName"]] = product_reviews
 
     tokenizer = Tokenizer()
     tokenizer.fit_on_texts(reviews)
@@ -119,17 +119,15 @@ async def generate_strategies(request: Request):
     raw_cached_data = redis_client.get(cache_key)
     cache_hit = False
     if raw_cached_data:
-        print("Cache hit!!!")
         cached_data = json.loads(raw_cached_data)
         cache_hit = True
     else:
-        print("Cache miss!!!")
         message = openAIClient.responses.create(model="gpt-4.1", input=full_prompt)
         redis_client.set(
             cache_key,
             json.dumps({"sentiments": sentiments, "response": message.output_text}),
         )
-        response = {"output_text": message.output_text}
+        response = {"sentiments": sentiments, "output_text": message.output_text}
 
     if cache_hit:
         response = {
@@ -141,6 +139,8 @@ async def generate_strategies(request: Request):
     pdf_generator = PDFGenerator(
         title=f"{company} {category} Sentiment Analysis",
         content=response["output_text"],
+        chart_data=sentiments,
+        product_data=products,
     )
     data = pdf_generator.generate_pdf()
     encoded_data = base64.b64encode(data).decode("utf-8")

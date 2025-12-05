@@ -17,18 +17,19 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import StrictStr
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 from uuid import UUID
-from openapi_client.models.conversation import Conversation
-from openapi_client.models.conversation_status import ConversationStatus
-from openapi_client.models.create_conversation_request import CreateConversationRequest
-from openapi_client.models.create_message_request import CreateMessageRequest
-from openapi_client.models.message import Message
-from openapi_client.models.update_conversation_request import UpdateConversationRequest
+from db_service_client.models.conversation import Conversation
+from db_service_client.models.conversation_status import ConversationStatus
+from db_service_client.models.create_conversation_request import CreateConversationRequest
+from db_service_client.models.create_message_request import CreateMessageRequest
+from db_service_client.models.message import Message
+from db_service_client.models.product import Product
+from db_service_client.models.update_conversation_request import UpdateConversationRequest
 
-from openapi_client.api_client import ApiClient, RequestSerialized
-from openapi_client.api_response import ApiResponse
-from openapi_client.rest import RESTResponseType
+from db_service_client.api_client import ApiClient, RequestSerialized
+from db_service_client.api_response import ApiResponse
+from db_service_client.rest import RESTResponseType
 
 
 class DefaultApi:
@@ -1698,7 +1699,7 @@ class DefaultApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[object]:
+    ) -> List[Product]:
         """Get products by query
 
 
@@ -1735,7 +1736,7 @@ class DefaultApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[object]",
+            '200': "List[Product]",
             '404': None,
         }
         response_data = self.api_client.call_api(
@@ -1765,7 +1766,7 @@ class DefaultApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[object]]:
+    ) -> ApiResponse[List[Product]]:
         """Get products by query
 
 
@@ -1802,7 +1803,7 @@ class DefaultApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[object]",
+            '200': "List[Product]",
             '404': None,
         }
         response_data = self.api_client.call_api(
@@ -1869,7 +1870,7 @@ class DefaultApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[object]",
+            '200': "List[Product]",
             '404': None,
         }
         response_data = self.api_client.call_api(

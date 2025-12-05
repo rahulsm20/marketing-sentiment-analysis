@@ -12,15 +12,15 @@ class RedisClient:
             connection_pool=redis.ConnectionPool().from_url(config["REDIS_URL"])
         )
 
-    def connect(self):
-        # Simulate connecting to Redis server
-        self.connected = True
-        print(f"Connected to Redis at {config['REDIS_URL']}")
-
     def disconnect(self):
         # Simulate disconnecting from Redis server
         self.connected = False
         print("Disconnected from Redis")
+
+    def connect(self):
+        # Simulate connecting to Redis server
+        self.connected = True
+        print("Connected to Redis")
 
     def is_connected(self) -> bool:
         return self.connected
@@ -44,4 +44,3 @@ class RedisClient:
 
 
 redis_client = RedisClient()
-redis_client.connect()

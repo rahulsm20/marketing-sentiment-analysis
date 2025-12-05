@@ -13,7 +13,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.create_message_request import CreateMessageRequest
+from db_service_client.models.create_message_request import CreateMessageRequest
 
 # TODO update the JSON string below
 json = "{}"

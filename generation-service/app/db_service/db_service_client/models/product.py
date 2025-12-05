@@ -17,26 +17,20 @@ import pprint
 import re  # noqa: F401
 import json
 
-from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from uuid import UUID
-from openapi_client.models.conversation_status import ConversationStatus
 from typing import Optional, Set
 from typing_extensions import Self
 
-class Conversation(BaseModel):
+class Product(BaseModel):
     """
-    Conversation
+    Product
     """ # noqa: E501
-    id: UUID
-    openai_conv_id: Optional[StrictStr] = None
-    query: Optional[StrictStr] = None
-    user_id: Optional[UUID] = None
-    status: ConversationStatus
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime = Field(alias="updatedAt")
-    __properties: ClassVar[List[str]] = ["id", "openai_conv_id", "query", "user_id", "status", "createdAt", "updatedAt"]
+    id: StrictStr = Field(alias="_id")
+    product_name: StrictStr = Field(alias="productName")
+    price: Optional[StrictStr] = None
+    reviews: List[StrictStr]
+    __properties: ClassVar[List[str]] = ["_id", "productName", "price", "reviews"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -56,7 +50,7 @@ class Conversation(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of Conversation from a JSON string"""
+        """Create an instance of Product from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -81,7 +75,7 @@ class Conversation(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of Conversation from a dict"""
+        """Create an instance of Product from a dict"""
         if obj is None:
             return None
 
@@ -89,13 +83,10 @@ class Conversation(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "openai_conv_id": obj.get("openai_conv_id"),
-            "query": obj.get("query"),
-            "user_id": obj.get("user_id"),
-            "status": obj.get("status"),
-            "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt")
+            "_id": obj.get("_id"),
+            "productName": obj.get("productName"),
+            "price": obj.get("price"),
+            "reviews": obj.get("reviews")
         })
         return _obj
 

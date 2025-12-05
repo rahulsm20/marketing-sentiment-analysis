@@ -21,20 +21,22 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from uuid import UUID
+from db_service_client.models.conversation_status import ConversationStatus
 from typing import Optional, Set
 from typing_extensions import Self
 
-class Product(BaseModel):
+class Conversation(BaseModel):
     """
-    Product
+    Conversation
     """ # noqa: E501
     id: UUID
-    product_name: StrictStr = Field(alias="productName")
-    description: Optional[StrictStr] = None
-    created_at: Optional[datetime] = Field(default=None, alias="createdAt")
-    updated_at: Optional[datetime] = Field(default=None, alias="updatedAt")
-    reviews: List[Dict[str, Any]]
-    __properties: ClassVar[List[str]] = ["id", "productName", "description", "createdAt", "updatedAt", "reviews"]
+    openai_conv_id: Optional[StrictStr] = None
+    query: Optional[StrictStr] = None
+    user_id: Optional[UUID] = None
+    status: ConversationStatus
+    created_at: datetime = Field(alias="createdAt")
+    updated_at: datetime = Field(alias="updatedAt")
+    __properties: ClassVar[List[str]] = ["id", "openai_conv_id", "query", "user_id", "status", "createdAt", "updatedAt"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -54,7 +56,7 @@ class Product(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of Product from a JSON string"""
+        """Create an instance of Conversation from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -79,7 +81,7 @@ class Product(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of Product from a dict"""
+        """Create an instance of Conversation from a dict"""
         if obj is None:
             return None
 
@@ -88,11 +90,12 @@ class Product(BaseModel):
 
         _obj = cls.model_validate({
             "id": obj.get("id"),
-            "productName": obj.get("productName"),
-            "description": obj.get("description"),
+            "openai_conv_id": obj.get("openai_conv_id"),
+            "query": obj.get("query"),
+            "user_id": obj.get("user_id"),
+            "status": obj.get("status"),
             "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt"),
-            "reviews": obj.get("reviews")
+            "updatedAt": obj.get("updatedAt")
         })
         return _obj
 

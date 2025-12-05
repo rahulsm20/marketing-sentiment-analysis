@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.user import User
+from db_service_client.models.user import User
 
 class TestUser(unittest.TestCase):
     """User unit test stubs"""

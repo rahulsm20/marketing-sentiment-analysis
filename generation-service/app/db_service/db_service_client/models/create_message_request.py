@@ -19,17 +19,20 @@ import json
 
 from pydantic import BaseModel, ConfigDict, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from openapi_client.models.conversation_status import ConversationStatus
+from uuid import UUID
+from db_service_client.models.message_role import MessageRole
 from typing import Optional, Set
 from typing_extensions import Self
 
-class UpdateConversationRequest(BaseModel):
+class CreateMessageRequest(BaseModel):
     """
-    UpdateConversationRequest
+    CreateMessageRequest
     """ # noqa: E501
-    status: Optional[ConversationStatus] = None
-    openai_conv_id: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["status", "openai_conv_id"]
+    user_id: Optional[UUID] = None
+    conversation_id: UUID
+    content: StrictStr
+    role: MessageRole
+    __properties: ClassVar[List[str]] = ["user_id", "conversation_id", "content", "role"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,7 +52,7 @@ class UpdateConversationRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of UpdateConversationRequest from a JSON string"""
+        """Create an instance of CreateMessageRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -74,7 +77,7 @@ class UpdateConversationRequest(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of UpdateConversationRequest from a dict"""
+        """Create an instance of CreateMessageRequest from a dict"""
         if obj is None:
             return None
 
@@ -82,8 +85,10 @@ class UpdateConversationRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "status": obj.get("status"),
-            "openai_conv_id": obj.get("openai_conv_id")
+            "user_id": obj.get("user_id"),
+            "conversation_id": obj.get("conversation_id"),
+            "content": obj.get("content"),
+            "role": obj.get("role")
         })
         return _obj
 

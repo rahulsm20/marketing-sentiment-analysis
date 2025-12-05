@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.product import Product
+from db_service_client.models.product import Product
 
 class TestProduct(unittest.TestCase):
     """Product unit test stubs"""
@@ -37,11 +37,9 @@ class TestProduct(unittest.TestCase):
             return Product(
                 id = '',
                 product_name = '',
-                description = '',
-                created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                price = '',
                 reviews = [
-                    None
+                    ''
                     ]
             )
         else:
@@ -49,7 +47,7 @@ class TestProduct(unittest.TestCase):
                 id = '',
                 product_name = '',
                 reviews = [
-                    None
+                    ''
                     ],
         )
         """

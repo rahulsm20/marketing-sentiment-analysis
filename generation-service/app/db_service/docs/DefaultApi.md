@@ -1,4 +1,4 @@
-# openapi_client.DefaultApi
+# db_service_client.DefaultApi
 
 All URIs are relative to *http://localhost:4004*
 
@@ -22,22 +22,22 @@ List conversations
 
 
 ```python
-import openapi_client
-from openapi_client.models.conversation import Conversation
-from openapi_client.rest import ApiException
+import db_service_client
+from db_service_client.models.conversation import Conversation
+from db_service_client.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost:4004
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = db_service_client.Configuration(
     host = "http://localhost:4004"
 )
 
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with db_service_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.DefaultApi(api_client)
+    api_instance = db_service_client.DefaultApi(api_client)
     user_id = 'user_id_example' # str |  (optional)
 
     try:
@@ -88,22 +88,22 @@ Get a conversation by ID
 
 
 ```python
-import openapi_client
-from openapi_client.models.conversation import Conversation
-from openapi_client.rest import ApiException
+import db_service_client
+from db_service_client.models.conversation import Conversation
+from db_service_client.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost:4004
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = db_service_client.Configuration(
     host = "http://localhost:4004"
 )
 
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with db_service_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.DefaultApi(api_client)
+    api_instance = db_service_client.DefaultApi(api_client)
     id = 'id_example' # str | 
 
     try:
@@ -155,27 +155,27 @@ Update a conversation status or metadata
 
 
 ```python
-import openapi_client
-from openapi_client.models.conversation import Conversation
-from openapi_client.models.conversation_status import ConversationStatus
-from openapi_client.models.update_conversation_request import UpdateConversationRequest
-from openapi_client.rest import ApiException
+import db_service_client
+from db_service_client.models.conversation import Conversation
+from db_service_client.models.conversation_status import ConversationStatus
+from db_service_client.models.update_conversation_request import UpdateConversationRequest
+from db_service_client.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost:4004
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = db_service_client.Configuration(
     host = "http://localhost:4004"
 )
 
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with db_service_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.DefaultApi(api_client)
+    api_instance = db_service_client.DefaultApi(api_client)
     id = 'id_example' # str | 
-    status = openapi_client.ConversationStatus() # ConversationStatus | 
-    update_conversation_request = openapi_client.UpdateConversationRequest() # UpdateConversationRequest | 
+    status = db_service_client.ConversationStatus() # ConversationStatus | 
+    update_conversation_request = db_service_client.UpdateConversationRequest() # UpdateConversationRequest | 
 
     try:
         # Update a conversation status or metadata
@@ -227,24 +227,24 @@ Create a new conversation
 
 
 ```python
-import openapi_client
-from openapi_client.models.conversation import Conversation
-from openapi_client.models.create_conversation_request import CreateConversationRequest
-from openapi_client.rest import ApiException
+import db_service_client
+from db_service_client.models.conversation import Conversation
+from db_service_client.models.create_conversation_request import CreateConversationRequest
+from db_service_client.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost:4004
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = db_service_client.Configuration(
     host = "http://localhost:4004"
 )
 
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with db_service_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.DefaultApi(api_client)
-    create_conversation_request = openapi_client.CreateConversationRequest() # CreateConversationRequest | 
+    api_instance = db_service_client.DefaultApi(api_client)
+    create_conversation_request = db_service_client.CreateConversationRequest() # CreateConversationRequest | 
 
     try:
         # Create a new conversation
@@ -294,22 +294,22 @@ Get messages in a conversation
 
 
 ```python
-import openapi_client
-from openapi_client.models.message import Message
-from openapi_client.rest import ApiException
+import db_service_client
+from db_service_client.models.message import Message
+from db_service_client.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost:4004
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = db_service_client.Configuration(
     host = "http://localhost:4004"
 )
 
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with db_service_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.DefaultApi(api_client)
+    api_instance = db_service_client.DefaultApi(api_client)
     conversation_id = 'conversation_id_example' # str | 
     user_id = 'user_id_example' # str | 
 
@@ -363,24 +363,24 @@ Create a new message
 
 
 ```python
-import openapi_client
-from openapi_client.models.create_message_request import CreateMessageRequest
-from openapi_client.models.message import Message
-from openapi_client.rest import ApiException
+import db_service_client
+from db_service_client.models.create_message_request import CreateMessageRequest
+from db_service_client.models.message import Message
+from db_service_client.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost:4004
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = db_service_client.Configuration(
     host = "http://localhost:4004"
 )
 
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with db_service_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.DefaultApi(api_client)
-    create_message_request = openapi_client.CreateMessageRequest() # CreateMessageRequest | 
+    api_instance = db_service_client.DefaultApi(api_client)
+    create_message_request = db_service_client.CreateMessageRequest() # CreateMessageRequest | 
 
     try:
         # Create a new message
@@ -422,7 +422,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **products_get**
-> List[object] products_get(query)
+> List[Product] products_get(query)
 
 Get products by query
 
@@ -430,21 +430,22 @@ Get products by query
 
 
 ```python
-import openapi_client
-from openapi_client.rest import ApiException
+import db_service_client
+from db_service_client.models.product import Product
+from db_service_client.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost:4004
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = db_service_client.Configuration(
     host = "http://localhost:4004"
 )
 
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with db_service_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.DefaultApi(api_client)
+    api_instance = db_service_client.DefaultApi(api_client)
     query = 'query_example' # str | 
 
     try:
@@ -467,7 +468,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**List[object]**
+[**List[Product]**](Product.md)
 
 ### Authorization
 

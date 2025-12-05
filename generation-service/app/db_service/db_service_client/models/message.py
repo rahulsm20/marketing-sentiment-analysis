@@ -21,7 +21,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from uuid import UUID
-from openapi_client.models.message_role import MessageRole
+from db_service_client.models.message_role import MessageRole
 from typing import Optional, Set
 from typing_extensions import Self
 

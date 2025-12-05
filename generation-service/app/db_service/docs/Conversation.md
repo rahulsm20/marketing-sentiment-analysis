@@ -16,7 +16,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.conversation import Conversation
+from db_service_client.models.conversation import Conversation
 
 # TODO update the JSON string below
 json = "{}"

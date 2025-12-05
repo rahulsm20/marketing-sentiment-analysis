@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.create_message_request import CreateMessageRequest
+from db_service_client.models.create_message_request import CreateMessageRequest
 
 class TestCreateMessageRequest(unittest.TestCase):
     """CreateMessageRequest unit test stubs"""

@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.message_role import MessageRole
+from db_service_client.models.message_role import MessageRole
 
 class TestMessageRole(unittest.TestCase):
     """MessageRole unit test stubs"""

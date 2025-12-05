@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.conversation_status import ConversationStatus
+from db_service_client.models.conversation_status import ConversationStatus
 
 class TestConversationStatus(unittest.TestCase):
     """ConversationStatus unit test stubs"""

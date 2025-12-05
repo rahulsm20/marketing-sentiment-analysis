@@ -14,7 +14,7 @@
 
 import unittest
 
-from openapi_client.models.create_conversation_request import CreateConversationRequest
+from db_service_client.models.create_conversation_request import CreateConversationRequest
 
 class TestCreateConversationRequest(unittest.TestCase):
     """CreateConversationRequest unit test stubs"""
