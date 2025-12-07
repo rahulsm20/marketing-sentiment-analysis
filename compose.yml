@@ -41,3 +41,84 @@ services:
     depends_on:
       - generation-service
       - scraping-service
+  storage_service:
+    build:
+      context: ./storage-service
+      dockerfile: Dockerfile
+    image: storage-service:latest
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    ports:
+      - 4006:4006
+    depends_on:
+      - elasticsearch
+  db_service:
+    build:
+      context: ./db-service
+      dockerfile: Dockerfile
+    image: db-service:latest
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/sentiment_db
+    ports:
+      - 4004:4004
+    depends_on:
+      - postgres
+  chat_service:
+    build:
+      context: ./chat-service
+      dockerfile: Dockerfile
+    image: chat-service:latest
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/sentiment_db
+      - REDIS_URL=redis://redis:6379
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    ports:
+      - 4005:4005
+    depends_on:
+      - postgres
+      - redis
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=sentiment_db
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - 9200:9200
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: kibana
+    ports:
+      - 5601:5601
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.11.0
+    container_name: logstash
+    ports:
+      - 5044:5044
+      - 9600:9600
+    volumes:
+      - ./logstash/pipeline/:/usr/share/logstash/pipeline/
+    depends_on:
+      - elasticsearch
+
+volumes:
+  es_data:
