@@ -1,4 +1,11 @@
-import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  doublePrecision,
+  index,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 export const ConversationStatus = {
   PENDING: "pending",
@@ -20,7 +27,7 @@ const ConversationStatusEnum = [
 
 const MessageRoleEnum = ["user", "assistant"] as const;
 
-export const usersTable = pgTable("users_table", {
+export const usersTable = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name"),
   email: text("email").unique(),
@@ -31,7 +38,7 @@ export const usersTable = pgTable("users_table", {
 });
 
 export const conversationsTable = pgTable(
-  "conversations_table",
+  "conversations",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     openai_convId: text("openai_conv_id").unique(),
@@ -52,7 +59,7 @@ export const conversationsTable = pgTable(
 );
 
 export const messagesTable = pgTable(
-  "messages_table",
+  "messages",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     conversationId: uuid("conversation_id").references(
@@ -73,7 +80,7 @@ export const messagesTable = pgTable(
 );
 
 export const pdfDocumentsTable = pgTable(
-  "pdf_documents_table",
+  "pdf_documents",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     conversationId: uuid("conversation_id").references(
@@ -89,4 +96,30 @@ export const pdfDocumentsTable = pgTable(
   (table) => [
     index("pdf_documents_conversation_id_index").on(table.conversationId),
   ]
+);
+
+export const productsTable = pgTable("products", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name"),
+  url: text("url"),
+  price: doublePrecision("price"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export const productReviewsTable = pgTable(
+  "product_reviews",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    productId: uuid("product_id").references(() => productsTable.id),
+    reviewText: text("review_text"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at")
+      .notNull()
+      .$onUpdate(() => new Date()),
+  },
+
+  (table) => [index("product_reviews_product_id_index").on(table.productId)]
 );

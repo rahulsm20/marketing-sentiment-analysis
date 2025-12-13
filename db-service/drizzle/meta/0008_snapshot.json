@@ -1,11 +1,11 @@
 {
-  "id": "362fc1a1-1901-4698-9d34-7ef7dc365374",
-  "prevId": "77fea533-34a0-4be2-a49c-e9fe06b9a95d",
+  "id": "16099ee6-016f-45e6-99bb-bda6cdbe625e",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.conversations_table": {
-      "name": "conversations_table",
+    "public.conversations": {
+      "name": "conversations",
       "schema": "",
       "columns": {
         "id": {
@@ -87,10 +87,10 @@
         }
       },
       "foreignKeys": {
-        "conversations_table_user_id_users_table_id_fk": {
-          "name": "conversations_table_user_id_users_table_id_fk",
-          "tableFrom": "conversations_table",
-          "tableTo": "users_table",
+        "conversations_user_id_users_id_fk": {
+          "name": "conversations_user_id_users_id_fk",
+          "tableFrom": "conversations",
+          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
@@ -103,8 +103,8 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "conversations_table_openai_conv_id_unique": {
-          "name": "conversations_table_openai_conv_id_unique",
+        "conversations_openai_conv_id_unique": {
+          "name": "conversations_openai_conv_id_unique",
           "nullsNotDistinct": false,
           "columns": [
             "openai_conv_id"
@@ -115,8 +115,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.messages_table": {
-      "name": "messages_table",
+    "public.messages": {
+      "name": "messages",
       "schema": "",
       "columns": {
         "id": {
@@ -132,6 +132,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "content": {
           "name": "content",
           "type": "text",
@@ -142,7 +148,8 @@
           "name": "role",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "'user'"
         },
         "created_at": {
           "name": "created_at",
@@ -173,15 +180,43 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "messages_user_id_index": {
+          "name": "messages_user_id_index",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
-        "messages_table_conversation_id_conversations_table_id_fk": {
-          "name": "messages_table_conversation_id_conversations_table_id_fk",
-          "tableFrom": "messages_table",
-          "tableTo": "conversations_table",
+        "messages_conversation_id_conversations_id_fk": {
+          "name": "messages_conversation_id_conversations_id_fk",
+          "tableFrom": "messages",
+          "tableTo": "conversations",
           "columnsFrom": [
             "conversation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "messages_user_id_users_id_fk": {
+          "name": "messages_user_id_users_id_fk",
+          "tableFrom": "messages",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
           ],
           "columnsTo": [
             "id"
@@ -196,8 +231,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.pdf_documents_table": {
-      "name": "pdf_documents_table",
+    "public.pdf_documents": {
+      "name": "pdf_documents",
       "schema": "",
       "columns": {
         "id": {
@@ -257,10 +292,10 @@
         }
       },
       "foreignKeys": {
-        "pdf_documents_table_conversation_id_conversations_table_id_fk": {
-          "name": "pdf_documents_table_conversation_id_conversations_table_id_fk",
-          "tableFrom": "pdf_documents_table",
-          "tableTo": "conversations_table",
+        "pdf_documents_conversation_id_conversations_id_fk": {
+          "name": "pdf_documents_conversation_id_conversations_id_fk",
+          "tableFrom": "pdf_documents",
+          "tableTo": "conversations",
           "columnsFrom": [
             "conversation_id"
           ],
@@ -277,8 +312,134 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.users_table": {
-      "name": "users_table",
+    "public.product_reviews": {
+      "name": "product_reviews",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "product_id": {
+          "name": "product_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "review_text": {
+          "name": "review_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "product_reviews_product_id_index": {
+          "name": "product_reviews_product_id_index",
+          "columns": [
+            {
+              "expression": "product_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "product_reviews_product_id_products_id_fk": {
+          "name": "product_reviews_product_id_products_id_fk",
+          "tableFrom": "product_reviews",
+          "tableTo": "products",
+          "columnsFrom": [
+            "product_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.products": {
+      "name": "products",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "product_name": {
+          "name": "product_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "product_url": {
+          "name": "product_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price": {
+          "name": "price",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.users": {
+      "name": "users",
       "schema": "",
       "columns": {
         "id": {
@@ -318,8 +479,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "users_table_email_unique": {
-          "name": "users_table_email_unique",
+        "users_email_unique": {
+          "name": "users_email_unique",
           "nullsNotDistinct": false,
           "columns": [
             "email"
