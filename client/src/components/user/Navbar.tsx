@@ -1,6 +1,17 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import { GanttChart } from "lucide-react";
+import { GanttChart, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Separator } from "../ui/separator";
 import { LoginButton, LogoutButton } from "./ActionButtons";
 import { ModeToggle } from "./ModeToggle";
 
@@ -58,13 +69,41 @@ const Navbar = () => {
       </div>
       {user ? (
         <ul className="flex p-3 gap-5 items-center justify-center">
-          {user?.name && <li>{user?.name}</li>}
-          <li>
-            <LogoutButton />
-          </li>
+          <Avatar
+            className="h-6 w-6 rounded-full"
+            title={user?.name || "User Avatar"}
+          >
+            <AvatarImage
+              src={user?.picture}
+              alt={user?.name || "User Avatar"}
+              title={user?.name || "User Avatar"}
+            />
+            <AvatarFallback>
+              {user?.name?.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
           <li>
             <ModeToggle />
           </li>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Menu className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuGroup className="flex flex-col gap-2">
+                <DropdownMenuLabel>
+                  Signed in as <br />
+                  <span className="font-medium">{user?.email}</span>
+                </DropdownMenuLabel>
+                <Separator />
+                <DropdownMenuItem>
+                  <LogoutButton />
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </ul>
       ) : (
         <ul className="flex justify-end p-3 gap-5">

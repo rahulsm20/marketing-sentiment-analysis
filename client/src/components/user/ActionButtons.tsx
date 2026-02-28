@@ -1,5 +1,6 @@
 import { clientUrl } from "@/utils/constants";
 import { useAuth0 } from "@auth0/auth0-react";
+import { LogOut } from "lucide-react";
 import { Button } from "../ui/button";
 
 export const LoginButton = () => {
@@ -24,8 +25,9 @@ export const LogoutButton = () => {
     }
   };
   return (
-    <Button size="sm" onClick={handleLogout}>
-      Log Out
+    <Button className="flex gap-2" size="sm" onClick={handleLogout}>
+      <span>Log Out</span>
+      <LogOut className="h-4 w-4" />
     </Button>
   );
 };

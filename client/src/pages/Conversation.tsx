@@ -4,6 +4,7 @@ import Navbar from "@/components/user/Navbar";
 import Sidebar from "@/components/user/Sidebar";
 import { Stopwatch } from "@/components/user/Stopwatch";
 import { ConversationItem } from "@/types";
+import { LOCAL_CACHE_KEYS } from "@/utils/constants";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
@@ -14,11 +15,11 @@ import { toast } from "sonner";
 const Conversation = () => {
   const id = useParams().id;
   const [conversation, setConversation] = useState<ConversationItem | null>(
-    null
+    null,
   );
 
   const { isPending, error } = useQuery({
-    queryKey: [`conversationData:${id}`],
+    queryKey: [LOCAL_CACHE_KEYS.CONVERSATION(id || "")],
     enabled: !!id,
     retry: false,
     queryFn: () =>

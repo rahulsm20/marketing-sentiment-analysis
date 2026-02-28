@@ -10,8 +10,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ConversationItem } from "@/types";
+import { LOCAL_CACHE_KEYS } from "@/utils/constants";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useQuery } from "@tanstack/react-query";
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  useQuery,
+} from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import {
   Ellipsis,
   GanttChart,
@@ -21,7 +27,7 @@ import {
   PlusCircle,
   SidebarOpen,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Skeleton } from "../ui/skeleton";
@@ -33,45 +39,58 @@ import { ModeToggle } from "./ModeToggle";
 
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-  const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const id = useParams()?.id;
 
-  const {
-    logout,
-    isAuthenticated,
-    isLoading: isFetchingAuth,
-    user,
-  } = useAuth0();
+  const { logout, user } = useAuth0();
 
-  useEffect(() => {
-    const handleLogout = async () => {
-      await logout({ logoutParams: { returnTo: window.location.origin } });
-    };
-    if (!isFetchingAuth && !isAuthenticated) {
-      handleLogout();
-    }
-  }, [isFetchingAuth, logout, isAuthenticated]);
-
-  const fetchConversations = async () => {
-    return schedulerApi.getConversations().then((res) => {
-      setConversations(res);
-      setLoaded(true);
-      return res;
-    });
+  const handleLogout = async () => {
+    await logout({ logoutParams: { returnTo: window.location.origin } });
   };
 
-  const { isLoading, error } = useQuery({
-    queryKey: [`conversationData`],
-    enabled: !loaded,
+  // useEffect(() => {
+  //   if (!isFetchingAuth && !isAuthenticated) {
+  //     handleLogout();
+  //   }
+  // }, [isFetchingAuth, logout, isAuthenticated]);
+
+  const {
+    data: conversations = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: [LOCAL_CACHE_KEYS.CONVERSATIONS],
+    queryFn: () => schedulerApi.getConversations(),
     retry: false,
-    queryFn: () =>
-      fetchConversations().then((res) => {
-        return res;
-      }),
   });
 
   if (error) {
+    if (error instanceof AxiosError) {
+      switch (error.response?.status) {
+        case 401:
+          toast(`Your session has expired, logging you out...`, {
+            position: "top-center",
+            action: {
+              label: "Dismiss",
+              onClick: () => console.log("Dismiss"),
+            },
+          });
+          setTimeout(() => {
+            handleLogout();
+          }, 3000);
+          return null;
+        case 429:
+          toast(error.response?.data?.message, {
+            position: "top-center",
+            action: {
+              label: "Dismiss",
+              onClick: () => console.log("Dismiss"),
+            },
+          });
+          return null;
+      }
+    }
+
     console.error("Failed to fetch conversations", error);
     toast(`Failed to fetch conversations`, {
       position: "top-center",
@@ -175,7 +194,7 @@ const Sidebar = () => {
               ) : conversations.length > 0 ? (
                 <ConversationItems
                   conversations={conversations}
-                  refetch={fetchConversations}
+                  refetch={refetch}
                   isLoading={isLoading}
                   id={id}
                 />
@@ -203,7 +222,7 @@ const Sidebar = () => {
         </div>
         <ConversationItems
           conversations={conversations}
-          refetch={fetchConversations}
+          refetch={refetch}
           isLoading={isLoading}
           id={id}
         />
@@ -219,12 +238,14 @@ const ConversationItems = ({
   id,
 }: {
   conversations: ConversationItem[];
-  refetch: () => Promise<void>;
+  refetch: (
+    options?: RefetchOptions | undefined,
+  ) => Promise<QueryObserverResult<ConversationItem[], Error>>;
   isLoading: boolean;
   id: string | undefined;
 }) => {
   return isLoading ? (
-    <Skeleton className="h-4 w-full" />
+    <Skeleton className="h-6 w-full" />
   ) : (
     <ul className="flex flex-col gap-2">
       {conversations.length > 0 ? (

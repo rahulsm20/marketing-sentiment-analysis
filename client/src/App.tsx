@@ -3,7 +3,6 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { queryClient } from "./api/client";
-import About from "./pages/About";
 import Analytics from "./pages/Analytics";
 import Conversation from "./pages/Conversation";
 import Home from "./pages/Home";
@@ -25,7 +24,7 @@ function App() {
     routes = (
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/about" element={<About />} />
+        {/* <Route path="/about" element={<About />} /> */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     );

@@ -42,7 +42,7 @@ const Footer = () => {
           </ul>
         </div>
         <p className="flex gap-2 text-zinc-500 text-xs">
-          © 2025 Market Sentience
+          © {new Date().getFullYear()} Market Sentience
         </p>
         <span className="text-xs text-zinc-500">
           Please enjoy each feature equally.

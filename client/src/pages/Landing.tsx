@@ -63,14 +63,14 @@ const Landing = () => {
     <div className="hero">
       <Navbar />
       <Layout className="flex px-20 items-center mb-20">
-        <div className="flex items-center justify-between flex-col lg:flex-row gap-2 lg:gap-5  lg:w-2/3">
+        <div className="flex items-center justify-between flex-col lg:flex-row gap-2 lg:gap-5 xl:w-1/2">
           <div className="flex flex-col">
             <h1 className="text-4xl font-bold mb-4">
               <GanttChart className="inline-block mr-2" />
               Market Sentience
             </h1>
             <p className="text-lg mb-8">
-              The one-stop shop for all your marketing analysis needs.
+              One-stop shop for all your marketing analysis needs.
             </p>
           </div>
           <Button
@@ -79,24 +79,27 @@ const Landing = () => {
           >
             <span>Get Started</span>
             <ArrowRight className="h-4 w-4" />
-          </Button>
+          </Button>{" "}
         </div>
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-          {features.map((feature, index) => (
-            <Card
-              key={index}
-              className="p-2 hover:-translate-y-2 duration-300 ease-in-out hover:shadow-md hover:shadow-red-600 max-w-72"
-            >
-              <CardHeader>
-                <CardTitle>{feature.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>{feature.description}</CardDescription>
-                {feature.icon && <div className="mt-4">{feature.icon}</div>}
-              </CardContent>
-            </Card>
-          ))}
-        </section>
+        <div className="flex flex-col gap-10 border p-5">
+          <h1 className="text-3xl border-b py-3 font-semibold">Features</h1>
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            {features.map((feature, index) => (
+              <Card
+                key={index}
+                className="p-2 hover:-translate-y-2 duration-300 ease-in-out hover:shadow-md hover:shadow-red-600 max-w-72"
+              >
+                <CardHeader>
+                  <CardTitle>{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>{feature.description}</CardDescription>
+                  {feature.icon && <div className="mt-4">{feature.icon}</div>}
+                </CardContent>
+              </Card>
+            ))}
+          </section>
+        </div>
       </Layout>
       <Footer />
     </div>
