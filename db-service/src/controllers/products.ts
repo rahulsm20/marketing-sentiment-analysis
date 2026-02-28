@@ -1,3 +1,6 @@
+import { productsTable } from "@/lib/db/schema";
+import { db } from "@/lib/db/tracking";
+import { ilike } from "drizzle-orm/sql/expressions/conditions";
 import { Product } from "../lib/models/product.model";
 import { CACHE_KEY } from "../utils/constants";
 import { cacheData, getCachedData } from "../utils/redis";
@@ -17,9 +20,11 @@ export const productController = {
     if (cachedData) {
       return JSON.parse(cachedData);
     }
-    const products = await Product.find({
-      query: joinedQuery,
-    }).limit(10);
+    const products = await db
+      .select()
+      .from(productsTable)
+      .where(ilike(productsTable.query, joinedQuery))
+      .limit(50);
     await cacheData(key, JSON.stringify(products), 3600);
     return products;
   },

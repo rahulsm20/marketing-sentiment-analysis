@@ -78,6 +78,20 @@
       "when": 1765637439628,
       "tag": "0010_charming_talon",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1766117024788,
+      "tag": "0011_tranquil_diamondback",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1766120077559,
+      "tag": "0012_closed_nick_fury",
+      "breakpoints": true
     }
   ]
 }

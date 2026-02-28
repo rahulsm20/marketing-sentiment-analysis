@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev src/server.ts",
+    "dev": "bun --watch src/server.ts",
     "build": "tsc && npx drizzle-kit generate",
-    "start": "node dist/src/server.js",
+    "start": "bun dist/src/server.js",
     "generate": "npx drizzle-kit generate --dialect=postgresql --schema src/lib/db/schema.ts --out ./drizzle",
     "migrate": "npx drizzle-kit generate --dialect=postgresql --schema src/lib/db/schema.ts --out ./drizzle && npx drizzle-kit push",
     "test": "npm run test"

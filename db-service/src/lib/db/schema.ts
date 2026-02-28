@@ -103,6 +103,9 @@ export const productsTable = pgTable("products", {
   name: text("name"),
   url: text("url"),
   price: doublePrecision("price"),
+  query: text("query"),
+  company: text("company"),
+  category: text("category"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
     .notNull()
