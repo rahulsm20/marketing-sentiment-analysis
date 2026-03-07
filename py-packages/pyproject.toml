@@ -1,0 +1,24 @@
+[project]
+name = "py-packages"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "dotenv>=0.9.9",
+    "psycopg2>=2.9.11",
+    "python-dotenv[cli]>=1.2.2",
+    "sqlacodegen>=4.0.2",
+    "sqlalchemy>=2.0.48",
+    "sqlmodel>=0.0.37",
+]
+
+[tool.sqlacodegen]
+url = "postgresql+psycopg2://youruser:yourpass@localhost:5432/yourdb"
+generator = "sqlmodels"
+output_module = "app/models.py"
+
+# Exclude internal/system schemas
+schemas = ["public"]
+
+use_inflect = true       
