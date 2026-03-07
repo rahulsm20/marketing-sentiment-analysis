@@ -1,0 +1,19 @@
+{
+  "name": "ts-packages",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "bun build src/index.ts --outfile=dist/index.ts  && bunx drizzle-kit generate",
+    "start": "bun dist/src/server.js",
+    "generate": "bunx drizzle-kit generate --dialect=postgresql --schema src/lib/db/schema.ts --out ./drizzle",
+    "migrate": "bunx drizzle-kit generate --dialect=postgresql --schema src/lib/db/schema.ts --out ./drizzle && npx drizzle-kit push",
+    "test": "npm run test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
