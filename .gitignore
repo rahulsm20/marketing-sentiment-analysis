@@ -3,11 +3,13 @@ dist
 .serverless
 node_modules
 venv
-.vscode
+.venv
 env
 *.csv
 __pycache__
 windows-venv
-analysis/
+.env.json
+analysis
 for_me.md
 logs.txt
+.vscode
