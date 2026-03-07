@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "bun --watch src/server.ts",
     "build": "bun build src/server.ts --outdir ./dist --target node",
-    "start": "node dist/src/server.js"
+    "start": "bun dist/src/server.js"
   },
   "keywords": [],
   "author": "",

@@ -10,7 +10,7 @@ app.use(express.json());
 app.use("/chat", chatRouter);
 app.get("/", async (req: Request, res: Response) => {
   return res.status(200).json({
-    message: "Service running",
+    message: "Chat service running",
     status: "ok",
     timestamp: new Date().toISOString(),
     environment: config.NODE_ENV,
