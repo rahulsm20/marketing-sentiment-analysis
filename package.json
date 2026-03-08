@@ -1,10 +1,10 @@
 {
   "workspaces": [
-    "./chat-service",
-    "./scheduler",
-    "./scraping-service",
-    "./storage-service",
-    "./ts-packages"
+    "chat-service",
+    "scheduler",
+    "scraping-service",
+    "storage-service",
+    "ts-packages"
   ],
   "dependencies": {
     "@aws-sdk/client-s3": "^3.936.0",
