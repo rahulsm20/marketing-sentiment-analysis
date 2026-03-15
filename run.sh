@@ -31,7 +31,39 @@ echo "Logging Service PID: $logging_pid"
 echo "Storage Service PID: $storage_pid"
 echo "All services started. Press Ctrl+C to stop."
 # Trap to kill all on exit
-trap "echo 'Shutting down...'; kill $client_pid $scheduler_pid $scraping_pid $generation_pid $embedding_pid $db_pid $logging_pid $storage_pid; exit" SIGINT SIGTERM
+# trap "echo 'Shutting down...'; kill $client_pid $scheduler_pid $scraping_pid $generation_pid $embedding_pid $db_pid $logging_pid $storage_pid; exit" SIGINT SIGTERM
+shutdown() {
+  echo ""
+  echo "Gracefully shutting down services..."
+
+  services=(
+    "$client_pid:Client"
+    "$scheduler_pid:Scheduler"
+    "$scraping_pid:Scraping"
+    "$generation_pid:Generation"
+    "$embedding_pid:Embedding"
+    "$db_pid:DB"
+    "$logging_pid:Logging"
+    "$storage_pid:Storage"
+  )
+
+  for svc in "${services[@]}"; do
+    pid="${svc%%:*}"
+    name="${svc##*:}"
+
+    if kill -0 "$pid" 2>/dev/null; then
+      echo "Stopping $name (PID $pid)..."
+      kill -TERM "$pid"
+      wait "$pid"
+      echo "$name stopped."
+    fi
+  done
+
+  echo "All services stopped."
+  exit 0
+}
+
+trap shutdown SIGINT SIGTERM
 
 # Wait for all
 wait $client_pid $scheduler_pid $scraping_pid $generation_pid $embedding_pid $db_pid $logging_pid $storage_pid
