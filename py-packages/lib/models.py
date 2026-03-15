@@ -26,14 +26,12 @@ class Products(SQLModel, table=True):
 class Users(SQLModel, table=True):
     __table_args__ = (
         PrimaryKeyConstraint('id', name='users_pkey'),
-        UniqueConstraint('email', name='users_email_unique')
     )
 
-    id: uuid.UUID = Field(sa_column=Column('id', Uuid, primary_key=True, server_default=text('gen_random_uuid()')))
+    id: str = Field(sa_column=Column('id', Text, primary_key=True))
+    email: str = Field(sa_column=Column('email', Text, nullable=False))
     created_at: datetime.datetime = Field(sa_column=Column('created_at', DateTime, nullable=False, server_default=text('now()')))
     updated_at: datetime.datetime = Field(sa_column=Column('updated_at', DateTime, nullable=False))
-    name: Optional[str] = Field(default=None, sa_column=Column('name', Text))
-    email: Optional[str] = Field(default=None, sa_column=Column('email', Text))
 
     conversations: list['Conversations'] = Relationship(back_populates='user')
     messages: list['Messages'] = Relationship(back_populates='user')
@@ -54,7 +52,7 @@ class Conversations(SQLModel, table=True):
     updated_at: datetime.datetime = Field(sa_column=Column('updated_at', DateTime, nullable=False))
     openai_conv_id: Optional[str] = Field(default=None, sa_column=Column('openai_conv_id', Text))
     query: Optional[str] = Field(default=None, sa_column=Column('query', Text))
-    user_id: Optional[uuid.UUID] = Field(default=None, sa_column=Column('user_id', Uuid))
+    user_id: Optional[str] = Field(default=None, sa_column=Column('user_id', Text))
 
     user: Optional['Users'] = Relationship(back_populates='conversations')
     messages: list['Messages'] = Relationship(back_populates='conversation')
@@ -92,7 +90,7 @@ class Messages(SQLModel, table=True):
     created_at: datetime.datetime = Field(sa_column=Column('created_at', DateTime, nullable=False, server_default=text('now()')))
     updated_at: datetime.datetime = Field(sa_column=Column('updated_at', DateTime, nullable=False))
     conversation_id: Optional[uuid.UUID] = Field(default=None, sa_column=Column('conversation_id', Uuid))
-    user_id: Optional[uuid.UUID] = Field(default=None, sa_column=Column('user_id', Uuid))
+    user_id: Optional[str] = Field(default=None, sa_column=Column('user_id', Text))
     content: Optional[str] = Field(default=None, sa_column=Column('content', Text))
 
     conversation: Optional['Conversations'] = Relationship(back_populates='messages')
