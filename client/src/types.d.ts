@@ -11,11 +11,11 @@ export type ProductData = {
 export type MessageType = {
   data: string;
   sender: string;
-  _id: string;
+  id: string;
 };
 
 export type ConversationItem = {
-  _id: string;
+  id: string;
   query: string;
   status: "pending" | "completed" | "failed";
   messages: MessageType[];

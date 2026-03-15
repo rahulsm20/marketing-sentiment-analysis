@@ -235,7 +235,7 @@ const ConversationItems = ({
   conversations,
   refetch,
   isLoading,
-  id,
+  id: currId,
 }: {
   conversations: ConversationItem[];
   refetch: (
@@ -249,12 +249,12 @@ const ConversationItems = ({
   ) : (
     <ul className="flex flex-col gap-2">
       {conversations.length > 0 ? (
-        conversations.map(({ query, _id }) => (
-          <Link to={`/conversation/${_id}`}>
+        conversations.map(({ query, id }) => (
+          <Link to={`/conversation/${id}`}>
             <div
-              key={_id}
+              key={id}
               className={`flex items-center justify-between text-sm px-2 py-1 rounded ${
-                _id == id
+                currId == id
                   ? "bg-zinc-100 dark:bg-zinc-800"
                   : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
               }`}
@@ -268,7 +268,7 @@ const ConversationItems = ({
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <DeleteDialog _id={_id} refetch={refetch} />
+                    <DeleteDialog _id={id} refetch={refetch} />
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

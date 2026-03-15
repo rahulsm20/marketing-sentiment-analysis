@@ -13,12 +13,11 @@ MongoDB stores conversation and message data, while Pinecone manages semantic em
 - [Tech Stack](#tech-stack)
 - [Setup](#setup)
 - [System Design](#system-design)
-- [Code Gen](#code-gen)
+- [Code Gen](#code-generation)
 
 ## Tech Stack
 
 - Frontend
-
   - Vite
   - React
   - Shadcn
@@ -37,6 +36,7 @@ MongoDB stores conversation and message data, while Pinecone manages semantic em
   - GCP Pub/Sub
   - Puppeteer
   - Docker
+  - SQLAlchemy
 
 ## Setup
 
@@ -60,6 +60,6 @@ MongoDB stores conversation and message data, while Pinecone manages semantic em
 
 ## Code Generation
 
-- We have employed client code generation in this project using OpenAPI for certain services
+- Client code generation is employed in this project using OpenAPI for certain services
   that are used across multiple microservices to maintain consistency in behaviour and make
   sure changes in one service don't break in prod but even before commit.
