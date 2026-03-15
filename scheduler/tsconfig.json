@@ -2,7 +2,8 @@
   "compilerOptions": {
     "target": "ES6",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/shared/*": ["../ts-packages/src/*"]
     },
     "module": "commonjs",
     "strict": true,
@@ -11,6 +12,6 @@
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist"
   },
-  "include": ["src/**/*.ts", "types.ts"],
+  "include": ["src/**/*.ts", "types.ts", "../ts-packages/**/*.ts"],
   "exclude": ["node_modules"]
 }

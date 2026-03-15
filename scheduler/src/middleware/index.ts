@@ -1,12 +1,14 @@
+import { logger } from "@/lib/logger";
 import { NextFunction, Request, Response } from "express";
-import { User } from "../lib/models";
+import { createUser, getUserById } from "../../../ts-packages/src/lib/methods";
+import { getUserInfo } from "../../../ts-packages/src/lib/utils";
 
 //-----------------------------------------------------------------------------------
 
 export const checkUser = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const user = req.auth;
@@ -14,10 +16,16 @@ export const checkUser = async (
       return res.status(401).json({ message: "Unauthorized" });
     }
     const userId = user.payload.sub;
-    const dbUser = await User.findOne({ userId });
+    const token = user.token;
+    if (!userId) throw new Error("no userid provided");
+    const auth0User = await getUserInfo(token);
+    const dbUser = await getUserById(userId);
+    if (!auth0User?.email) throw new Error("no auth0 entry with email");
+
     if (!dbUser) {
-      const fromDb = await User.create({
-        userId,
+      const fromDb = await createUser({
+        id: userId,
+        email: auth0User.email,
       });
       req.user = fromDb;
     } else {
@@ -25,6 +33,7 @@ export const checkUser = async (
     }
     next();
   } catch (error) {
+    logger.info(error);
     return res.status(500).json({ message: "Internal server error", error });
   }
 };

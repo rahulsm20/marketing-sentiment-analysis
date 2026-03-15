@@ -4,10 +4,14 @@
  */
 //-----------------------------------------------------------------------------------
 
+import { pubSub } from "@/lib/pubsub";
 import express from "express";
-import { User } from "../lib/models";
-import { Conversation } from "../lib/models/conversation.model";
-import { rabbitMQ } from "../lib/rabbitmq";
+import {
+  deleteConversation,
+  getConversationById,
+  getConversations,
+  getUserById,
+} from "../../../ts-packages/src/lib/methods";
 import { RABBITMQ_TOPIC } from "../utils/constants";
 
 // ----------------------------------------------------------------------------------
@@ -19,9 +23,8 @@ router.get("/:id", async (req, res) => {
     if (!req.params.id) {
       return res.status(400).json({ message: "Conversation ID is required" });
     }
-    const conversation = await Conversation.findById(req.params.id)
-      .populate("messages")
-      .populate("user");
+    const id = req.params.id;
+    const conversation = await getConversationById(id);
 
     if (!conversation) {
       return res.status(404).json({ message: "Conversation not found" });
@@ -29,19 +32,28 @@ router.get("/:id", async (req, res) => {
 
     switch (conversation.status) {
       case "pending":
-        await rabbitMQ.sendToQueue(
-          RABBITMQ_TOPIC.SCRAPING,
-          JSON.stringify(conversation)
-        );
-        conversation.status = RABBITMQ_TOPIC.SCRAPING;
-        await conversation.save();
+        // await rabbitMQ.sendToQueue(
+        //   RABBITMQ_TOPIC.SCRAPING,
+        //   JSON.stringify(conversation)
+        // );
+        await pubSub.publish(RABBITMQ_TOPIC.SCRAPING, conversation);
+        // conversation.status = RABBITMQ_TOPIC.SCRAPING;
+        // await conversation.save();
+
         break;
       default:
-        await rabbitMQ.sendToQueue(
-          conversation.status,
-          JSON.stringify(conversation)
-        );
-        await conversation.save();
+        // await rabbitMQ.sendToQueue(
+        //   conversation.status,
+        //   JSON.stringify(conversation),
+        // );
+        const conversationStatus = conversation.status.toUpperCase();
+        if (Object.keys(RABBITMQ_TOPIC).includes(conversationStatus)) {
+          await pubSub.publish(
+            RABBITMQ_TOPIC[conversationStatus],
+            conversation,
+          );
+        }
+
         break;
     }
 
@@ -57,22 +69,19 @@ router.delete("/:id", async (req, res) => {
     if (!req.params.id) {
       return res.status(400).json({ message: "Conversation ID is required" });
     }
-    const conversation = await Conversation.findOne({
-      _id: req.params.id,
-      user: req.user._id,
-    });
+    const id = req.params.id;
+    const conversation = await getConversationById(id);
 
     if (!conversation) {
       return res.status(404).json({ message: "Conversation not found" });
     }
 
-    await conversation.deleteOne();
-
+    await deleteConversation(id);
     return res
       .status(200)
       .json({ message: "Conversation deleted successfully" });
   } catch (error) {
-    console.error("Error fetching conversation:", error);
+    console.error("Error deleting conversation:", error);
     return res.status(500).json({ message: "Internal server error", error });
   }
 });
@@ -83,11 +92,13 @@ router.get("/", async (req, res) => {
     if (!reqAuth) {
       return res.status(400).json({ error: "Unauthorized" });
     }
-    const user = await User.findOne({ userId: reqAuth.payload.sub });
+    const userId = reqAuth.payload.sub;
+    if (!userId) throw new Error("unauthorized");
+    const user = await getUserById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    const conversations = await Conversation.find({ user: user._id });
+    const conversations = await getConversations(user.id);
 
     return res.status(200).json(conversations);
   } catch (error) {

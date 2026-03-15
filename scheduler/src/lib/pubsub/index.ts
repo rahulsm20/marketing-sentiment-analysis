@@ -5,6 +5,7 @@
 
 //-----------------------------------------------------------------------------------
 
+import { config } from "@/utils/config";
 import { PubSub } from "@google-cloud/pubsub";
 import dotenv from "dotenv";
 dotenv.config();
@@ -12,15 +13,29 @@ dotenv.config();
 //-----------------------------------------------------------------------------------
 
 const pubSubClient = new PubSub({
-  projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-  apiKey: process.env.GOOGLE_API_KEY,
+  projectId: config.GOOGLE_PUBSUB_PROJECT_ID,
+  apiKey: config.GOOGLE_API_KEY,
+  apiEndpoint:
+    config.NODE_ENV === "development"
+      ? "http://localhost:8085"
+      : "pubsub.googleapis.com",
 });
 
 export const pubSub = {
   publish: async (topic: string, data: any) => {
     const messageBuffer = Buffer.from(JSON.stringify(data));
     try {
-      await pubSubClient.topic(topic).publish(messageBuffer);
+      const topicObj = pubSubClient.topic(topic);
+      await topicObj.create().catch((err) => {
+        if (err.code === 6) {
+          // Topic already exists, ignore the error
+          console.log(`Topic ${topic} already exists.`);
+        } else {
+          throw err;
+        }
+      });
+
+      await topicObj.publishMessage({ data: messageBuffer });
       console.log(`Published message to ${topic}:`, data);
     } catch (error) {
       console.error(`Error publishing message to ${topic}:`, error);

@@ -1,10 +1,13 @@
 //---------------------------------------------------------------------------------
 
+import { pubSub } from "@/lib/pubsub";
+import {
+  createConversation,
+  createMessage,
+  getUserById,
+} from "@/shared/lib/methods";
 import { Request, Response } from "express";
 import { IUser } from "../../types";
-import { Message, User } from "../lib/models";
-import { Conversation } from "../lib/models/conversation.model";
-import { rabbitMQ } from "../lib/rabbitmq";
 import { RABBITMQ_TOPIC } from "../utils/constants";
 
 //---------------------------------------------------------------------------------
@@ -12,7 +15,7 @@ import { RABBITMQ_TOPIC } from "../utils/constants";
 declare global {
   namespace Express {
     interface Request {
-      user: IUser;
+      user: IUser | undefined;
     }
   }
 }
@@ -35,32 +38,34 @@ export const addTaskToQueue = async (req: Request, res: Response) => {
   }
   const query = `${company}+${category}`;
 
-  const user = await User.findOne({
-    userId: req.auth?.payload.sub, // Assuming user ID is available in the request
-  });
+  const userId = req.auth?.payload.sub;
+  if (!userId) {
+    throw new Error("No UserID included in request");
+  }
+  const user = await getUserById(userId);
 
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
 
-  const conversation = new Conversation({
+  const conversation = await createConversation({
     query,
-    user: user?._id,
+    userId,
+  });
+  if (!conversation) {
+    throw new Error("Failed to create conversation");
+  }
+
+  await createMessage({
+    conversationId: conversation.id,
+    userId,
+    role: "assistant",
+    content: "Generating analysis for " + query.split("+").join(" ") + "...",
   });
 
-  const saved = await conversation.save();
-
-  const message = new Message({
-    conversation: saved._id,
-    author: "system",
-    data: "Generating analysis for " + query.split("+").join(" ") + "...",
-  });
-
-  await message.save();
-
-  await rabbitMQ.sendToQueue(
+  await pubSub.publish(
     RABBITMQ_TOPIC.SCRAPING,
-    JSON.stringify({ company, category, conversationId: saved._id })
+    JSON.stringify({ company, category, conversationId: conversation.id }),
   );
-  return res.status(201).json({ conversationId: saved._id });
+  return res.status(201).json({ conversationId: conversation.id });
 };

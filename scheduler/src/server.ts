@@ -14,7 +14,6 @@ import { db } from "./lib/db/mongo";
 import { logger } from "./lib/logger";
 import { checkUser } from "./middleware";
 import { requestLogger } from "./middleware/loggerMiddleware";
-import { rateLimiter } from "./middleware/ratelimiter";
 import { conversationRoutes } from "./routes/conversationRoutes";
 import { taskRoutes } from "./routes/taskRoutes";
 import { config } from "./utils/config";
@@ -35,7 +34,7 @@ app.use(
   cors({
     origin: config.CLIENT_URL,
     credentials: true,
-  })
+  }),
 );
 
 //----------------------------------------------------------
@@ -49,11 +48,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(jwtCheck);
 app.use(checkUser);
-app.use(rateLimiter);
+// app.use(rateLimiter);
 app.use("/v1/tasks", taskRoutes);
 app.use("/v1/conversation", conversationRoutes);
 app.get("/", async (_req: Request, res: Response) => {
-  return res.status(200).json({ message: "Service running", status: "ok" });
+  return res
+    .status(200)
+    .json({ message: "scheduler service running", status: "ok" });
 });
 
 //----------------------------------------------------------

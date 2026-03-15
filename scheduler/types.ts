@@ -1,4 +1,3 @@
-import { Document, Types } from "mongoose";
 export enum LinkPrecedence {
   primary = "primary",
   secondary = "secondary",
@@ -14,9 +13,10 @@ export type Contact = {
   linkedId?: number | null;
 };
 
-export interface IUser extends Document {
-  userId?: string | null | undefined;
-  conversations: Types.ObjectId[]; // or Types.ObjectId[] if you only store IDs
+export interface IUser {
+  id?: string | null | undefined;
+  email: string | null;
+  conversations?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
