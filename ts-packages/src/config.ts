@@ -16,3 +16,15 @@ export const config = {
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || "",
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || "",
 };
+
+export const RABBITMQ_TOPIC: { [key: string]: string } = {
+  SCRAPING: "market_sentience_scraper",
+  GENERATION: "market_sentience_generation",
+  EMBEDDING: "market_sentience_embedding",
+};
+
+export const RABBITMQ_TOPIC_MAP: { [key: string]: string } = {
+  market_sentience_scraper: "Scraping",
+  market_sentience_generation: "Generation",
+  market_sentience_embedding: "Embedding",
+};

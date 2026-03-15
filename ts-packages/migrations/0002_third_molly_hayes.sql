@@ -2,7 +2,7 @@ CREATE TABLE "conversations" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"openai_conv_id" text,
 	"query" text,
-	"user_id" uuid,
+	"user_id" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"status" text DEFAULT 'pending' NOT NULL,
 	"updated_at" timestamp NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE "conversations" (
 CREATE TABLE "messages" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"conversation_id" uuid,
-	"user_id" uuid,
+	"user_id" text,
 	"content" text,
 	"role" text DEFAULT 'user' NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -49,12 +49,10 @@ CREATE TABLE "products" (
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"name" text,
-	"email" text,
+	"id" text PRIMARY KEY NOT NULL,
+	"email" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp NOT NULL,
-	CONSTRAINT "users_email_unique" UNIQUE("email")
+	"updated_at" timestamp NOT NULL
 );
 --> statement-breakpoint
 ALTER TABLE "conversations" ADD CONSTRAINT "conversations_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint

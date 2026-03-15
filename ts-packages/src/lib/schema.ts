@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   doublePrecision,
   index,
@@ -28,9 +29,8 @@ const ConversationStatusEnum = [
 const MessageRoleEnum = ["user", "assistant"] as const;
 
 export const usersTable = pgTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name"),
-  email: text("email").unique(),
+  id: text("id").primaryKey().notNull(),
+  email: text("email").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
     .notNull()
@@ -43,7 +43,7 @@ export const conversationsTable = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     openai_convId: text("openai_conv_id").unique(),
     query: text("query"),
-    userId: uuid("user_id").references(() => usersTable.id),
+    userId: text("user_id").references(() => usersTable.id),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     status: text({ enum: ConversationStatusEnum })
       .notNull()
@@ -55,17 +55,21 @@ export const conversationsTable = pgTable(
   (table) => [
     index("conversations_openai_conv_id_index").on(table.openai_convId),
     index("conversations_user_id_index").on(table.userId),
-  ]
+  ],
 );
+
+export const usersRelations = relations(usersTable, ({ many }) => ({
+  user_conversations: many(conversationsTable),
+}));
 
 export const messagesTable = pgTable(
   "messages",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     conversationId: uuid("conversation_id").references(
-      () => conversationsTable.id
+      () => conversationsTable.id,
     ),
-    userId: uuid("user_id").references(() => usersTable.id),
+    userId: text("user_id").references(() => usersTable.id),
     content: text("content"),
     role: text({ enum: MessageRoleEnum }).notNull().default("user"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -76,7 +80,7 @@ export const messagesTable = pgTable(
   (table) => [
     index("messages_conversation_id_index").on(table.conversationId),
     index("messages_user_id_index").on(table.userId),
-  ]
+  ],
 );
 
 export const pdfDocumentsTable = pgTable(
@@ -84,7 +88,7 @@ export const pdfDocumentsTable = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     conversationId: uuid("conversation_id").references(
-      () => conversationsTable.id
+      () => conversationsTable.id,
     ),
     fileName: text("file_name"),
     filePath: text("file_path"),
@@ -95,7 +99,7 @@ export const pdfDocumentsTable = pgTable(
   },
   (table) => [
     index("pdf_documents_conversation_id_index").on(table.conversationId),
-  ]
+  ],
 );
 
 export const productsTable = pgTable("products", {
@@ -124,5 +128,5 @@ export const productReviewsTable = pgTable(
       .$onUpdate(() => new Date()),
   },
 
-  (table) => [index("product_reviews_product_id_index").on(table.productId)]
+  (table) => [index("product_reviews_product_id_index").on(table.productId)],
 );
