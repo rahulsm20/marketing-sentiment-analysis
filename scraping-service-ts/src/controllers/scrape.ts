@@ -1,8 +1,10 @@
-const puppeteer = require("puppeteer");
-const { Product } = require("../models/product.model");
-const { Conversation } = require("../models/conversation.model");
+import { createProduct, getProducts } from "@/shared/lib/methods";
+import { config } from "@/utils/config";
+import { Request, Response } from "express";
+import puppeteer from "puppeteer";
+import { CardType } from "types";
 
-async function handleCookiesPopup(page) {
+async function handleCookiesPopup(page: any) {
   const cookiesButton = await page.$("#sp-cc-accept");
   if (cookiesButton) {
     await cookiesButton.click();
@@ -11,31 +13,36 @@ async function handleCookiesPopup(page) {
 
 /**
  * Scrapes product data from a given input
- * @param {{company: string, category: string, conversationId: string}} input
- * @returns {Promise<{data?: {products: Array, conversationId: string}, error?: string, message?: string, status: number}>}
  */
-async function scrapeProducts(input) {
+export async function scrapeProducts(req: Request, res: Response) {
   let browser;
-  const { company, category, conversationId } = input;
+  const {
+    company: rawCompany,
+    category: rawCategory,
+    conversationId,
+  } = req.query;
 
-  if (!company || !category) {
+  const company = (rawCompany as string).toLowerCase();
+  const category = (rawCategory as string).toLowerCase();
+  if (!company || !rawCategory) {
     return {
       error: "Please provide both company and category parameters.",
       status: 400,
     };
   }
 
-  const query = `${company.toLowerCase()}+${category}`;
-  const items = await Product.find({
+  const query = `${(company as string).toLowerCase()}+${category}`;
+
+  const items = await getProducts({
     query,
   });
 
   if (items.length > 0) {
-    return { data: { products: items, conversationId }, status: 200 };
+    return res.status(200).json({ data: { products: items, conversationId } });
   }
 
   try {
-    if (process.env.NODE_ENV === "development") {
+    if (config.NODE_ENV === "development") {
       browser = await puppeteer.launch({
         executablePath: "",
         headless: false,
@@ -64,9 +71,12 @@ async function scrapeProducts(input) {
 
     const url = page.url();
 
-    const cardData = [];
-    const scrapePage = async (url, currentPage = 1, scrapeToPage = null) => {
-      // console.log("Scraping page " + currentPage, url, { query });
+    const cardData: CardType[] = [];
+    const scrapePage = async (
+      url: string,
+      currentPage = 1,
+      scrapeToPage = 1,
+    ) => {
       if (!url || (scrapeToPage !== null && currentPage > scrapeToPage)) {
         return;
       }
@@ -75,26 +85,24 @@ async function scrapeProducts(input) {
       await handleCookiesPopup(page);
 
       await page.waitForSelector(".s-widget-container");
-      let pageCardData = await page.evaluate((query) => {
+      let pageCardData: CardType[] = await page.evaluate((query: string) => {
         const cards = Array.from(
-          document.querySelectorAll(".s-widget-container")
+          document.querySelectorAll(".s-widget-container"),
         );
 
         const cardInfo = cards
           .map((card) => {
-            const productName = card.querySelector("h2")?.textContent.trim();
+            const productName = card.querySelector("h2")?.textContent?.trim();
 
             const anchorTag = card.querySelector(
-              "a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal"
+              "a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal",
             );
-            const cardURL = anchorTag
-              ? anchorTag.getAttribute("href").includes("https")
-                ? anchorTag.getAttribute("href")
-                : "https://www.amazon.in" + anchorTag.getAttribute("href")
-              : "N/A";
+            if (!anchorTag || !anchorTag?.getAttribute) return null;
+            const cardURL =
+              "https://www.amazon.in" + anchorTag.getAttribute("href") || "N/A";
 
             const sponsoredTag = card.querySelector(
-              ".puis-sponsored-label-text"
+              ".puis-sponsored-label-text",
             );
             const sponsored = sponsoredTag ? "yes" : "no";
 
@@ -103,50 +111,49 @@ async function scrapeProducts(input) {
 
             const priceElement = card.querySelector(".a-price .a-offscreen");
             const price = priceElement
-              ? priceElement.textContent.split("₹")[1]
+              ? (priceElement.textContent?.split("₹")[1] ?? "N/A")
               : "N/A";
 
             const basePriceElement = card.querySelector(
-              "span.a-price.a-text-price > span.a-offscreen"
+              "span.a-price.a-text-price > span.a-offscreen",
             );
             const basePrice = basePriceElement
               ? basePriceElement.textContent
               : "N/A";
 
             const ratingElement = card.querySelector(
-              ".a-row > span:nth-child(1)[aria-label]"
+              ".a-row > span:nth-child(1)[aria-label]",
             );
             const decimalRegex = /^\d+([,.]\d+)?$/;
-            const ariaLabel = ratingElement
-              ? ratingElement.getAttribute("aria-label")
-              : "N/A";
+            const ariaLabel =
+              ratingElement?.getAttribute("aria-label") || "N/A";
             const firstThreeCharacters = ariaLabel.substring(0, 3);
             const rating = decimalRegex.test(firstThreeCharacters)
               ? firstThreeCharacters.replace(",", ".")
               : "N/A";
 
             const ratingsNumberElement = card.querySelector(
-              ".a-row > span:nth-child(2)[aria-label]"
+              ".a-row > span:nth-child(2)[aria-label]",
             );
             const numberRegex = /^-?\d+(\.\d+)?$/;
-            const numberFormated = ratingsNumberElement
-              ? ratingsNumberElement
-                  .getAttribute("aria-label")
-                  .replace(/[\s.,]+/g, "")
-              : "N/A";
+            const numberFormated =
+              ratingsNumberElement
+                ?.getAttribute("aria-label")
+                ?.replace(/[\s.,]+/g, "") || "N/A";
             const ratingsNumber = numberRegex.test(numberFormated)
               ? numberFormated
               : "N/A";
 
             const boughtPastMonthElement = card.querySelector(
-              ".a-row.a-size-base > .a-size-base.a-color-secondary"
+              ".a-row.a-size-base > .a-size-base.a-color-secondary",
             );
             const textContent = boughtPastMonthElement
-              ? boughtPastMonthElement.textContent
+              ? (boughtPastMonthElement.textContent ?? "N/A")
               : "N/A";
             const plusSignRegex = /\b.*?\+/;
             const plusSignText = textContent.match(plusSignRegex);
-            const boughtPastMonth = plusSignRegex.test(plusSignText)
+            if (!plusSignText) return null;
+            const boughtPastMonth = plusSignRegex.test(plusSignText[0])
               ? plusSignText[0]
               : "N/A";
             // const query = "${query}";
@@ -171,12 +178,11 @@ async function scrapeProducts(input) {
 
         return cardInfo;
       }, query);
-      // console.log("outside: ", { company, category });
       pageCardData = pageCardData.filter(
-        (card) =>
+        (card: CardType) =>
           card.productName &&
           card.productName.toLowerCase().includes(company.toLowerCase()) &&
-          card.cardURL !== "N/A"
+          card.cardURL !== "N/A",
       );
 
       for (const card of pageCardData) {
@@ -188,7 +194,7 @@ async function scrapeProducts(input) {
             });
           } catch (error) {
             console.log(
-              "Element #acrCustomerReviewText not found. Moving to the next card."
+              "Element #acrCustomerReviewText not found. Moving to the next card.",
             );
             continue;
           }
@@ -198,30 +204,30 @@ async function scrapeProducts(input) {
           // extract ratings count
           const ratingsCountText = await page.$eval(
             "#acrCustomerReviewText",
-            (element) => element.textContent
+            (element) => element.textContent,
           );
           card.ratingsCount = parseInt(
             ratingsCountText.split(" ")[0].replace(",", ""),
-            10
+            10,
           );
 
           // extract rating
           const ratingText = await page.$eval(
             "span.a-size-base.a-color-base",
-            (element) => element.textContent
+            (element) => element.textContent,
           );
-          card.rating = parseFloat(ratingText);
+          card.rating = ratingText;
 
           // Extract reviews
           const reviewElements = await page.$$(
-            "div[data-hook='review-collapsed'] > span"
+            "div[data-hook='review-collapsed'] > span",
           );
           // // console.log("reviews: ", reviewElements);
           const extractedReviews = [];
           for (const element of reviewElements) {
             const reviewText = await page.evaluate(
               (el) => el.textContent.trim(),
-              element
+              element,
             );
             extractedReviews.push(reviewText);
           }
@@ -235,46 +241,56 @@ async function scrapeProducts(input) {
         if (nextPageButton) {
           const isDisabled = await page.evaluate(
             (btn) => btn.hasAttribute("aria-disabled"),
-            nextPageButton
+            nextPageButton,
           );
           if (!isDisabled) {
             const nextPageUrl = encodeURI(
-              await page.evaluate((nextBtn) => nextBtn.href, nextPageButton)
+              await page.evaluate(
+                (nextBtn) => (nextBtn as HTMLAnchorElement).href,
+                nextPageButton,
+              ),
             );
-            // console.log({ nextPageUrl });
-            console.log({ company, category });
-            await scrapePage(nextPageUrl, currentPage + 1, scrapeToPage, query);
+            await scrapePage(nextPageUrl, currentPage + 1, scrapeToPage);
           } else {
-            // // console.log("All available pages scraped:", currentPage);
           }
         } else if (!scrapeToPage || currentPage < scrapeToPage) {
           // // console.log("All available pages scraped:", currentPage);
         }
       }
     };
-    await scrapePage(url, 1, scrapeToPage, query);
+    await scrapePage(url, 1, scrapeToPage);
 
     for (const product of cardData) {
       try {
-        const newProduct = new Product(product);
-        await newProduct.save();
+        await createProduct({
+          name: product.productName,
+          url: product?.cardURL,
+          price: parseFloat(product?.price),
+          query,
+          company,
+          category,
+        });
       } catch (error) {
         console.log(error);
-        return { error: error, status: 500 };
+        return { error, status: 500 };
       }
     }
     if (cardData.length === 0) {
-      return { message: "No products found.", status: 404 };
+      return res.status(404).json({ message: "No products found." });
     }
-    return { data: { products: cardData, conversationId }, status: 200 };
+    return res
+      .status(200)
+      .json({ data: { products: cardData, conversationId } });
   } catch (error) {
     console.log(error);
-    return { error: error.message || "An error occurred.", status: 500 };
+    if (error instanceof Error) {
+      return res
+        .status(500)
+        .json({ error: { message: error.message || "An error occurred." } });
+    }
   } finally {
     if (browser) {
       await browser.close();
     }
   }
 }
-
-module.exports = { scrapeProducts };
