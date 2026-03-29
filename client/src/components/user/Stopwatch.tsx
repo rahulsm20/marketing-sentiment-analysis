@@ -1,7 +1,7 @@
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export const Stopwatch = () => {
+export const Stopwatch = ({ title }: { title?: string }) => {
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
@@ -12,9 +12,9 @@ export const Stopwatch = () => {
   }, []);
 
   return (
-    <p className="text-sm flex gap-2 p-2 items-center justify-center rounded-[var(--radius)] ">
+    <p className="text-sm flex gap-2 p-2 items-center justify-center rounded-[var(--radius)] border ">
       <Loader2 className="animate-spin h-4 w-4" />
-      <span>Elapsed Time: </span>
+      {title ? <span>{title}</span> : <span>Elapsed Time: </span>}
       <span>{seconds}s</span>
     </p>
   );

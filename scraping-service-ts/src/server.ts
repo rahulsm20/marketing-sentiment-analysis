@@ -1,11 +1,20 @@
+import { config, RABBITMQ_TOPIC } from "@/shared/config";
+import { pubSub } from "@/shared/lib/pubsub";
 import express, { Request, Response } from "express";
-import { scrapeProducts } from "./controllers/scrape";
+import { runScrape, scrapeProducts } from "./controllers/scrape";
+import { logger } from "./lib/logger";
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3002;
+
+if (config.NODE_ENV === "development") {
+  pubSub.subscribe(RABBITMQ_TOPIC.SCRAPING, async (data) => {
+    await runScrape(data);
+  });
+}
 
 app.use(express.json());
-app.get("/scrape", scrapeProducts);
+app.post("/scrape", scrapeProducts);
 app.get("/", async (_req: Request, res: Response) => {
   return res
     .status(200)
@@ -17,5 +26,5 @@ app.get("*", async (_req: Request, res: Response) => {
 });
 
 app.listen(port, () => {
-  console.log(`Scraping server is running at port ${port}`);
+  logger.info(`>> Scraping service is running at port ${port}`);
 });

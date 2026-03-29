@@ -1,4 +1,11 @@
-import { createProduct, getProducts } from "@/shared/lib/methods";
+import { RABBITMQ_TOPIC } from "@/shared/config";
+import {
+  createProduct,
+  getProducts,
+  updateConversation,
+} from "@/shared/lib/methods";
+import { pubSub } from "@/shared/lib/pubsub";
+import { ConversationStatus } from "@/shared/lib/schema";
 import { config } from "@/utils/config";
 import { Request, Response } from "express";
 import puppeteer from "puppeteer";
@@ -11,37 +18,71 @@ async function handleCookiesPopup(page: any) {
   }
 }
 
+export async function scrapeProducts(req: Request, res: Response) {
+  try {
+    const data = JSON.parse(
+      Buffer.from(req.body.message.data, "base64").toString(),
+    );
+    const response = await runScrape(data);
+    if (!response) throw new Error("Scraping failed");
+    if (response.status !== 200) {
+      throw new Error("Scraping failed");
+    }
+    return res.status(200).json({ message: "Scraping completed successfully" });
+  } catch (err) {
+    if (err instanceof Error)
+      return res
+        .status(500)
+        .json({ error: "An error occurred", message: err.message });
+  }
+}
+
 /**
  * Scrapes product data from a given input
  */
-export async function scrapeProducts(req: Request, res: Response) {
+export async function runScrape(data: { query: string; id?: string }) {
   let browser;
-  const {
-    company: rawCompany,
-    category: rawCategory,
-    conversationId,
-  } = req.query;
+  const { query, id: conversationId } = data;
+  if (!query) return { status: 400, message: "Query is required" };
+  if (!conversationId)
+    return { status: 400, message: "Conversation ID is required" };
 
+  const [rawCompany, rawCategory] = query.split("+");
   const company = (rawCompany as string).toLowerCase();
   const category = (rawCategory as string).toLowerCase();
   if (!company || !rawCategory) {
     return {
-      error: "Please provide both company and category parameters.",
       status: 400,
+      message: "Company and category are required",
     };
   }
-
-  const query = `${(company as string).toLowerCase()}+${category}`;
 
   const items = await getProducts({
     query,
   });
 
   if (items.length > 0) {
-    return res.status(200).json({ data: { products: items, conversationId } });
+    await updateConversation({
+      id: conversationId,
+      status: ConversationStatus.EMBEDDING,
+    });
+    // send pub sub even to emebedding service
+    await pubSub.publish(RABBITMQ_TOPIC.EMBEDDING, {
+      query,
+      id: conversationId,
+    });
+    return {
+      data: { products: items, conversationId },
+      status: 200,
+    };
   }
 
   try {
+    // if no products found, update the conversation status to scraping
+    await updateConversation({
+      id: conversationId,
+      status: ConversationStatus.SCRAPING,
+    });
     if (config.NODE_ENV === "development") {
       browser = await puppeteer.launch({
         executablePath: "",
@@ -276,17 +317,20 @@ export async function scrapeProducts(req: Request, res: Response) {
       }
     }
     if (cardData.length === 0) {
-      return res.status(404).json({ message: "No products found." });
+      return {
+        message: "No products found.",
+        status: 404,
+      };
     }
-    return res
-      .status(200)
-      .json({ data: { products: cardData, conversationId } });
+    return {
+      data: { products: cardData, conversationId },
+    };
   } catch (error) {
     console.log(error);
     if (error instanceof Error) {
-      return res
-        .status(500)
-        .json({ error: { message: error.message || "An error occurred." } });
+      return {
+        error: { message: error.message || "An error occurred." },
+      };
     }
   } finally {
     if (browser) {

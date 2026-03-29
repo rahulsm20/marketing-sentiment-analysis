@@ -1,3 +1,4 @@
+import { RABBITMQ_TOPIC } from "@/shared/config";
 import { Channel, ChannelModel, connect } from "amqplib";
 import { config } from "../../utils/config";
 
@@ -18,7 +19,9 @@ class RabbitMQClient {
     try {
       this.connection = await connect(config.RABBITMQ_URL);
       this.channel = await this.connection.createChannel();
-      await this.channel.assertQueue(config.RABBITMQ_TOPIC, { durable: true });
+      await this.channel.assertQueue(RABBITMQ_TOPIC.SCRAPING, {
+        durable: true,
+      });
       console.log(">> Connected to RabbitMQ");
     } catch (error) {
       console.error("Error connecting to RabbitMQ:", error);
@@ -43,7 +46,7 @@ class RabbitMQClient {
       if (!this.channel) {
         throw new Error("Channel is not initialized. Call connect() first.");
       }
-      const jobs = await this.channel.get(config.RABBITMQ_TOPIC, {
+      const jobs = await this.channel.get(RABBITMQ_TOPIC.SCRAPING, {
         noAck: true,
       });
       if (!jobs) {

@@ -4,15 +4,15 @@
  */
 //-----------------------------------------------------------------------------------
 
-import { pubSub } from "@/lib/pubsub";
-import express from "express";
+import { RABBITMQ_TOPIC } from "@/shared/config";
 import {
   deleteConversation,
   getConversationById,
   getConversations,
   getUserById,
-} from "../../../ts-packages/src/lib/methods";
-import { RABBITMQ_TOPIC } from "../utils/constants";
+} from "@/shared/lib/methods";
+import { pubSub } from "@/shared/lib/pubsub";
+import express from "express";
 
 // ----------------------------------------------------------------------------------
 

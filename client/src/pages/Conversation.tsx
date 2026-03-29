@@ -4,6 +4,7 @@ import Navbar from "@/components/user/Navbar";
 import Sidebar from "@/components/user/Sidebar";
 import { Stopwatch } from "@/components/user/Stopwatch";
 import { ConversationItem } from "@/types";
+import { getLoadingTitle } from "@/utils";
 import { LOCAL_CACHE_KEYS } from "@/utils/constants";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -17,7 +18,7 @@ const Conversation = () => {
   const [conversation, setConversation] = useState<ConversationItem | null>(
     null,
   );
-
+  const LOADING_STATES = ["scraping", "generation", "embedding", "pending"];
   const { isPending, error } = useQuery({
     queryKey: [LOCAL_CACHE_KEYS.CONVERSATION(id || "")],
     enabled: !!id,
@@ -48,9 +49,11 @@ const Conversation = () => {
           <Sidebar />
         </div>
         <div className="flex-1 overflow-y-auto custom-scroll">
-          {isPending || conversation?.status == "pending" ? (
+          {isPending ||
+          (conversation?.status &&
+            LOADING_STATES.includes(conversation?.status)) ? (
             <div className="flex gap-5 items-center justify-center min-h-screen w-full">
-              <Stopwatch />
+              <Stopwatch title={getLoadingTitle(conversation?.status)} />
             </div>
           ) : (
             <ChatUI messages={conversation?.messages || []} />
