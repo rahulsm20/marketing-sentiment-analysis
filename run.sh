@@ -1,9 +1,7 @@
 #!/bin/bash
 cd client && npm run dev &
 client_pid=$!
-cd scheduler && npm run dev &
-scheduler_pid=$!
-cd scraping-service && npm run dev &
+cd scraping-service-ts && bun dev &
 scraping_pid=$!
 ( cd generation-service || exit 1
   source .venv/bin/activate
@@ -19,6 +17,8 @@ cd db-service && npm run dev &
 db_pid=$!
 cd storage-service && npm run dev &
 storage_pid=$!
+cd scheduler && npm run dev &
+scheduler_pid=$!
 echo "Client PID: $client_pid"
 echo "Scheduler Service PID: $scheduler_pid"
 echo "Scraping Service PID: $scraping_pid"
