@@ -1,30 +1,122 @@
-# This workflow deploys all services to Production
-# Deploying all services together ensures any changes in one service are reflected in others.
-# This helps maintain consistency and reduces the risk of integration issues.
-
-name: Deploy all services to Production
+name: Deploy services
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
-  deploy_scraping_service:
+  deploy_scheduler:
     runs-on: ubuntu-latest
+    environment: production
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - name: Authenticate to GCP
+        id: auth
+        uses: google-github-actions/auth@v1
         with:
-          node-version: "14"
-      - name: Shell into dir
-        run: cd scraping-service
-      - name: Install dependencies
-        run: npm install
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker us-west1-docker.pkg.dev --quiet
 
-      - name: Run tests
-        run: npm test
+      - name: Build and Push Scheduler Docker Image
+        run: |
+          docker build -f Dockerfile.scheduler --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/scheduler:latest . && 
+          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/scheduler:latest
 
-      - name: Deploy to production
-        run: npm run deploy
+      - name: Deploy Scheduler Service to Cloud Run
+        run: |
+          gcloud run deploy scheduler \
+          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/scheduler:latest \
+          --region us-west1 \
+          --platform managed \
+          --allow-unauthenticated
+  deploy_generation_service:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Authenticate to GCP
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker us-west1-docker.pkg.dev --quiet
+
+      - name: Build and Push Generation Docker Image
+        run: |
+          docker build -f Dockerfile.generation --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/generation-service:latest . && 
+          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/generation-service:latest
+
+      - name: Deploy Generation Service to Cloud Run
+        run: |
+          gcloud run deploy generation-service \
+          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/generation-service:latest \
+          --region us-west1 \
+          --platform managed \
+          --allow-unauthenticated
+
+  deploy_embedding_service:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Authenticate to GCP
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker us-west1-docker.pkg.dev --quiet
+
+      - name: Build and Push Embedding Docker Image
+        run: |
+          docker build -f Dockerfile.embedding --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/embedding-service:latest . && 
+          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/embedding-service:latest
+
+      - name: Deploy Embedding Service to Cloud Run
+        run: |
+          gcloud run deploy embedding-service \
+          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/embedding-service:latest \
+          --region us-west1 \
+          --platform managed \
+          --allow-unauthenticated
+  deploy_chat_service:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Authenticate to GCP
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker us-west1-docker.pkg.dev --quiet
+
+      - name: Build and Push Chat Docker Image
+        run: |
+          docker build -f Dockerfile.chat --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/chat:latest . && 
+          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/chat:latest
+
+      - name: Deploy Chat Service to Cloud Run
+        run: |
+          gcloud run deploy chat-service \
+          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/chat_service:latest \
+          --region us-west1 \
+          --platform managed \
+          --allow-unauthenticated
