@@ -47,6 +47,11 @@ router.get("/:id", async (req, res) => {
         //   JSON.stringify(conversation),
         // );
         const conversationStatus = conversation.status.toUpperCase();
+        console.log({
+          conversationStatus,
+          conversation,
+          topic: RABBITMQ_TOPIC[conversationStatus],
+        });
         if (Object.keys(RABBITMQ_TOPIC).includes(conversationStatus)) {
           await pubSub.publish(
             RABBITMQ_TOPIC[conversationStatus],
