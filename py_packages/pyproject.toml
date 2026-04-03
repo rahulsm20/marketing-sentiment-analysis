@@ -1,5 +1,5 @@
 [project]
-name = "py-packages"
+name = "py_packages"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -24,4 +24,4 @@ output_module = "app/models.py"
 # Exclude internal/system schemas
 schemas = ["public"]
 
-use_inflect = true       
+use_inflect = true
