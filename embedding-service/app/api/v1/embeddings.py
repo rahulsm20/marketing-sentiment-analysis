@@ -6,15 +6,15 @@ from app.core.db import pc
 from langchain_pinecone import PineconeEmbeddings
 
 # from app.lib.db_service import db_service
-from app.lib.pub_sub import pubsub_client
+from py_packages.lib.pubsub import publish
+from py_packages.lib.methods import get_products 
 from app.core.db import pc
 from fastapi.responses import JSONResponse
-
-from app.db_service.openapi_client.api.default_api import (
+from app.db_service.db_service_client.api.default_api import (
     DefaultApi as db_service,
 )
 
-# ---------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 
 embeddings = PineconeEmbeddings(model="llama-text-embed-v2")
 index_name = "market-sentience-product-embeddings"
@@ -59,11 +59,11 @@ async def embed(query: str = None):
             search_with_text = index.search(
                 namespace="__default__",
                 query={"inputs": {"text": query}, "top_k": 4},
-                fields=["query", "title", "reviews", "price", "url"],
+                fields=["query", "title", "review", "price", "url"],
                 rerank={
                     "model": "bge-reranker-v2-m3",
                     "top_n": 2,
-                    "rank_fields": ["query"],
+                    "rank_fields": ["review"],
                 },
             )
             if (
@@ -72,10 +72,10 @@ async def embed(query: str = None):
             ):
                 hits = [
                     {
-                        "id": hit._id,
+                        "id": hit.fields.get("product_id", ""),
                         "title": hit.fields.get("title", ""),
                         "score": hit._score,
-                        "reviews": hit.fields.get("reviews", []),
+                        "review": hit.fields.get("review", []),
                         "price": int("".join(hit.fields.get("price", "0").split(","))),
                         "url": hit.fields.get("url", ""),
                     }
@@ -86,7 +86,7 @@ async def embed(query: str = None):
                 )
                 end = datetime.now()
                 duration = end - start
-                pubsub_client.publish_message(
+                publish(
                     message=f"{message}",
                     query=f"{query}".encode("utf-8"),
                     embedded_count=f"{len(hits)}".encode("utf-8"),
@@ -100,7 +100,7 @@ async def embed(query: str = None):
                 content={"message": "No embeddings found."},
                 status_code=404,
             )
-        products = await db_service.products_get(query=query)
+        products = await get_products(query=query)
         if "error" in products:
             return {"message": "Error fetching products.", "details": products}
         if not products:
@@ -117,9 +117,9 @@ async def embed(query: str = None):
                     "id": str(product["_id"]),
                     "values": vector,
                     "metadata": {
-                        "query": query,
+                        "product_id": str(product["_id"]),
                         "title": product["productName"],
-                        "reviews": product.get("reviews", []),
+                        "review": review,
                         "price": product.get("price", 0),
                         "url": product.get("productUrl", ""),
                     },
@@ -131,7 +131,7 @@ async def embed(query: str = None):
 
         end = datetime.now()
         duration = end - start
-        pubsub_client.publish_message(
+        publish(
             message=f"Embedded {len(vectors)} products for query {query}.",
             query=query,
             embedded_count=len(vectors),
@@ -143,3 +143,11 @@ async def embed(query: str = None):
             "duration": duration.total_seconds(),
             "embedded_count": len(vectors),
         }
+
+
+# async def truncate_embeddings():
+#     if pc:
+#         index = pc.Index(name=index_name)
+#         index.delete(delete_all=True, namespace="__default__")
+#         return {"message": "All embeddings deleted from the index."}
+#     return {"message": "Pinecone client not initialized."}

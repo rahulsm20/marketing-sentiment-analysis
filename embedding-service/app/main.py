@@ -3,14 +3,45 @@ Embedding Service API
 This service provides an API for generating embeddings from text inputs.
 """
 
-from fastapi import APIRouter, FastAPI, FastAPI
-from fastapi.security import HTTPBearer
+import asyncio
+from contextlib import asynccontextmanager
+
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer
+
 from app.api.v1.embeddings import embed
+from py_packages.lib.pubsub import subscribe
+
+###################################
+
+EMBEDDING_TOPIC = "market_sentience_embedding"
 
 token_auth_scheme = HTTPBearer()
 
-app = FastAPI()
+
+def _on_embedding_event(data: dict) -> None:
+    """
+    Handles an incoming embedding Pub/Sub event.
+    Expected payload: { company, category, conversationId }
+    """
+    company = data.get("company", "")
+    category = data.get("category", "")
+    query = data.get("query") or f"{company}+{category}"
+    if not query.strip("+"):
+        print("Embedding event received with no query/company/category — skipping.")
+        return
+    print(f"Embedding event received for query: {query}")
+    asyncio.run(embed(query))
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    subscribe(EMBEDDING_TOPIC, _on_embedding_event)
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 app_router = APIRouter()
 
 app.add_middleware(
