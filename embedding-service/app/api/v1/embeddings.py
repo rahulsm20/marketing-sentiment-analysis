@@ -10,9 +10,6 @@ from py_packages.lib.pubsub import publish
 from py_packages.lib.methods import get_products 
 from app.core.db import pc
 from fastapi.responses import JSONResponse
-from app.db_service.db_service_client.api.default_api import (
-    DefaultApi as db_service,
-)
 
 # --------------------------------------------------------------------------
 

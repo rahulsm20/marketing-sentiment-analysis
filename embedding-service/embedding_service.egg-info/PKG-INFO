@@ -1,0 +1,120 @@
+Metadata-Version: 2.4
+Name: embedding-service
+Version: 0.1.0
+Summary: Add your description here
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: absl-py==2.3.1
+Requires-Dist: aiohappyeyeballs==2.6.1
+Requires-Dist: aiohttp==3.12.15
+Requires-Dist: aiohttp-retry==2.9.1
+Requires-Dist: aiosignal==1.4.0
+Requires-Dist: annotated-types==0.7.0
+Requires-Dist: anyio==4.9.0
+Requires-Dist: attrs==25.3.0
+Requires-Dist: certifi==2025.7.14
+Requires-Dist: cffi==1.17.1
+Requires-Dist: charset-normalizer==3.4.2
+Requires-Dist: click==8.2.1
+Requires-Dist: colorama==0.4.6
+Requires-Dist: distro==1.9.0
+Requires-Dist: dnspython==2.7.0
+Requires-Dist: fastapi[standard]==0.115.12
+Requires-Dist: fastapi-cli==0.0.7
+Requires-Dist: frozenlist==1.7.0
+Requires-Dist: h11==0.16.0
+Requires-Dist: h5py==3.14.0
+Requires-Dist: httpcore==1.0.9
+Requires-Dist: httptools==0.6.4
+Requires-Dist: httpx==0.28.1
+Requires-Dist: idna==3.10
+Requires-Dist: iniconfig==2.1.0
+Requires-Dist: jiter==0.10.0
+Requires-Dist: jsonpatch==1.33
+Requires-Dist: jsonpointer==3.0.0
+Requires-Dist: keras==3.11.3
+Requires-Dist: langchain-core==0.3.74
+Requires-Dist: langchain-openai==0.3.31
+Requires-Dist: langchain-pinecone==0.2.11
+Requires-Dist: langchain-tests==0.3.20
+Requires-Dist: langsmith==0.4.16
+Requires-Dist: markdown-it-py==3.0.0
+Requires-Dist: mdurl==0.1.2
+Requires-Dist: ml-dtypes==0.5.3
+Requires-Dist: multidict==6.6.4
+Requires-Dist: namex==0.1.0
+Requires-Dist: numpy==2.3.2
+Requires-Dist: openai==1.101.0
+Requires-Dist: optree==0.17.0
+Requires-Dist: orjson==3.11.2
+Requires-Dist: packaging==24.2
+Requires-Dist: pika==1.3.2
+Requires-Dist: pinecone==7.3.0
+Requires-Dist: pinecone-plugin-assistant==1.7.0
+Requires-Dist: pinecone-plugin-interface==0.0.7
+Requires-Dist: pluggy==1.6.0
+Requires-Dist: propcache==0.3.2
+Requires-Dist: py-cpuinfo==9.0.0
+Requires-Dist: pycparser==2.22
+Requires-Dist: pydantic==2.11.7
+Requires-Dist: pydantic-core==2.33.2
+Requires-Dist: pygments==2.19.2
+Requires-Dist: pymongo==4.14.1
+Requires-Dist: pytest==8.4.1
+Requires-Dist: pytest-asyncio==0.26.0
+Requires-Dist: pytest-benchmark==5.1.0
+Requires-Dist: pytest-codspeed==4.0.0
+Requires-Dist: pytest-recording==0.13.4
+Requires-Dist: pytest-socket==0.7.0
+Requires-Dist: python-dateutil==2.9.0.post0
+Requires-Dist: python-dotenv>=1.2.2
+Requires-Dist: pyyaml==6.0.2
+Requires-Dist: regex==2025.7.34
+Requires-Dist: requests==2.32.4
+Requires-Dist: requests-toolbelt==1.0.0
+Requires-Dist: rich==14.1.0
+Requires-Dist: rich-toolkit==0.14.8
+Requires-Dist: shellingham==1.5.4
+Requires-Dist: six==1.17.0
+Requires-Dist: sniffio==1.3.1
+Requires-Dist: starlette==0.46.2
+Requires-Dist: syrupy==4.9.1
+Requires-Dist: tenacity==9.1.2
+Requires-Dist: tiktoken==0.11.0
+Requires-Dist: tqdm==4.67.1
+Requires-Dist: typer==0.16.0
+Requires-Dist: typing-extensions==4.14.1
+Requires-Dist: typing-inspection==0.4.1
+Requires-Dist: urllib3==2.5.0
+Requires-Dist: uvicorn==0.35.0
+Requires-Dist: uvloop==0.21.0
+Requires-Dist: watchfiles==1.1.0
+Requires-Dist: websockets==15.0.1
+Requires-Dist: wrapt==1.17.3
+Requires-Dist: yarl==1.20.1
+Requires-Dist: zstandard==0.24.0
+Requires-Dist: google-cloud-pubsub>=2.33.0
+Requires-Dist: auth0-python>=4.13.0
+Requires-Dist: openapi-client>=1.1.7
+Requires-Dist: py_packages
+
+# Embedding Service
+
+### Index
+
+- [responsibilty](#responsibilty)
+- [tech stack](#tech-stack)
+
+### Responsibilty
+
+    * embeds documents scraped for relevant company and category of products
+    * pushes task to generation process
+
+### Tech stack
+
+- FastAPI
+- RabbitMQ
+- Pinecone
+- Langchain
+- Docker
+- uv

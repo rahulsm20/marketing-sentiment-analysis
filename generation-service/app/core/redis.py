@@ -1,4 +1,6 @@
 import redis
+from redis.commands.core import ResponseT
+
 from app.core.config import config
 from app.utils.constants import CACHE_KEY
 
@@ -25,7 +27,7 @@ class RedisClient:
     def is_connected(self) -> bool:
         return self.connected
 
-    def get(self, key: str):
+    def get(self, key: str) -> ResponseT:
         if not self.connected:
             # raise ConnectionError("Not connected to Redis")
             self.connect()

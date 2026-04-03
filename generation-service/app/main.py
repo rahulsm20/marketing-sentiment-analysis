@@ -1,27 +1,22 @@
-import json
-import re
-from fastapi import FastAPI, Request, FastAPI
-from fastapi.security import HTTPBearer
-from keras.models import load_model
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
-import google.generativeai as genai
-import os
-from dotenv import load_dotenv
-from fastapi.middleware.cors import CORSMiddleware
-import pprint
-from openai import OpenAI
-from app.db_service.db_service_client.api.default_api import DefaultApi as DBService
-from fpdf import FPDF
-from app.storage_service.storage_service_client.api import (
-    DefaultApi as StorageService,
-)
 import base64
-from app.storage_service.storage_service_client.models.upload_file_request import (
-    UploadFileRequest,
-)
+import json
+import os
+import re
+
+import google.generativeai as genai
+from dotenv import load_dotenv
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer
+from py_packages.lib.methods import get_products
+from tf_keras.models import load_model
+from tf_keras.preprocessing.sequence import pad_sequences
+from tf_keras.preprocessing.text import Tokenizer
+from openai import OpenAI
+
 from app.core.pdf import PDFGenerator
 from app.core.redis import redis_client
+
 from app.utils.constants import CACHE_KEY
 
 load_dotenv()
@@ -72,10 +67,10 @@ async def generate_strategies(request: Request):
     company = body["company"]
     category = body["category"]
 
-    db_service = DBService()
-    storage_service = StorageService()
+    # db_service = DBService()
+    # storage_service = StorageService()
     query = company + " " + category
-    product_data = db_service.products_get(query)
+    product_data = get_products(session=None, query=query)
     reviews = []
     productWithReviews = {}
     products = [product.to_dict() for product in product_data]
@@ -118,6 +113,7 @@ async def generate_strategies(request: Request):
     cache_key = CACHE_KEY["MARKETING_STRATEGIES"](company=company, category=category)
     raw_cached_data = redis_client.get(cache_key)
     cache_hit = False
+    cached_data = None
     if raw_cached_data:
         cached_data = json.loads(raw_cached_data)
         cache_hit = True
@@ -129,7 +125,7 @@ async def generate_strategies(request: Request):
         )
         response = {"sentiments": sentiments, "output_text": message.output_text}
 
-    if cache_hit:
+    if cache_hit and cached_data is not None:
         response = {
             "sentiments": cached_data["sentiments"],
             "output_text": cached_data["response"],
@@ -145,21 +141,21 @@ async def generate_strategies(request: Request):
     data = pdf_generator.generate_pdf()
     encoded_data = base64.b64encode(data).decode("utf-8")
 
-    upload_file_request = UploadFileRequest(
-        filename=f"{company}_{category}_sentiment_analysis.pdf",
-        filetype="application/pdf",
-        data=encoded_data,
-    )
+    # upload_file_request = UploadFileRequest(
+    #     filename=f"{company}_{category}_sentiment_analysis.pdf",
+    #     filetype="application/pdf",
+    #     data=encoded_data,
+    # )
 
-    file = storage_service.file_post_with_http_info(
-        upload_file_request=upload_file_request.to_dict(),
-    )
-    file_data = json.loads(file.raw_data)
-    if not file or not file_data:
-        raise Exception("File upload failed")
+    # file = storage_service.file_post_with_http_info(
+    #     upload_file_request=upload_file_request.to_dict(),
+    # )
+    # file_data = json.loads(file.raw_data)
+    # if not file or not file_data:
+    #     raise Exception("File upload failed")
 
     return {
         "sentiments": response["sentiments"],
         "response": response["output_text"],
-        "file": file_data["url"],
+        # "file": file_data["url"],
     }

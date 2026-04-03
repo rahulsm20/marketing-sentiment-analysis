@@ -3,7 +3,7 @@ name = "embedding-service"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "absl-py==2.3.1",
     "aiohappyeyeballs==2.6.1",
@@ -68,7 +68,7 @@ dependencies = [
     "pytest-recording==0.13.4",
     "pytest-socket==0.7.0",
     "python-dateutil==2.9.0.post0",
-    "python-dotenv==1.1.1",
+    "python-dotenv>=1.2.2",
     "pyyaml==6.0.2",
     "regex==2025.7.34",
     "requests==2.32.4",
@@ -97,6 +97,10 @@ dependencies = [
     "google-cloud-pubsub>=2.33.0",
     "auth0-python>=4.13.0",
     "openapi-client>=1.1.7",
+    "py_packages"
 ]
 [tool.uv]
 environments = ["platform_python_implementation == 'CPython'"]
+
+[tool.uv.sources]
+py_packages = { path = "../py_packages", editable = true }
