@@ -2,9 +2,9 @@
   "compilerOptions": {
     "target": "ES6",
     "module": "commonjs",
-    "baseUrl": ".",
+    "rootDir": "../",
     "paths": {
-      "@/*": ["src/*"],
+      "@/*": ["./src/*"],
       "@/shared/*": ["../ts-packages/src/*"]
     },
     "strict": true,

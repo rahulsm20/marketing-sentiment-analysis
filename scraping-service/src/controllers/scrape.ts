@@ -9,7 +9,7 @@ import { ConversationStatus } from "@/shared/lib/schema";
 import { config } from "@/utils/config";
 import { Request, Response } from "express";
 import puppeteer from "puppeteer";
-import { CardType } from "types";
+import { CardType } from "../../types";
 
 async function handleCookiesPopup(page: any) {
   const cookiesButton = await page.$("#sp-cc-accept");
@@ -322,6 +322,10 @@ export async function runScrape(data: { query: string; id?: string }) {
         status: 404,
       };
     }
+    await pubSub.publish(RABBITMQ_TOPIC.EMBEDDING, {
+      query,
+      id: conversationId,
+    });
     return {
       data: { products: cardData, conversationId },
     };
