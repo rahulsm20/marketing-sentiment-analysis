@@ -1,6 +1,6 @@
-# Template
+# Chat Service
 
 - Typescript
-- Node.js
-- Express.js
-- Prisma
+- Bun
+- Express
+- OpenAI

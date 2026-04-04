@@ -1,11 +1,11 @@
-import { dbServiceApi } from "@/lib/api";
 import { openAIClient } from "@/lib/openai";
+import { getProducts } from "@/shared/src/lib/methods";
 import { Request, Response } from "express";
 
 export const chatController = {
   sendMessage: async (req: Request, res: Response) => {
     try {
-      const { message, conversation_id, user_id } = req.body;
+      const { message, conversation_id, user_id, context } = req.body;
       // create new message in db
 
       // console.log({ message });
@@ -27,16 +27,16 @@ export const chatController = {
       //   content: msg.content,
       // }));
       // call openai api with messages
-      const products = await dbServiceApi.productsGet({
-        query: "oneplus mobiles",
+      const products = await getProducts({
+        query: message,
       });
-      console.log({ products });
+
       if (!message)
         return res.status(400).json({ error: "Message is required" });
       // const messages = [{ role: "user", content: message }];
       const response = await openAIClient.responses.create({
         model: "gpt-5-nano",
-        input: message,
+        input: message
       });
       return res.status(200).json({ message, response: response.output_text });
     } catch (err) {
