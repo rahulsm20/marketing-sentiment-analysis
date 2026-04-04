@@ -11,10 +11,12 @@ from langchain_pinecone import PineconeEmbeddings
 # from app.lib.db_service import db_service
 from py_packages.lib.pubsub import publish
 from py_packages.lib.methods import get_products 
-from py_packages.lib.db import get_session, engine
+from py_packages.lib.db import  engine
 from sqlmodel import Session
 from app.core.db import pc
 from fastapi.responses import JSONResponse
+
+from py_packages.lib.methods import ConversationStatus, update_conversation
 
 # --------------------------------------------------------------------------
 
@@ -31,7 +33,7 @@ async def embed_text(text: str) -> list[float]:
 # ---------------------------------------------------------------------------
 
 
-async def embed(query: str = None):
+async def embed(query: str = None, conversation_id: str = None):
     try:
         start = datetime.now()
         print(f"Embedding query: {query}")
@@ -77,23 +79,23 @@ async def embed(query: str = None):
                             "title": hit.fields.get("title", ""),
                             "score": hit._score,
                             "review": hit.fields.get("review", []),
-                            "price": int("".join(hit.fields.get("price", "0").split(","))),
+                            "price": hit.fields.get("price", 0),
                             "url": hit.fields.get("url", ""),
                         }
                         for hit in search_with_text["result"]["hits"]
                     ]
-                    message = (
-                        '{"message": "Embeddings found.", "data": ' + json.dumps(hits) + "}"
-                    )
+                    
                     end = datetime.now()
                     duration = end - start
+                    with Session(engine) as session:
+                        update_conversation(session=session, conversation_id=conversation_id, status='generation')
                     publish(
-                        message=f"{message}",
-                        query=f"{query}".encode("utf-8"),
-                        embedded_count=f"{len(hits)}".encode("utf-8"),
-                        duration=f"{duration.total_seconds()}".encode("utf-8"),
+                        topic=f"market_sentience_generation",
+                        data={
+                        "query": query,
+                        "id": conversation_id,
+                        }
                     )
-                    print(end, duration)
                     return JSONResponse(
                         content={"message": "Embeddings found.", "data": hits},
                         status_code=200,
@@ -138,13 +140,13 @@ async def embed(query: str = None):
 
             end = datetime.now()
             duration = end - start
+            with Session(engine) as session:
+                update_conversation(session=session, conversation_id=conversation_id, status='generation')
             publish(
                 topic=f"market_sentience_generation",
                 data={
-                "message": f"Embedded {len(vectors)} products for query {query}.",
                 "query": query,
-                "embedded_count": len(vectors),
-                "duration": duration.total_seconds(),
+                "id": conversation_id,
                 }
             )
 

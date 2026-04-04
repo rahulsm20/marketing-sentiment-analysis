@@ -3,6 +3,8 @@ from fpdf import FPDF
 from pathlib import Path
 from bs4 import BeautifulSoup
 from mistletoe import markdown
+import matplotlib
+matplotlib.use("agg")
 import matplotlib.pyplot as plt
 from io import BytesIO
 

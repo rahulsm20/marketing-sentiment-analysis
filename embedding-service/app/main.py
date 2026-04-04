@@ -31,11 +31,12 @@ def _on_embedding_event(data: dict) -> None:
     company = data.get("company", "")
     category = data.get("category", "")
     query = data.get("query") or f"{company}+{category}"
+    id = data.get("id")
     if not query.strip("+"):
         print("Embedding event received with no query/company/category — skipping.")
         return
     print(f"Embedding event received for query: {query}")
-    asyncio.run(embed(query))
+    asyncio.run(embed(query, conversation_id=id))
 
 
 @asynccontextmanager
