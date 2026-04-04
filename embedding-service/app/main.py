@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
 
 from app.api.v1.embeddings import embed
-# from py_packages.lib.pubsub import subscribe
+from py_packages.lib.pubsub import subscribe
 # 
 ###################################
 
@@ -35,10 +35,10 @@ def _on_embedding_event(data: dict) -> None:
     asyncio.run(embed(query))
 
 
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     subscribe(EMBEDDING_TOPIC, _on_embedding_event)
-#     yield
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    subscribe(EMBEDDING_TOPIC, _on_embedding_event)
+    yield
 
 
 app = FastAPI()
