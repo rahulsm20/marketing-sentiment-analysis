@@ -1,0 +1,3 @@
+CREATE TYPE "public"."conversation_status" AS ENUM('pending', 'in_progress', 'completed', 'scraping', 'generation', 'embedding', 'scraping_error', 'generation_error', 'embedding_error');--> statement-breakpoint
+ALTER TABLE "conversations" ALTER COLUMN "status" SET DEFAULT 'pending'::"public"."conversation_status";--> statement-breakpoint
+ALTER TABLE "conversations" ALTER COLUMN "status" SET DATA TYPE "public"."conversation_status" USING "status"::"public"."conversation_status";

@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   doublePrecision,
   index,
+  pgEnum,
   pgTable,
   text,
   timestamp,
@@ -15,16 +16,22 @@ export const ConversationStatus = {
   SCRAPING: "scraping",
   GENERATION: "generation",
   EMBEDDING: "embedding",
+  SCRAPING_ERROR: "scraping_error",
+  GENERATION_ERROR: "generation_error",
+  EMBEDDING_ERROR: "embedding_error",
 } as const;
 
-const ConversationStatusEnum = [
-  ConversationStatus.PENDING,
-  ConversationStatus.IN_PROGRESS,
-  ConversationStatus.COMPLETED,
-  ConversationStatus.SCRAPING,
-  ConversationStatus.GENERATION,
-  ConversationStatus.EMBEDDING,
-] as const;
+export const ConversationStatusEnum = pgEnum("conversation_status", [
+  "pending",
+  "in_progress",
+  "completed",
+  "scraping",
+  "generation",
+  "embedding",
+  "scraping_error",
+  "generation_error",
+  "embedding_error",
+]);
 
 const MessageRoleEnum = ["user", "assistant"] as const;
 
@@ -45,7 +52,7 @@ export const conversationsTable = pgTable(
     query: text("query"),
     userId: text("user_id").references(() => usersTable.id),
     createdAt: timestamp("created_at").notNull().defaultNow(),
-    status: text({ enum: ConversationStatusEnum })
+    status: ConversationStatusEnum("status")
       .notNull()
       .default(ConversationStatus.PENDING),
     updatedAt: timestamp("updated_at")

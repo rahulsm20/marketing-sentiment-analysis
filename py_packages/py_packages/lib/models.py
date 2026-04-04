@@ -1,9 +1,22 @@
 from typing import Optional
 import datetime
+import enum
 import uuid
 
-from sqlalchemy import Column, DateTime, Double, ForeignKeyConstraint, Index, PrimaryKeyConstraint, Text, UniqueConstraint, Uuid, text
+from sqlalchemy import Column, DateTime, Double, Enum, ForeignKeyConstraint, Index, PrimaryKeyConstraint, Text, UniqueConstraint, Uuid, text
 from sqlmodel import Field, Relationship, SQLModel
+
+class ConversationStatus(str, enum.Enum):
+    PENDING = 'pending'
+    IN_PROGRESS = 'in_progress'
+    COMPLETED = 'completed'
+    SCRAPING = 'scraping'
+    GENERATION = 'generation'
+    EMBEDDING = 'embedding'
+    SCRAPING_ERROR = 'scraping_error'
+    GENERATION_ERROR = 'generation_error'
+    EMBEDDING_ERROR = 'embedding_error'
+
 
 class Products(SQLModel, table=True):
     __table_args__ = (
@@ -48,7 +61,7 @@ class Conversations(SQLModel, table=True):
 
     id: uuid.UUID = Field(sa_column=Column('id', Uuid, primary_key=True, server_default=text('gen_random_uuid()')))
     created_at: datetime.datetime = Field(sa_column=Column('created_at', DateTime, nullable=False, server_default=text('now()')))
-    status: str = Field(sa_column=Column('status', Text, nullable=False, server_default=text("'pending'::text")))
+    status: ConversationStatus = Field(sa_column=Column('status', Enum(ConversationStatus, values_callable=lambda cls: [member.value for member in cls], name='conversation_status'), nullable=False, server_default=text("'pending'::conversation_status")))
     updated_at: datetime.datetime = Field(sa_column=Column('updated_at', DateTime, nullable=False))
     openai_conv_id: Optional[str] = Field(default=None, sa_column=Column('openai_conv_id', Text))
     query: Optional[str] = Field(default=None, sa_column=Column('query', Text))
