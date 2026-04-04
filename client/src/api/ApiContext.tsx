@@ -9,9 +9,11 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
   const { getAccessTokenSilently } = useAuth0();
   const schedulerApi = useMemo(
     () => createSchedulerApi(getAccessTokenSilently),
-    [getAccessTokenSilently]
+    [getAccessTokenSilently],
   );
-  return <ApiContext.Provider value={schedulerApi}>{children}</ApiContext.Provider>;
+  return (
+    <ApiContext.Provider value={schedulerApi}>{children}</ApiContext.Provider>
+  );
 };
 
 export const useApi = () => {
