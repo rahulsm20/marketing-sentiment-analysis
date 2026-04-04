@@ -1,43 +1,30 @@
-import { config } from "@/utils/config";
-import { Auth0Client } from "@auth0/auth0-spa-js";
 import axios, { AxiosInstance } from "axios";
+
+type GetTokenFn = () => Promise<string>;
 
 export class ApiService {
   private api: AxiosInstance;
-  private auth0Client: Auth0Client;
 
-  constructor(auth0Client: Auth0Client, baseUrl: string) {
-    this.auth0Client = auth0Client;
-
+  constructor(getToken: GetTokenFn, baseUrl: string) {
     this.api = axios.create({
       baseURL: baseUrl,
       withCredentials: true,
     });
 
     this.api.interceptors.request.use(
-      async (config) => {
-        const token = await this.getToken();
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+      async (requestConfig) => {
+        try {
+          const token = await getToken();
+          if (token) {
+            requestConfig.headers.Authorization = `Bearer ${token}`;
+          }
+        } catch (error) {
+          console.error("Error fetching token:", error);
         }
-        return config;
+        return requestConfig;
       },
-      (error) => Promise.reject(error)
+      (error) => Promise.reject(error),
     );
-  }
-
-  private async getToken(): Promise<string | null> {
-    try {
-      return await this.auth0Client.getTokenSilently({
-        authorizationParams: {
-          scope: "openid profile email offline_access",
-          audience: config.VITE_AUTH0_AUDIENCE,
-        },
-      });
-    } catch (error) {
-      console.error("Error fetching token:", error);
-      return null;
-    }
   }
 
   async addTask(company: string, category: string) {

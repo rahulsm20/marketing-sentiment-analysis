@@ -1,7 +1,6 @@
-import { schedulerApi } from "@/api/auth0";
+import { useApi } from "@/api/ApiContext";
 import { ChatInputValidation } from "@/utils/validators";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Search } from "lucide-react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
@@ -17,6 +16,7 @@ import {
 } from "../ui/select";
 import Layout from "./Layout";
 const Body = () => {
+  const schedulerApi = useApi();
   const form = useForm<FieldValues>({
     resolver: zodResolver(ChatInputValidation),
   });
@@ -61,15 +61,11 @@ const Body = () => {
   };
 
   return (
-    <Layout className="flex flex-col gap-5">
+    <Layout className="flex flex-col gap-5 ">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl flex items-center gap-2">
-          <Search className="inline" />
-          <span>Market Sentience</span>
+          <p className="text-sm text-muted-foreground">Search for a product.</p>
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Search for a product to get the best strategies to sell it.
-        </p>
       </div>
       <Form {...form}>
         <form
@@ -81,11 +77,11 @@ const Body = () => {
             name="company"
             render={({ field, fieldState }) => (
               <FormItem>
-                <FormLabel>Company</FormLabel>
+                <FormLabel>Brand</FormLabel>
                 <Input
                   onChange={field.onChange}
                   defaultValue={field.value}
-                  placeholder="Enter Company Name"
+                  placeholder="Enter Brand Name"
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />

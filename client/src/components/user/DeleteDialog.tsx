@@ -1,4 +1,4 @@
-import { schedulerApi } from "@/api/auth0";
+import { useApi } from "@/api/ApiContext";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +33,7 @@ export function DeleteDialog({
     options?: RefetchOptions | undefined,
   ) => Promise<QueryObserverResult<ConversationItem[], Error>>;
 }) {
+  const schedulerApi = useApi();
   const navigate = useNavigate();
   const [enabled, setEnabled] = useState(false);
   const { isLoading } = useQuery({

@@ -1,4 +1,4 @@
-import { schedulerApi } from "@/api/auth0";
+import { useApi } from "@/api/ApiContext";
 import ChatUI from "@/components/user/ChatUI";
 import Navbar from "@/components/user/Navbar";
 import Sidebar from "@/components/user/Sidebar";
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 //--------------------------------------------------------------------------
 
 const Conversation = () => {
+  const schedulerApi = useApi();
   const id = useParams().id;
   const [conversation, setConversation] = useState<ConversationItem | null>(
     null,

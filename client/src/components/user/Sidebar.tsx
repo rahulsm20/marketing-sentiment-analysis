@@ -1,4 +1,4 @@
-import { schedulerApi } from "@/api/auth0";
+import { useApi } from "@/api/ApiContext";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -38,6 +38,7 @@ import { ModeToggle } from "./ModeToggle";
 //--------------------------------------------
 
 const Sidebar = () => {
+  const schedulerApi = useApi();
   const [open, setOpen] = useState(false);
   const id = useParams()?.id;
 

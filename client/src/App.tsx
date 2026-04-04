@@ -2,6 +2,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { ApiProvider } from "./api/ApiContext";
 import { queryClient } from "./api/client";
 import Analytics from "./pages/Analytics";
 import Conversation from "./pages/Conversation";
@@ -30,13 +31,15 @@ function App() {
     );
   } else if (isAuthenticated && user) {
     routes = (
-      <Routes>
-        <Route path="/home" element={<Home />} />
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="/conversation/:id" element={<Conversation />} />
-        <Route path="/" element={<Navigate to="/home" />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <ApiProvider>
+        <Routes>
+          <Route path="/home" element={<Home />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/conversation/:id" element={<Conversation />} />
+          <Route path="/" element={<Navigate to="/home" />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </ApiProvider>
     );
   }
   return (

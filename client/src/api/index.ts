@@ -1,13 +1,13 @@
 import { updateHistory } from "@/utils";
 import { LOCAL_CACHE_KEYS, serverUrl } from "@/utils/constants";
 import axios from "axios";
-import { schedulerApi } from "./auth0";
+import { ApiService } from "./apiService";
 
 export const api = axios.create({
   baseURL: serverUrl,
 });
 
-export const generateStrategies = async (company: string, category: string) => {
+export const generateStrategies = async (schedulerApi: ApiService, company: string, category: string) => {
   let productData, data;
 
   const cachedStrategies = LOCAL_CACHE_KEYS.STRATEGIES(company, category);
