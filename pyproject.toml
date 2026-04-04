@@ -3,7 +3,7 @@ name = "market-sentience"
 version = "0.1.0"
 description = "config for all python microservices in market sentience"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = []
 
 [tool.uv.workspace]

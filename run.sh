@@ -1,7 +1,7 @@
 #!/bin/bash
 cd client && npm run dev &
 client_pid=$!
-cd scraping-service-ts && bun dev &
+cd scraping-service && bun dev &
 scraping_pid=$!
 ( cd generation-service || exit 1
   source .venv/bin/activate
@@ -13,8 +13,6 @@ generation_pid=$!
   fastapi dev app/main.py --port 4000
 ) &
 embedding_pid=$!
-cd db-service && npm run dev &
-db_pid=$!
 cd storage-service && npm run dev &
 storage_pid=$!
 cd scheduler && npm run dev &
