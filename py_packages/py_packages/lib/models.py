@@ -78,7 +78,7 @@ class ProductReviews(SQLModel, table=True):
 
 class Messages(SQLModel, table=True):
     __table_args__ = (
-        ForeignKeyConstraint(['conversation_id'], ['conversations.id'], name='messages_conversation_id_conversations_id_fk'),
+        ForeignKeyConstraint(['conversation_id'], ['conversations.id'], ondelete='CASCADE', name='messages_conversation_id_conversations_id_fk'),
         ForeignKeyConstraint(['user_id'], ['users.id'], name='messages_user_id_users_id_fk'),
         PrimaryKeyConstraint('id', name='messages_pkey'),
         Index('messages_conversation_id_index', 'conversation_id'),
@@ -100,7 +100,7 @@ class Messages(SQLModel, table=True):
 class PdfDocuments(SQLModel, table=True):
     __tablename__ = 'pdf_documents'
     __table_args__ = (
-        ForeignKeyConstraint(['conversation_id'], ['conversations.id'], name='pdf_documents_conversation_id_conversations_id_fk'),
+        ForeignKeyConstraint(['conversation_id'], ['conversations.id'], ondelete='CASCADE', name='pdf_documents_conversation_id_conversations_id_fk'),
         PrimaryKeyConstraint('id', name='pdf_documents_pkey'),
         Index('pdf_documents_conversation_id_index', 'conversation_id')
     )

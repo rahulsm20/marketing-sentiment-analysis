@@ -53,7 +53,7 @@ export const pubSub = {
     });
 
     try {
-      const subObj = topicObj.subscription("sub");
+      const subObj = topicObj.subscription(`${topic}-sub`);
       let subscription;
       // await subscription.create();
       const [exists] = await subObj.exists();

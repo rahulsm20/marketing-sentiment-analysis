@@ -4,6 +4,7 @@ This service provides an API for generating embeddings from text inputs.
 """
 
 import asyncio
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, FastAPI
@@ -12,6 +13,8 @@ from fastapi.security import HTTPBearer
 
 from app.api.v1.embeddings import embed
 from py_packages.lib.pubsub import subscribe
+
+_IS_LOCAL = os.getenv("NODE_ENV", "development") == "development"
 # 
 ###################################
 
@@ -37,11 +40,12 @@ def _on_embedding_event(data: dict) -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    subscribe(EMBEDDING_TOPIC, _on_embedding_event)
+    if _IS_LOCAL:
+        subscribe(EMBEDDING_TOPIC, _on_embedding_event)
     yield
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 app_router = APIRouter()
 
 app.add_middleware(

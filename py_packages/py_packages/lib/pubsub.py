@@ -28,7 +28,8 @@ _futures: dict[str, Any] = {}
 
 
 def _subscription_path(topic: str) -> str:
-    return _publisher.subscription_path(_PROJECT_ID, f"{topic}-sub")  # type: ignore[attr-defined]
+    sub_key = f"{topic}-sub"
+    return _publisher.subscription_path(_PROJECT_ID, sub_key)  # type: ignore[attr-defined]
 
 
 def _topic_path(topic: str) -> str:
