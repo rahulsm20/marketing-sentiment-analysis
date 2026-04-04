@@ -68,6 +68,7 @@ export const messagesTable = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     conversationId: uuid("conversation_id").references(
       () => conversationsTable.id,
+      { onDelete: "cascade" },
     ),
     userId: text("user_id").references(() => usersTable.id),
     content: text("content"),
@@ -89,6 +90,7 @@ export const pdfDocumentsTable = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     conversationId: uuid("conversation_id").references(
       () => conversationsTable.id,
+      { onDelete: "cascade" },
     ),
     fileName: text("file_name"),
     filePath: text("file_path"),

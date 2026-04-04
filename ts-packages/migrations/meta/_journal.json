@@ -8,6 +8,27 @@
       "when": 1773568711931,
       "tag": "0002_third_molly_hayes",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1775298121788,
+      "tag": "0001_rapid_rachel_grey",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1775298149329,
+      "tag": "0002_true_cyclops",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1775298288647,
+      "tag": "0003_certain_maestro",
+      "breakpoints": true
     }
   ]
 }
