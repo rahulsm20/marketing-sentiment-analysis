@@ -1,3 +1,4 @@
+import datetime
 from typing import Literal, Optional
 import uuid
 
@@ -223,9 +224,11 @@ def create_pdf_document(
     conversation_id: uuid.UUID,
     file_name: Optional[str] = None,
     file_path: Optional[str] = None,
+    updated_at: Optional[datetime.datetime] = datetime.datetime.now(),
 ) -> PdfDocuments:
     doc = PdfDocuments(
-        conversation_id=conversation_id, file_name=file_name, file_path=file_path
+        conversation_id=conversation_id, file_name=file_name, file_path=file_path,
+        updated_at=updated_at
     )
     session.add(doc)
     session.commit()

@@ -18,6 +18,7 @@ export const config = {
   GOOGLE_PUBSUB_PROJECT_ID: process.env.GOOGLE_PUBSUB_PROJECT_ID || "",
   GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || "",
   NODE_ENV: process.env.NODE_ENV || "development",
+  S3_BUCKET: process.env.S3_BUCKET || "market-sentience",
 };
 
 export const RABBITMQ_TOPIC: { [key: string]: string } = {

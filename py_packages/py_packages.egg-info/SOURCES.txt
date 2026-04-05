@@ -7,9 +7,11 @@ py_packages.egg-info/dependency_links.txt
 py_packages.egg-info/requires.txt
 py_packages.egg-info/top_level.txt
 py_packages/lib/auth.py
+py_packages/lib/db.py
 py_packages/lib/logger.py
 py_packages/lib/methods.py
 py_packages/lib/models.py
 py_packages/lib/mutex.py
 py_packages/lib/pubsub.py
 py_packages/lib/redis.py
+py_packages/lib/s3.py
