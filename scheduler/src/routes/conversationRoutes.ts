@@ -38,9 +38,8 @@ router.get("/:id/report", async (req, res) => {
     let url = "";
     for (const report of reports) {
       const key = `${report.id}_${report.fileName}`;
-      console.log({ key });
       try {
-        url = await getFileFromS3(`s3://market_sentience/${key}`);
+        url = await getFileFromS3(key);
       } catch (err) {
         console.log(err);
       }
