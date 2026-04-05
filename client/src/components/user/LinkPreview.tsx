@@ -12,17 +12,13 @@ const S3LinkPreview = ({
   const schedulerApi = useApi();
   const pattern = new RegExp("^s3://[^/]+/([a-f0-9-]+)_");
   const file_name = url.match(pattern)?.[1];
-  //   const [id, setId] = useState<string>();
-  console.log({ conversationId });
+
   // on click, fetch the report from the server
   const handleClick = () => {
     schedulerApi.getReport(conversationId).then((data) => {
       if (!data || !data.url || !file_name) return;
-      console.log(data.url);
-      const url = URL.createObjectURL(data.url);
       const link = document.createElement("a");
-      console.log({ link, url, file_name });
-      link.href = url;
+      link.href = data.url;
       link.download = file_name;
       link.click();
     });
