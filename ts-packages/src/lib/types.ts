@@ -12,8 +12,8 @@ import type {
 // ---------------------------------------------------------------------------
 
 export type User = typeof usersTable.$inferSelect;
-export type Conversation = typeof conversationsTable.$inferSelect;
 export type Message = typeof messagesTable.$inferSelect;
+export type Conversation = typeof conversationsTable.$inferSelect;
 export type PdfDocument = typeof pdfDocumentsTable.$inferSelect;
 export type Product = typeof productsTable.$inferSelect;
 export type ProductReview = typeof productReviewsTable.$inferSelect;

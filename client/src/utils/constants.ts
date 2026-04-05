@@ -12,4 +12,5 @@ export const LOCAL_CACHE_KEYS = {
     `sentiments?${company}&category=${category}`,
   CONVERSATIONS: "conversations",
   CONVERSATION: (id: string) => `conversation?${id}`,
+  MESSAGES: (id: string) => `messages?${id}`,
 };

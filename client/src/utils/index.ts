@@ -22,3 +22,15 @@ export const getLoadingTitle = (stage?: string) => {
       return "Loading";
   }
 };
+
+export const getAllLinksFromText = (text: string) => {
+  const regex = /(https?:\/\/[^\s]+)/g;
+  const matches = text.match(regex);
+  return matches || [];
+};
+
+export const getAllS3LinksFromText = (text: string) => {
+  const regex = /(s3?:\/\/[^\s]+)/g;
+  const matches = text.match(regex);
+  return matches || [];
+};

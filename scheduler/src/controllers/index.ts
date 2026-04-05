@@ -1,11 +1,7 @@
 //---------------------------------------------------------------------------------
 
 import { RABBITMQ_TOPIC } from "@/shared/config";
-import {
-  createConversation,
-  createMessage,
-  getUserById,
-} from "@/shared/lib/methods";
+import { createConversation, getUserById } from "@/shared/lib/methods";
 import { pubSub } from "@/shared/lib/pubsub";
 import { Request, Response } from "express";
 import { IUser } from "../../types";
@@ -56,12 +52,12 @@ export const addTaskToQueue = async (req: Request, res: Response) => {
     throw new Error("Failed to create conversation");
   }
 
-  await createMessage({
-    conversationId: conversation.id,
-    userId,
-    role: "assistant",
-    content: "Generating analysis for " + query.split("+").join(" ") + "...",
-  });
+  // await createMessage({
+  //   conversationId: conversation.id,
+  //   userId,
+  //   role: "assistant",
+  //   content: "Generating analysis for " + query.split("+").join(" ") + "...",
+  // });
 
   await pubSub.publish(RABBITMQ_TOPIC.SCRAPING, {
     company,

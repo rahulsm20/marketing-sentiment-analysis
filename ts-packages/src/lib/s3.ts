@@ -4,6 +4,7 @@ import {
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Readable } from "node:stream";
 
 export const s3Client = new S3Client({
@@ -27,11 +28,10 @@ export const uploadFileToS3 = async (
   return true;
 };
 
-export const getFileFromS3 = async (fileName: string): Promise<Buffer> => {
+export const getFileFromS3 = async (fileName: string): Promise<string> => {
   const command = new GetObjectCommand({
     Bucket: config.S3_BUCKET,
     Key: fileName,
   });
-  const response = await s3Client.send(command);
-  return response.Body as unknown as Buffer;
+  return getSignedUrl(s3Client, command, { expiresIn: 3600 });
 };

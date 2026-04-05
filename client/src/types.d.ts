@@ -9,9 +9,10 @@ export type ProductData = {
 };
 
 export type MessageType = {
-  data: string;
-  sender: string;
+  content: string;
+  role: string;
   id: string;
+  conversationId: string;
 };
 
 export type ConversationItem = {

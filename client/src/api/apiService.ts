@@ -56,4 +56,16 @@ export class ApiService {
     const { data } = await this.api.delete(`/conversation/${id}`);
     return data;
   }
+  async getMessages(conversationId: string) {
+    const { data } = await this.api.get(
+      `/conversation/${conversationId}/messages`,
+    );
+    return data;
+  }
+  async getReport(conversationId: string) {
+    const { data } = await this.api.get(
+      `/conversation/${conversationId}/report`,
+    );
+    return data;
+  }
 }

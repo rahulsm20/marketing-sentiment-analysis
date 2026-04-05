@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import {
   conversationsTable,
   ConversationStatus,
@@ -128,7 +128,8 @@ export async function getPdfDocuments(
   return db
     .select()
     .from(pdfDocumentsTable)
-    .where(eq(pdfDocumentsTable.conversationId, conversationId));
+    .where(eq(pdfDocumentsTable.conversationId, conversationId))
+    .orderBy(desc(pdfDocumentsTable.updatedAt));
 }
 
 // ---------------------------------------------------------------------------

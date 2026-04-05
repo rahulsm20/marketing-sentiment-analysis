@@ -9,14 +9,67 @@ import {
   deleteConversation,
   getConversationById,
   getConversations,
+  getMessages,
+  getPdfDocuments,
   getUserById,
 } from "@/shared/lib/methods";
 import { pubSub } from "@/shared/lib/pubsub";
+import { getFileFromS3 } from "@/shared/lib/s3";
 import express from "express";
 
 // ----------------------------------------------------------------------------------
 
 const router = express.Router();
+
+router.get("/:id/report", async (req, res) => {
+  try {
+    if (!req.params.id) {
+      return res.status(400).json({ message: "Conversation ID is required" });
+    }
+    const id = req.params.id;
+    const conversation = await getConversationById(id);
+    if (!conversation) {
+      return res.status(404).json({ message: "Conversation not found" });
+    }
+    const reports = await getPdfDocuments(id);
+    if (!reports || reports.length === 0) {
+      return res.status(404).json({ message: "Report not found" });
+    }
+    let url = "";
+    for (const report of reports) {
+      const key = `${report.id}_${report.fileName}`;
+      console.log({ key });
+      try {
+        url = await getFileFromS3(`s3://market_sentience/${key}`);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    if (!url) return res.status(404).json({ message: "Report not found" });
+    return res.status(200).json({ url });
+  } catch (error) {
+    console.error("Error fetching conversation:", error);
+    return res.status(500).json({ message: "Internal server error", error });
+  }
+});
+
+router.get("/:id/messages", async (req, res) => {
+  try {
+    if (!req.params.id) {
+      return res.status(400).json({ message: "Conversation ID is required" });
+    }
+    const id = req.params.id;
+    const conversation = await getConversationById(id);
+    if (!conversation) {
+      return res.status(404).json({ message: "Conversation not found" });
+    }
+    const messages = await getMessages(id);
+    return res.status(200).json(messages);
+  } catch (error) {
+    console.error("Error fetching conversation:", error);
+    return res.status(500).json({ message: "Internal server error", error });
+  }
+});
 
 router.get("/:id", async (req, res) => {
   try {

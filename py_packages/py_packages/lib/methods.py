@@ -204,9 +204,11 @@ def create_message(
     content: str,
     user_id: Optional[uuid.UUID] = None,
     role: Literal["user", "assistant"] = "user",
+    updated_at: Optional[datetime.datetime] = datetime.datetime.now(),
 ) -> Messages:
     message = Messages(
-        conversation_id=conversation_id, user_id=user_id, content=content, role=role
+        conversation_id=conversation_id, user_id=user_id, content=content, role=role,
+        updated_at=updated_at
     )
     session.add(message)
     session.commit()

@@ -31,9 +31,8 @@ def upload_bytes(data: bytes, bucket: str, key: str, content_type: str | None = 
     kwargs = {"Body": data, "Bucket": bucket, "Key": key}
     if content_type:
         kwargs["ContentType"] = content_type
-    obj = client.put_object(**kwargs)
-    head = client.head_object(Bucket=bucket, Key=key)
-    print(client, obj, head)
+    client.put_object(**kwargs)
+    client.head_object(Bucket=bucket, Key=key)
     return f"s3://{bucket}/{key}"
 
 

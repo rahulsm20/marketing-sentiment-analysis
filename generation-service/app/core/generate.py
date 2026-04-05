@@ -13,6 +13,7 @@ from openai import OpenAI
 from sqlmodel import Session
 from py_packages.lib.db import engine
 from py_packages.lib.s3 import upload_bytes
+from py_packages.lib.methods import create_message
 
 PROMPT = os.getenv("PROMPT")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -103,10 +104,15 @@ async def generate(query: str, id:str):
         )
         data = pdf_generator.generate_pdf()
 
-        doc = create_pdf_document(session=session, conversation_id=id, file_name=f"{company}_{category}_sentiment_analysis.pdf")
+        file_name = f"{company}_{category}_sentiment_analysis.pdf"
+        file_path = f"s3://market_sentience/{file_name}"
+        doc = create_pdf_document(session=session, conversation_id=id, file_name=file_name, file_path=file_path)
         url = upload_bytes(data=data, bucket="market-sentience", key=f"{doc.id}_{company}_{category}_sentiment_analysis.pdf", content_type="application/pdf") 
         
         update_conversation(session=session, conversation_id=id, status='completed')
+    
+        response_text = f'Hello, we have analyzed the sentiment of the reviews for the products in the category {category} of {company}. \nPlease find the sentiment analysis report attached. {url}'
+        create_message(session=session, conversation_id=id, content=response_text, role="assistant")
         result = {
             "sentiments": response["sentiments"],
             "response": response["output_text"],
