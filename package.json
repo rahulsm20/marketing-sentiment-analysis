@@ -3,7 +3,6 @@
     "chat-service",
     "scheduler",
     "scraping-service",
-    "storage-service",
     "ts-packages"
   ],
   "dependencies": {
