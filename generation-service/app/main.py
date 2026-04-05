@@ -10,16 +10,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
-from py_packages.lib.methods import get_products
 from py_packages.lib.pubsub import subscribe
-from tf_keras.models import load_model
-from tf_keras.preprocessing.sequence import pad_sequences
-from tf_keras.preprocessing.text import Tokenizer
-
-from app.core.pdf import PDFGenerator
-from app.core.redis import redis_client
 from app.core.generate import generate
-from app.utils.constants import CACHE_KEY
 _IS_LOCAL = os.getenv("NODE_ENV", "development") == "development"
 
 #########################################

@@ -1,7 +1,6 @@
-import base64
 import json
 import re
-from py_packages.lib.methods import get_products, update_conversation
+from py_packages.lib.methods import get_products, update_conversation, create_pdf_document
 from tf_keras.models import load_model
 from tf_keras.preprocessing.sequence import pad_sequences
 from tf_keras.preprocessing.text import Tokenizer
@@ -13,6 +12,7 @@ from app.utils.constants import CACHE_KEY
 from openai import OpenAI
 from sqlmodel import Session
 from py_packages.lib.db import engine
+from py_packages.lib.s3 import upload_bytes
 
 PROMPT = os.getenv("PROMPT")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -77,6 +77,7 @@ async def generate(query: str, id:str):
         cache_hit = False
         cached_data = None
         if raw_cached_data:
+            print("Cache hit")
             cached_data = json.loads(raw_cached_data)
             cache_hit = True
         else:
@@ -101,24 +102,15 @@ async def generate(query: str, id:str):
             product_data=products,
         )
         data = pdf_generator.generate_pdf()
-        encoded_data = base64.b64encode(data).decode("utf-8")
 
-        # upload_file_request = UploadFileRequest(
-        #     filename=f"{company}_{category}_sentiment_analysis.pdf",
-        #     filetype="application/pdf",
-        #     data=encoded_data,
-        # )
-
-        # file = storage_service.file_post_with_http_info(
-        #     upload_file_request=upload_file_request.to_dict(),
-        # )
-        # file_data = json.loads(file.raw_data)
-        # if not file or not file_data:
-        #     raise Exception("File upload failed")
+        doc = create_pdf_document(session=session, conversation_id=id, file_name=f"{company}_{category}_sentiment_analysis.pdf")
+        url = upload_bytes(data=data, bucket="market-sentience", key=f"{doc.id}_{company}_{category}_sentiment_analysis.pdf", content_type="application/pdf") 
+        
         update_conversation(session=session, conversation_id=id, status='completed')
-        return {
+        result = {
             "sentiments": response["sentiments"],
             "response": response["output_text"],
-            # "file": file_data["url"],
+            "file": url,
         }
+        return result
 
