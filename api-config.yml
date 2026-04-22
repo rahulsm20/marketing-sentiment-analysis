@@ -1,0 +1,42 @@
+openapi: 3.0.0
+info:
+  title: Market Sentience API
+  version: 1.0.0
+servers:
+  - url: https://api.marketsentience.xyz
+paths:
+  /scrape:
+    post:
+      x-google-backend:
+        address: https://scraper-service-abc.a.run.app
+      responses:
+        "200":
+          description: OK
+  /generate:
+    post:
+      x-google-backend:
+        address: https://-servgenerationice-xyz.a.run.app
+      responses:
+        "200":
+          description: OK
+  /schedule:
+    post:
+      x-google-backend:
+        address: https://scheduler-service-xyz.a.run.app
+      responses:
+        "200":
+          description: OK
+  /db:
+    post:
+      x-google-backend:
+        address: https://database-service-xyz.a.run.app
+      responses:
+        "200":
+          description: OK
+  /auth:
+    post:
+      x-google-backend:
+        address: https://auth-service-xyz.a.run.app
+      responses:
+        "200":
+          description: OK

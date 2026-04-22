@@ -3,6 +3,7 @@ import { chatController } from "../controllers/chat";
 
 const router = express.Router();
 
+// router.get("/fill", fillMissingDataInVectors);
 router.post("/", chatController.sendMessage);
 
 // TODO: Add route and controller for retrieving chat history

@@ -1,45 +1,51 @@
-import { openAIClient } from "@/lib/openai";
-import { getProducts } from "@/shared/src/lib/methods";
+import { getConversationById } from "@/shared/src/lib/methods";
+import { searchProducts } from "@/shared/src/lib/pinecode";
 import { Request, Response } from "express";
 
 export const chatController = {
   sendMessage: async (req: Request, res: Response) => {
     try {
-      const { message, conversation_id, user_id, context } = req.body;
-      // create new message in db
+      const { conversationId } = req.body;
 
-      // console.log({ message });
-      // const newMessage = await dbServiceApi.messagesPost({
-      //   createMessageRequest: {
-      //     role: "user",
-      //     content: message,
-      //     conversationId: conversation_id,
-      //     userId: user_id,
-      //   },
-      // });
-      // // fetch messages from db based on conversationId with limit to ensure it fits in context window
-      // const messagesResponse = await dbServiceApi.messagesConversationIdGet({
-      //   conversationId: conversation_id,
-      //   userId: user_id,
-      // });
-      // const messages = (messagesResponse || []).map((msg) => ({
-      //   role: msg.role,
-      //   content: msg.content,
-      // }));
-      // call openai api with messages
-      const products = await getProducts({
-        query: message,
-      });
+      if (!conversationId)
+        return res.status(400).json({ error: "Conversation ID is required" });
+      const conv = await getConversationById(conversationId);
+      if (!conv)
+        return res.status(404).json({ error: "Conversation not found" });
 
-      if (!message)
-        return res.status(400).json({ error: "Message is required" });
-      // const messages = [{ role: "user", content: message }];
-      const response = await openAIClient.responses.create({
-        model: "gpt-5-nano",
-        input: message
-      });
-      return res.status(200).json({ message, response: response.output_text });
+      const query = conv.query;
+      if (!query) return res.status(400).json({ error: "Query is required" });
+
+      // const products = await getProducts({
+      //   query,
+      // });
+      const vectors = await searchProducts(query);
+      // console.log({ vectors });
+      return res.status(200).json({ message: "ok", data: vectors });
+      // if (!message)
+      //   return res.status(400).json({ error: "Message is required" });
+
+      // const response = await openAIClient.responses.create({
+      //   model: config.OPEN_AI_MODEL,
+      //   input: message,
+      // });
+
+      // await createMessage({
+      //   conversationId,
+      //   userId,
+      //   content: message,
+      //   role: "user",
+      // });
+
+      // await createMessage({
+      //   conversationId,
+      //   content: response.output_text,
+      //   role: "assistant",
+      // });
+
+      // return res.status(200).json({ message, response: response.output_text });
     } catch (err) {
+      console.log(err);
       return res.status(500).json({ error: `Internal Server Error ${err}` });
     }
   },

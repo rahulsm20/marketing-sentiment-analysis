@@ -32,6 +32,8 @@ class Products(SQLModel, table=True):
     query: Optional[str] = Field(default=None, sa_column=Column('query', Text))
     company: Optional[str] = Field(default=None, sa_column=Column('company', Text))
     category: Optional[str] = Field(default=None, sa_column=Column('category', Text))
+    ratings: Optional[float] = Field(default=None, sa_column=Column('ratings', Double(53)))
+    no_of_ratings: Optional[float] = Field(default=None, sa_column=Column('no_of_ratings', Double(53)))
 
     product_reviews: list['ProductReviews'] = Relationship(back_populates='product')
 

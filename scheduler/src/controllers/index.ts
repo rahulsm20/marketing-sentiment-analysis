@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------
 
-import { RABBITMQ_TOPIC } from "@/shared/config";
+import { PUBSUB_TOPIC } from "@/shared/config";
 import { createConversation, getUserById } from "@/shared/lib/methods";
 import { pubSub } from "@/shared/lib/pubsub";
 import { Request, Response } from "express";
@@ -59,7 +59,7 @@ export const addTaskToQueue = async (req: Request, res: Response) => {
   //   content: "Generating analysis for " + query.split("+").join(" ") + "...",
   // });
 
-  await pubSub.publish(RABBITMQ_TOPIC.SCRAPING, {
+  await pubSub.publish(PUBSUB_TOPIC.SCRAPING, {
     company,
     category,
     conversationId: conversation.id,

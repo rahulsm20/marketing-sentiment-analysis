@@ -1,4 +1,4 @@
-import { RABBITMQ_TOPIC } from "@/shared/config";
+import { PUBSUB_TOPIC } from "@/shared/config";
 import {
   createProduct,
   getProducts,
@@ -67,7 +67,7 @@ export async function runScrape(data: { query: string; id?: string }) {
       status: ConversationStatus.EMBEDDING,
     });
     // send pub sub even to emebedding service
-    await pubSub.publish(RABBITMQ_TOPIC.EMBEDDING, {
+    await pubSub.publish(PUBSUB_TOPIC.EMBEDDING, {
       query,
       id: conversationId,
     });
@@ -96,12 +96,14 @@ export async function runScrape(data: { query: string; id?: string }) {
       });
     }
     const page = await browser.newPage();
+    page.setDefaultNavigationTimeout(60000);
+    page.setDefaultTimeout(60000);
 
     const searchPhrase = company + " " + category;
     const scrapeToPage = 1;
 
-    const homeUrl = "https://www.amazon.in/gp/cart/view.html";
-    await page.goto(homeUrl);
+    const homeUrl = `https://www.amazon.in/s?k=${encodeURIComponent(searchPhrase)}`;
+    await page.goto(homeUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
 
     await handleCookiesPopup(page);
     await page.waitForSelector("#twotabsearchtextbox");
@@ -228,7 +230,9 @@ export async function runScrape(data: { query: string; id?: string }) {
 
       for (const card of pageCardData) {
         if (card.productName.toLowerCase().includes(company.toLowerCase())) {
-          await page.goto(card.cardURL);
+          if (card.cardURL.includes("amazon.in")) {
+            await page.goto(card.cardURL);
+          } else continue;
           try {
             await page.waitForSelector("#acrCustomerReviewText", {
               timeout: 5000,
@@ -308,6 +312,8 @@ export async function runScrape(data: { query: string; id?: string }) {
           url: product?.cardURL,
           price: parseFloat(product?.price),
           query,
+          ratings: parseFloat(product?.rating),
+          noOfRatings: parseFloat(product?.ratingsNumber),
           company,
           category,
         });
@@ -322,7 +328,7 @@ export async function runScrape(data: { query: string; id?: string }) {
         status: 404,
       };
     }
-    await pubSub.publish(RABBITMQ_TOPIC.EMBEDDING, {
+    await pubSub.publish(PUBSUB_TOPIC.EMBEDDING, {
       query,
       id: conversationId,
     });

@@ -4,7 +4,7 @@
  */
 //-----------------------------------------------------------------------------------
 
-import { RABBITMQ_TOPIC } from "@/shared/config";
+import { PUBSUB_TOPIC } from "@/shared/config";
 import {
   deleteConversation,
   getConversationById,
@@ -85,11 +85,11 @@ router.get("/:id", async (req, res) => {
     switch (conversation.status) {
       case "pending":
         // await rabbitMQ.sendToQueue(
-        //   RABBITMQ_TOPIC.SCRAPING,
+        //   PUBSUB_TOPIC.SCRAPING,
         //   JSON.stringify(conversation)
         // );
-        await pubSub.publish(RABBITMQ_TOPIC.SCRAPING, conversation);
-        // conversation.status = RABBITMQ_TOPIC.SCRAPING;
+        await pubSub.publish(PUBSUB_TOPIC.SCRAPING, conversation);
+        // conversation.status = PUBSUB_TOPIC.SCRAPING;
         // await conversation.save();
 
         break;
@@ -99,11 +99,8 @@ router.get("/:id", async (req, res) => {
         //   JSON.stringify(conversation),
         // );
         const conversationStatus = conversation.status.toUpperCase();
-        if (Object.keys(RABBITMQ_TOPIC).includes(conversationStatus)) {
-          await pubSub.publish(
-            RABBITMQ_TOPIC[conversationStatus],
-            conversation,
-          );
+        if (Object.keys(PUBSUB_TOPIC).includes(conversationStatus)) {
+          await pubSub.publish(PUBSUB_TOPIC[conversationStatus], conversation);
         }
 
         break;

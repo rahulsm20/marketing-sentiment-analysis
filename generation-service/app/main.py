@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
 from py_packages.lib.pubsub import subscribe
 from app.core.generate import generate
+
 _IS_LOCAL = os.getenv("NODE_ENV", "development") == "development"
 
 #########################################
@@ -28,25 +29,26 @@ def _on_generation_event(data: dict) -> None:
     Handles an incoming generation Pub/Sub event.
     Expected payload: { query, id }
     """
-   
+
     id = data.get("id")
-    query = data.get("query") 
+    query = data.get("query")
     # print(data)
-    
+
     if not query.strip("+"):
         print("Generation event received with no query/company/category — skipping.")
         return
-    
+
     print(f"Generation event received for query: {query}")
-    asyncio.run(generate(query,id))
+    asyncio.run(generate(query, id))
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     if _IS_LOCAL:
         subscribe(GENERATION_TOPIC, _on_generation_event)
     yield
-    
-    
+
+
 class LLM:
     def __init__(self, model_name):
         self.model = genai.GenerativeModel(model_name)
@@ -68,7 +70,6 @@ app.add_middleware(
 )
 
 
-
 @app.get("/")
 async def read_root():
     return {"message": "Generation Service is up and running!"}
@@ -80,9 +81,11 @@ async def generate_strategies(request: Request):
     query = body.get("query")
     id = body.get("id")
     if not query:
-        return JSONResponse(content ={"message": "Query is required."}, status_code=400)
+        return JSONResponse(content={"message": "Query is required."}, status_code=400)
     company = query.split("+")[0]
     category = query.split("+")[1]
     if not company or not category:
-        return JSONResponse(content ={"message": "Company and category are required."}, status_code=400)
+        return JSONResponse(
+            content={"message": "Company and category are required."}, status_code=400
+        )
     return await generate(query, id)

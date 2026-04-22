@@ -19,15 +19,16 @@ export const config = {
   GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || "",
   NODE_ENV: process.env.NODE_ENV || "development",
   S3_BUCKET: process.env.S3_BUCKET || "market-sentience",
+  PINECONE_API_KEY: process.env.PINECONE_API_KEY || "",
 };
 
-export const RABBITMQ_TOPIC: { [key: string]: string } = {
+export const PUBSUB_TOPIC: { [key: string]: string } = {
   SCRAPING: "market_sentience_scraper",
   GENERATION: "market_sentience_generation",
   EMBEDDING: "market_sentience_embedding",
 };
 
-export const RABBITMQ_TOPIC_MAP: { [key: string]: string } = {
+export const PUBSUB_TOPIC_MAP: { [key: string]: string } = {
   market_sentience_scraper: "Scraping",
   market_sentience_generation: "Generation",
   market_sentience_embedding: "Embedding",

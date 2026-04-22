@@ -10,8 +10,8 @@ from langchain_pinecone import PineconeEmbeddings
 
 # from app.lib.db_service import db_service
 from py_packages.lib.pubsub import publish
-from py_packages.lib.methods import get_products 
-from py_packages.lib.db import  engine
+from py_packages.lib.methods import get_products
+from py_packages.lib.db import engine
 from sqlmodel import Session
 from app.core.db import pc
 from fastapi.responses import JSONResponse
@@ -19,7 +19,7 @@ from fastapi.responses import JSONResponse
 from py_packages.lib.methods import ConversationStatus, update_conversation
 
 # --------------------------------------------------------------------------
-
+EMBEDDING_TOPIC = "market_sentience_embedding"
 embeddings = PineconeEmbeddings(model="llama-text-embed-v2")
 index_name = "market-sentience-product-embeddings"
 
@@ -36,7 +36,6 @@ async def embed_text(text: str) -> list[float]:
 async def embed(query: str = None, conversation_id: str = None):
     try:
         start = datetime.now()
-        print(f"Embedding query: {query}")
         if not query:
             """
             Function to create an index for embedding if it does not exist.
@@ -53,7 +52,7 @@ async def embed(query: str = None, conversation_id: str = None):
                 )
 
             index = pc.Index(name=index_name)
-     
+
         else:
             if pc:
                 index = pc.Index(name=index_name)
@@ -61,14 +60,14 @@ async def embed(query: str = None, conversation_id: str = None):
                 search_with_text = index.search(
                     namespace="__default__",
                     query={"inputs": {"text": query}, "top_k": 4},
-                    fields=["query", "title", "review", "price", "url"],
+                    fields=["query", "title", "review", "price", "url", "product_id"],
                     rerank={
                         "model": "bge-reranker-v2-m3",
                         "top_n": 2,
                         "rank_fields": ["review"],
                     },
                 )
-                print(search_with_text)
+
                 if (
                     search_with_text["result"]["hits"]
                     and len(search_with_text["result"]["hits"]) > 0
@@ -84,17 +83,21 @@ async def embed(query: str = None, conversation_id: str = None):
                         }
                         for hit in search_with_text["result"]["hits"]
                     ]
-                    
+
                     end = datetime.now()
                     duration = end - start
                     with Session(engine) as session:
-                        update_conversation(session=session, conversation_id=conversation_id, status='generation')
+                        update_conversation(
+                            session=session,
+                            conversation_id=conversation_id,
+                            status="generation",
+                        )
                     publish(
-                        topic=f"market_sentience_generation",
+                        topic=EMBEDDING_TOPIC,
                         data={
-                        "query": query,
-                        "id": conversation_id,
-                        }
+                            "query": query,
+                            "id": conversation_id,
+                        },
                     )
                     return JSONResponse(
                         content={"message": "Embeddings found.", "data": hits},
@@ -109,7 +112,7 @@ async def embed(query: str = None, conversation_id: str = None):
                 if not products:
                     return {"message": "No new products to embed."}
                 vectors = []
-                print(f"Products: {products}")
+
                 for product in products:
                     text = f"{product.name}"
                     review_text = None
@@ -118,7 +121,12 @@ async def embed(query: str = None, conversation_id: str = None):
                         if review_text:
                             text += f"{review_text}"
                     vector = await embed_text(text)
-                    print(f"review_text: {review_text}")
+                    # print(f"review_text: {review_text}")
+                    if (
+                        not product.product_reviews
+                        or product.product_reviews.count() == 0
+                    ):
+                        continue
                     metadata = {
                         "product_id": str(product.id),
                         "title": product.name,
@@ -141,13 +149,17 @@ async def embed(query: str = None, conversation_id: str = None):
             end = datetime.now()
             duration = end - start
             with Session(engine) as session:
-                update_conversation(session=session, conversation_id=conversation_id, status='generation')
+                update_conversation(
+                    session=session,
+                    conversation_id=conversation_id,
+                    status="generation",
+                )
             publish(
                 topic=f"market_sentience_generation",
                 data={
-                "query": query,
-                "id": conversation_id,
-                }
+                    "query": query,
+                    "id": conversation_id,
+                },
             )
 
             return {
@@ -157,7 +169,7 @@ async def embed(query: str = None, conversation_id: str = None):
             }
     except Exception as e:
         print(f"Error embedding: {e}")
-        return JSONResponse(content ={"message": "Error embedding."}, status_code=500)
+        return JSONResponse(content={"message": "Error embedding."}, status_code=500)
 
 
 # async def truncate_embeddings():

@@ -8,7 +8,7 @@ const port = config.PORT || 3000;
 app.use(express.json());
 
 app.use("/chat", chatRouter);
-app.get("/", async (req: Request, res: Response) => {
+app.get("/", async (_req: Request, res: Response) => {
   return res.status(200).json({
     message: "Chat service running",
     status: "ok",
@@ -17,7 +17,7 @@ app.get("/", async (req: Request, res: Response) => {
   });
 });
 
-app.get("*", async (req: Request, res: Response) => {
+app.get("*", async (_req: Request, res: Response) => {
   return res.status(404).json({ error: "Invalid route" });
 });
 

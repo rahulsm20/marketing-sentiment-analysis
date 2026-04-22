@@ -1,4 +1,4 @@
-import { config, RABBITMQ_TOPIC } from "@/shared/config";
+import { config, PUBSUB_TOPIC } from "@/shared/config";
 import { pubSub } from "@/shared/lib/pubsub";
 import express, { Request, Response } from "express";
 import { runScrape, scrapeProducts } from "./controllers/scrape";
@@ -8,7 +8,7 @@ const app = express();
 const port = process.env.PORT || 3002;
 
 if (config.NODE_ENV === "development") {
-  pubSub.subscribe(RABBITMQ_TOPIC.SCRAPING, async (data) => {
+  pubSub.subscribe(PUBSUB_TOPIC.SCRAPING, async (data) => {
     await runScrape(data);
   });
 }

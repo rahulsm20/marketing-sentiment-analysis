@@ -46,7 +46,7 @@ const Navbar = () => {
     return (
       <>
         <li>
-          <Link to="/">
+          <Link to="/" className="flex gap-2">
             <GanttChart />
           </Link>
         </li>

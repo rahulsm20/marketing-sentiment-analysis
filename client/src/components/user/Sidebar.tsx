@@ -38,7 +38,7 @@ import { ModeToggle } from "./ModeToggle";
 //--------------------------------------------
 
 const Sidebar = () => {
-  const schedulerApi = useApi();
+  const { schedulerApi } = useApi();
   const [open, setOpen] = useState(false);
   const id = useParams()?.id;
 
@@ -61,7 +61,7 @@ const Sidebar = () => {
     refetch,
   } = useQuery({
     queryKey: [LOCAL_CACHE_KEYS.CONVERSATIONS],
-    queryFn: () => schedulerApi.getConversations(),
+    queryFn: () => schedulerApi?.getConversations(),
     retry: false,
   });
 

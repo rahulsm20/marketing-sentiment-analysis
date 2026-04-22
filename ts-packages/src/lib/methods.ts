@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import {
   conversationsTable,
   ConversationStatus,
@@ -38,15 +38,65 @@ export async function getProducts(filters?: {
   query?: string;
   company?: string;
   category?: string;
+  sortBy?: "createdAt" | "price" | "name";
+  take?: number;
+  ratings?: number;
+  noOfRatings?: number;
 }): GetProductsResult {
-  const rows = await db.select().from(productsTable);
-  if (!filters) return rows;
-  return rows.filter((p) => {
-    if (filters.query && p.query !== filters.query) return false;
-    if (filters.company && p.company !== filters.company) return false;
-    if (filters.category && p.category !== filters.category) return false;
-    return true;
-  });
+  if (!filters) return await db.select().from(productsTable);
+
+  const sortByMap = {
+    createdAt: desc(productsTable.createdAt),
+    price: desc(productsTable.price),
+    name: desc(productsTable.name),
+  };
+
+  let sortBy = sortByMap[filters.sortBy ?? "createdAt"];
+  let where;
+  let company;
+  let category;
+  let take = filters.take ?? 10;
+
+  if (filters.query) {
+    where = eq(productsTable.query, filters.query);
+  }
+  if (filters.company) {
+    if (where !== undefined) {
+      company = and(where, eq(productsTable.company, filters.company));
+    } else {
+      company = eq(productsTable.company, filters.company);
+    }
+  }
+  if (filters.category) {
+    if (where !== undefined) {
+      category = and(where, eq(productsTable.category, filters.category));
+    } else {
+      category = eq(productsTable.category, filters.category);
+    }
+  }
+  if (filters.ratings) {
+    if (where !== undefined) {
+      where = and(where, eq(productsTable.ratings, filters.ratings));
+    } else {
+      where = eq(productsTable.ratings, filters.ratings);
+    }
+  }
+
+  if (filters.noOfRatings) {
+    if (where !== undefined) {
+      where = and(where, eq(productsTable.noOfRatings, filters.noOfRatings));
+    } else {
+      where = eq(productsTable.noOfRatings, filters.noOfRatings);
+    }
+  }
+
+  const rows = await db
+    .select()
+    .from(productsTable)
+    .where(where)
+    .orderBy(sortBy)
+    .limit(take);
+  return rows;
 }
 
 export async function getProductById(id: string): GetProductByIdResult {
@@ -143,6 +193,8 @@ export async function createProduct(data: {
   query?: string;
   company?: string;
   category?: string;
+  ratings?: number;
+  noOfRatings?: number;
 }): CreateProductResult {
   const [row] = await db.insert(productsTable).values(data).returning();
   return row;

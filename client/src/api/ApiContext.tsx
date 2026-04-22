@@ -3,7 +3,10 @@ import { createContext, useContext, useMemo } from "react";
 import { ApiService } from "./apiService";
 import { createSchedulerApi } from "./auth0";
 
-const ApiContext = createContext<ApiService | null>(null);
+const ApiContext = createContext<{
+  schedulerApi: ApiService | null;
+  chatApi: ApiService | null;
+}>({ schedulerApi: null, chatApi: null });
 
 export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
   const { getAccessTokenSilently } = useAuth0();
@@ -11,8 +14,14 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
     () => createSchedulerApi(getAccessTokenSilently),
     [getAccessTokenSilently],
   );
+  const chatApi = useMemo(
+    () => createSchedulerApi(getAccessTokenSilently),
+    [getAccessTokenSilently],
+  );
   return (
-    <ApiContext.Provider value={schedulerApi}>{children}</ApiContext.Provider>
+    <ApiContext.Provider value={{ schedulerApi, chatApi }}>
+      {children}
+    </ApiContext.Provider>
   );
 };
 

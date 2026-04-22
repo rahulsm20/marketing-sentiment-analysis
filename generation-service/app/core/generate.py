@@ -1,6 +1,10 @@
 import json
 import re
-from py_packages.lib.methods import get_products, update_conversation, create_pdf_document
+from py_packages.lib.methods import (
+    get_products,
+    update_conversation,
+    create_pdf_document,
+)
 from tf_keras.models import load_model
 from tf_keras.preprocessing.sequence import pad_sequences
 from tf_keras.preprocessing.text import Tokenizer
@@ -19,6 +23,7 @@ PROMPT = os.getenv("PROMPT")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 openAIClient = OpenAI(api_key=OPENAI_API_KEY)
 
+model = load_model("./sentiment_analysis_model.h5")
 
 
 def to_titlecase(s: str) -> str:
@@ -27,16 +32,15 @@ def to_titlecase(s: str) -> str:
         lambda mo: mo.group(0)[0].upper() + mo.group(0)[1:].lower(),
         s,
     )
-    
-async def generate(query: str, id:str):
-    model = load_model("./sentiment_analysis_model.h5")
+
+
+async def generate(query: str, id: str):
     with Session(engine) as session:
         products = get_products(session=session, query=query)
         reviews = []
         productWithReviews = {}
         company = query.split("+")[0]
         category = query.split("+")[1]
-        
         for product in products:
             product_reviews = product.product_reviews
             for review in product_reviews:
@@ -60,7 +64,9 @@ async def generate(query: str, id:str):
             "product: "
             + product[:24]
             + ", reviews: "
-            + ", ".join(r.review_text for r in productWithReviews[product] if r.review_text)
+            + ", ".join(
+                r.review_text for r in productWithReviews[product] if r.review_text
+            )
             for product in productWithReviews
         ]
 
@@ -73,12 +79,13 @@ async def generate(query: str, id:str):
         full_prompt = (
             prompt + " " + company + " " + category + " reviews: " + joined_reviews
         )
-        cache_key = CACHE_KEY["MARKETING_STRATEGIES"](company=company, category=category)
+        cache_key = CACHE_KEY["MARKETING_STRATEGIES"](
+            company=company, category=category
+        )
         raw_cached_data = redis_client.get(cache_key)
         cache_hit = False
         cached_data = None
         if raw_cached_data:
-            print("Cache hit")
             cached_data = json.loads(raw_cached_data)
             cache_hit = True
         else:
@@ -106,17 +113,30 @@ async def generate(query: str, id:str):
 
         file_name = f"{company}_{category}_sentiment_analysis.pdf"
         file_path = f"s3://market_sentience/{file_name}"
-        doc = create_pdf_document(session=session, conversation_id=id, file_name=file_name, file_path=file_path)
-        url = upload_bytes(data=data, bucket="market-sentience", key=f"{doc.id}_{company}_{category}_sentiment_analysis.pdf", content_type="application/pdf") 
-        
-        update_conversation(session=session, conversation_id=id, status='completed')
-    
-        response_text = f'Hello, we have analyzed the sentiment of the reviews for the products in the category {category} of {company}. \nPlease find the sentiment analysis report attached. {url}'
-        create_message(session=session, conversation_id=id, content=response_text, role="assistant")
+        doc = create_pdf_document(
+            session=session,
+            conversation_id=id,
+            file_name=file_name,
+            file_path=file_path,
+        )
+        url = upload_bytes(
+            data=data,
+            bucket="market-sentience",
+            key=f"{doc.id}_{company}_{category}_sentiment_analysis.pdf",
+            content_type="application/pdf",
+        )
+
+        update_conversation(session=session, conversation_id=id, status="completed")
+
+        response_text = f"Hello, we have analyzed the sentiment of the reviews for {
+            company
+        } {category}. \nPlease find the sentiment analysis report attached. {url}"
+        create_message(
+            session=session, conversation_id=id, content=response_text, role="assistant"
+        )
         result = {
             "sentiments": response["sentiments"],
             "response": response["output_text"],
             "file": url,
         }
         return result
-

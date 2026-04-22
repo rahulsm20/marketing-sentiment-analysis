@@ -6,3 +6,6 @@ generate:
 
 run:
 	chmod +x run.sh && ./run.sh
+
+kill:
+	pkill 4001 

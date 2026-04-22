@@ -9,11 +9,11 @@ import {
 import Footer from "@/components/user/Footer";
 import Layout from "@/components/user/Layout";
 import Navbar from "@/components/user/Navbar";
+import NeuralNetwork from "@/components/user/Neurons";
 import { useAuth0 } from "@auth0/auth0-react";
 import {
   ArrowRight,
   GanttChart,
-  GanttChartSquare,
   GitBranchPlus,
   LineChart,
   MessageCircle,
@@ -46,11 +46,11 @@ const Landing = () => {
         "Engage in meaningful conversations with our AI chatbot to get insights and answers.",
       icon: <MessageCircle />,
     },
-    {
-      title: "Customizable Dashboards",
-      description: "Tailor your dashboard to fit your needs.",
-      icon: <GanttChartSquare />,
-    },
+    // {
+    //   title: "Customizable Dashboards",
+    //   description: "Tailor your dashboard to fit your needs.",
+    //   icon: <GanttChartSquare />,
+    // },
     {
       title: "Open Source",
       description: "Contribute to our open-source project and help us grow.",
@@ -81,7 +81,8 @@ const Landing = () => {
             <ArrowRight className="h-4 w-4" />
           </Button>{" "}
         </div>
-        <div className="flex flex-col gap-10 border p-5">
+        <NeuralNetwork />
+        <div className="flex flex-col gap-10 p-5">
           <h1 className="text-3xl border-b py-3 font-semibold">Features</h1>
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
             {features.map((feature, index) => (
@@ -99,6 +100,14 @@ const Landing = () => {
               </Card>
             ))}
           </section>
+        </div>
+        <div className="flex flex-col gap-10 p-5 xl:w-1/2">
+          <h1 className="text-3xl border-b py-3 font-semibold">How it works</h1>
+          <img
+            src="market-sentience.png"
+            alt="Market Sentience"
+            className="w-full"
+          />
         </div>
       </Layout>
       <Footer />

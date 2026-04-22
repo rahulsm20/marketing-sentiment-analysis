@@ -14,7 +14,7 @@ import { toast } from "sonner";
 //--------------------------------------------------------------------------
 
 const Conversation = () => {
-  const schedulerApi = useApi();
+  const { schedulerApi } = useApi();
   const id = useParams().id;
   const [conversation, setConversation] = useState<ConversationItem | null>(
     null,
@@ -27,7 +27,7 @@ const Conversation = () => {
     retry: false,
     queryFn: () =>
       id &&
-      schedulerApi.getConversation(id).then((res) => {
+      schedulerApi?.getConversation(id).then((res) => {
         setConversation(res);
         return res;
       }),
@@ -38,7 +38,7 @@ const Conversation = () => {
     retry: false,
     queryFn: () =>
       id &&
-      schedulerApi.getMessages(id).then((res) => {
+      schedulerApi?.getMessages(id).then((res) => {
         setMesages(res);
         return res;
       }),

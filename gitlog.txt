@@ -1,0 +1,151 @@
+1624d15 fix(client): download report
+7ef06c7 fix(scheduler): key inference for s3 file
+85f05c5 feat(client+scheduler): file upload and fetch logic
+8d4c08e chore: cleanup unused modules
+05bf28b refactor: deprecate storage service
+c3cc1bb refactor: update migrate and model generation scripts
+2abe64a fix: file upload in generation service
+cc7c030 feat(shared): ts and py libs for file upload
+c6f2816 feat(client): add apicontext for requests
+d18739e fix(db): add error states for conversation
+e93996e feat: misc changes to config + added precommit template
+e4ee289 chore(scheduler): cleanup + remove console.log
+9f27d85 fix(embed+gen): fix pubsub event propagation
+bf49c0f chore: add get_session util for py_packages
+8f3542f fix: scraping service to embedding event push
+37ebc0a fix: embedding change for sqlmodel
+d29d16f chore: add conv on delete cascade relations
+d333395 fix(general): gcp pubsub subscription name conflict
+b0cb2f2 fix(chat): tsconfig issue
+ea11bff chore: remove integrate action
+aad30db chore(embedding): restore embedding pubsub connection
+35728fd fix(client): issue sending auth creds with api req
+6606cc8 refactor: get rid of all generated client code
+57abbc8 feat(actions): updated deploy action
+42c3146 fix: root pyproject.toml config issue
+ca6e1c4 refactor+fix: py packages tree structure
+b92ea5d refactor+fix: move redis lib to shared package + fix import resolution for the same
+e774762 refactor: update py-packages to py_packages
+9b4d400 fix(embedding-service): fix import for shared package
+d218cbd chore: remove analysis code
+b506f24 revert: husky config
+6a68678 fix: conflicting package names
+4f2e853 refactor: deprecate db-service
+9e90d85 refactor: rename scraping-service-ts to scraping-service
+ed36aa0 feat: add redis + mutex + pubsub utils for python services
+d051ee2 fix: missing util for client side loading states
+0dff035 refactor: get rid of logging service
+10d3b8c chore: update config + main run script
+56ea2e3 fix: enrich client side loading state + fix scheduler -> scraping service flow
+4592013 refactor: migrate scraping service to typescript
+eafaca3 chore: update makefile
+d4e8fc7 chore: update run script
+2b91a56 fix(client): id inference for conversations and messages + updated readme
+fd9052e fix: misc fixes to make file, python version and scripts
+253e32e refactor(scheduler): use abstracted methods for db ops + related fixes
+4b914ec refactor(py-packages): update python db models
+e061dbd feat(ts-packages): add abstracted methods for db operations + updated schema
+7fda68e feat: add logger packages
+bdf90ab feat: add shared methods for db operations
+313c65c attempt fix: scraping service build action
+ad4785d chore: all updated package.json files
+3e99f41 feat: add shared package for ts and py services
+72617c9 refactor(chat_service): remove generated code for db-service
+fdaca9b chore: update .gitignore
+972b1ee feat: add makefile for convenience
+33056ac feat: add general migration and datamodel related scripts
+76d0d93 feat: add shared packages for ts services
+455e11f chore: remove auth service
+52ffa5e feat(db-service): new schema + related migrations
+dccbde5 chore: remove redundant start script
+cf3d1e6 chore: remove new client
+722e3a2 refactor: landing page redesign
+9348adb chore: change rate limit message
+dc13ec3 chore(db-service): update postgres schema
+d69ae04 chore: update compose.yml
+08abf81 chore: update readme
+bb69170 feat(generation): add charts to pdf
+7b3d263 fix(shared): fixed storage service openapi config
+88b330f fix(storage-service): fixed s3 client issues
+69ef338 feat(db-service): added caching layer
+220899b feat(generation): fixed strategy pdf generation
+fa3ceb3 feat(embedding-service): add generated code for db_service
+08e085c feat(shared): add shared openapi yaml configs
+d3082fc feat(generation-service): add generated openapi client code for db and storage services
+e625c4b chore(actions): update scrape ci
+37ea6d4 chore: cleanup
+13b398b feat(scheduler): add rate limiter to scheduler
+528d471 feat(shared): add shared config
+4a02847 feat(new-client): add client in next.js
+7b64ec1 feat(chat-service): add generated code
+e50dd76 feat(db-service): added message + conservation controllers
+6ca709f feat: added storage service
+806f69a chore: update main form validation
+dccea52 chore: init auth service
+c62fc63 feat(embedding_service): adding embedding functionality
+4b3edac Merge pull request #7 from rahulsm20/rehaul
+fcae6cb feat(db_service): add product controller and routes
+46f66ac chore: init chat service
+c9851c4 Merge pull request #6 from rahulsm20/rehaul
+e43a2a6 chore: update logger config for scheduler service
+79a9823 feat: add conversation schema + routes in db-service
+218678f chore: logging service changes
+6f8efdd chore: client update
+75ae315 Merge pull request #5 from rahulsm20/rehaul
+37f4954 fix: attempt fix rabbitmq pipeline
+f646a64 feat: add rabbitmq to embedding service
+7cbdc54 chore: cleanup
+16f2546 chore: update db service config
+615e6ec init logging-service
+97c96b7 updated some shit
+2a8cf24 Merge pull request #4 from rahulsm20/rehaul
+8fe8e99 feat: add db service
+096e163 init ci/cd
+5c7a6e7 fix: scraping task queue
+b271fb1 Merge pull request #3 from rahulsm20/rehaul
+2d273fd package fixes
+21b46cb fix: action dropdown menu closing on open
+77bf9b3 fix: ui issues
+b7b883e chore: update default font
+0a17fee Merge pull request #2 from rahulsm20/rehaul
+11d663a chore: update navbar blur
+94d41ff fix: scraping service port config
+d71e2b6 chore: update start script
+7061836 chore: update .gitignore
+734a1c7 chore: update compose file
+0c925ef fix: scraping logic error
+ff2d0c8 chore: update generation service openai integration
+6e85623 chore: scheduler service mongo integration
+b992fa7 init embedding service
+67b1ac6 chore: minor ui changes
+d87178d fix: conversation deletion
+1d52dc4 updated readme
+1ca47c5 chore: updated chat ui
+af28a56 fix build errors
+e745424 rehaul: initial commit
+0d9ac2a updated documentation
+fdfd6a0 updated readme
+c93ace6 updated gen service
+54ab902 client config updated
+bcd8887 added env detection
+34ab55b fixed stuff
+6c983b1 scraping service updated
+afcf0a7 final push
+406f7b3 added integration + unit tests
+77330a2 add frontend + dedicated scraping and generation services
+5825f84 models & server
+f171b37 Merge branch 'main' of https://github.com/rahulsm20/marketing-sentiment-analysis
+f028022 models & server
+9ba22aa updated readme
+99a404e added sample .env
+4e7c852 removed fault requirements
+55855fe added gemini integration
+682ff9b added stuff
+5d3f6b0 added stuff
+b376021 updated requirements
+091e8fe added compiled model
+6071d0f updated streamlit page and model + setup api routes for scraping
+295351f Merge pull request #1 from Nidhish2002/frontend
+eb65920 Added Home page in public folder
+3846b74 updated scraping script
+26fc3c6 initial commit

@@ -1,7 +1,7 @@
 import datetime
 from typing import Literal, Optional
 import uuid
-
+from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
 ConversationStatus = Literal[
@@ -29,7 +29,7 @@ def get_products(
     company: Optional[str] = None,
     category: Optional[str] = None,
 ) -> list[Products]:
-    statement = select(Products)
+    statement = select(Products).options(selectinload(Products.product_reviews))
     if query is not None:
         statement = statement.where(Products.query == query)
     if company is not None:

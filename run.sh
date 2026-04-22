@@ -15,11 +15,14 @@ generation_pid=$!
 embedding_pid=$!
 cd scheduler && npm run dev &
 scheduler_pid=$!
+cd chat-service && bun dev &
+chat_service_pid=$!
 echo "Client PID: $client_pid"
 echo "Scheduler Service PID: $scheduler_pid"
 echo "Scraping Service PID: $scraping_pid"
 echo "Generation Service PID: $generation_pid"
 echo "Embedding Service PID: $embedding_pid"
+echo "Chat Service PID: $chat_service_pid"
 echo "All services started. Press Ctrl+C to stop."
 # Trap to kill all on exit
 # trap "echo 'Shutting down...'; kill $client_pid $scheduler_pid $scraping_pid $generation_pid $embedding_pid $db_pid $logging_pid $storage_pid; exit" SIGINT SIGTERM
@@ -33,6 +36,7 @@ shutdown() {
     "$scraping_pid:Scraping"
     "$generation_pid:Generation"
     "$embedding_pid:Embedding"
+    "$chat_service_pid:Chat"
   )
 
   for svc in "${services[@]}"; do
@@ -54,4 +58,4 @@ shutdown() {
 trap shutdown SIGINT SIGTERM
 
 # Wait for all
-wait $client_pid $scheduler_pid $scraping_pid $generation_pid $embedding_pid
+wait $client_pid $scheduler_pid $scraping_pid $generation_pid $embedding_pid $chat_service_pid

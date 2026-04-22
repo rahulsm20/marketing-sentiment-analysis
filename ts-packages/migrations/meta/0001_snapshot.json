@@ -1,6 +1,6 @@
 {
-  "id": "134f11ff-6e79-414e-aaed-edc7c7c193cc",
-  "prevId": "3009eea6-265b-4e23-928a-72564de994ee",
+  "id": "dcc9158d-3a3d-443f-acc6-593710398d0b",
+  "prevId": "134f11ff-6e79-414e-aaed-edc7c7c193cc",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -432,6 +432,18 @@
         "category": {
           "name": "category",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ratings": {
+          "name": "ratings",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "no_of_ratings": {
+          "name": "no_of_ratings",
+          "type": "double precision",
           "primaryKey": false,
           "notNull": false
         },

@@ -33,7 +33,7 @@ export function DeleteDialog({
     options?: RefetchOptions | undefined,
   ) => Promise<QueryObserverResult<ConversationItem[], Error>>;
 }) {
-  const schedulerApi = useApi();
+  const { schedulerApi } = useApi();
   const navigate = useNavigate();
   const [enabled, setEnabled] = useState(false);
   const { isLoading } = useQuery({
@@ -41,7 +41,7 @@ export function DeleteDialog({
     enabled,
     retry: false,
     queryFn: () =>
-      schedulerApi.deleteConversation(_id).then(() => {
+      schedulerApi?.deleteConversation(_id).then(() => {
         setEnabled(false);
         refetch && refetch();
         navigate("/");
