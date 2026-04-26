@@ -10,7 +10,6 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 import { auth } from "express-oauth2-jwt-bearer";
-import { db } from "./lib/db/mongo";
 import { logger } from "./lib/logger";
 import { checkUser } from "./middleware";
 import { requestLogger } from "./middleware/loggerMiddleware";
@@ -58,14 +57,6 @@ app.get("/", async (_req: Request, res: Response) => {
 });
 
 //----------------------------------------------------------
-
-try {
-  db.connect(config.MONGO_URL)
-    .then(() => logger.info(">> Connected to MongoDB"))
-    .catch((err) => logger.error(err));
-} catch (err) {
-  logger.error(err);
-}
 
 app.get("*", async (_req: Request, res: Response) => {
   return res.status(404).json("Invalid route");

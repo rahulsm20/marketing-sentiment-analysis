@@ -1,8 +1,8 @@
 //---------------------------------------------------------------------------------
 
-import { PUBSUB_TOPIC } from "@/shared/config";
-import { createConversation, getUserById } from "@/shared/lib/methods";
-import { pubSub } from "@/shared/lib/pubsub";
+import { PUBSUB_TOPIC } from "@/shared/src/config";
+import { createConversation, getUserById } from "@/shared/src/lib/methods";
+import { pubSub } from "@/shared/src/lib/pubsub";
 import { Request, Response } from "express";
 import { IUser } from "../../types";
 

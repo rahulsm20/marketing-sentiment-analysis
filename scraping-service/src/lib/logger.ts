@@ -1,3 +1,3 @@
-import { createLogger } from "@/shared/lib/logger";
+import { createLogger } from "@/shared/src/lib/logger";
 
 export const logger = createLogger("scraping-service");

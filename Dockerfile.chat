@@ -1,0 +1,29 @@
+FROM oven/bun:1.2.18 AS build
+WORKDIR /usr/src/app
+
+COPY package.json bun.lock ./
+
+COPY ts-packages ./ts-packages
+COPY chat-service ./chat-service
+RUN mkdir scraping-service scheduler && echo '{"name":"scraping-service","version":"1.0.0"}' > scraping-service/package.json \ && echo '{"name":"scheduler","version":"1.0.0"}' > scheduler/package.json
+
+RUN bun install
+
+WORKDIR /usr/src/app/chat-service
+RUN bun run build
+
+FROM oven/bun:1.2.18 AS release
+WORKDIR /usr/src/app
+
+ENV NODE_ENV=production
+
+COPY --from=build /usr/src/app/node_modules ./node_modules
+
+COPY --from=build /usr/src/app/chat-service/dist ./chat-service/dist
+
+COPY --from=build /usr/src/app/ts-packages ./ts-packages
+
+WORKDIR /usr/src/app/chat-service
+
+EXPOSE 8080 
+CMD ["bun", "dist/server.js"]

@@ -4,7 +4,7 @@
  */
 //-----------------------------------------------------------------------------------
 
-import { PUBSUB_TOPIC } from "@/shared/config";
+import { PUBSUB_TOPIC } from "@/shared/src/config";
 import {
   deleteConversation,
   getConversationById,
@@ -12,9 +12,9 @@ import {
   getMessages,
   getPdfDocuments,
   getUserById,
-} from "@/shared/lib/methods";
-import { pubSub } from "@/shared/lib/pubsub";
-import { getFileFromS3 } from "@/shared/lib/s3";
+} from "@/shared/src/lib/methods";
+import { pubSub } from "@/shared/src/lib/pubsub";
+import { getFileFromS3 } from "@/shared/src/lib/s3";
 import express from "express";
 
 // ----------------------------------------------------------------------------------
@@ -131,6 +131,32 @@ router.delete("/:id", async (req, res) => {
       .json({ message: "Conversation deleted successfully" });
   } catch (error) {
     console.error("Error deleting conversation:", error);
+    return res.status(500).json({ message: "Internal server error", error });
+  }
+});
+
+router.post("/:id", async (req, res) => {
+  try {
+    const reqAuth = req.auth;
+    if (!reqAuth) {
+      return res.status(400).json({ error: "Unauthorized" });
+    }
+    const userId = reqAuth.payload.sub;
+    if (!userId) throw new Error("unauthorized");
+    const user = await getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const { id: convId } = req.params;
+    if (!convId) throw new Error("conversation id is required");
+    const conversation = await getConversationById(convId);
+    if (!conversation || conversation.userId !== user.id) {
+      return res.status(404).json({ message: "Conversation not found" });
+    }
+
+    return res.status(200).json(conversation);
+  } catch (error) {
+    console.error("Error creating conversation:", error);
     return res.status(500).json({ message: "Internal server error", error });
   }
 });

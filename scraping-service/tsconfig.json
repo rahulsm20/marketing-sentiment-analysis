@@ -5,7 +5,7 @@
     "rootDir": "../",
     "paths": {
       "@/*": ["./src/*"],
-      "@/shared/*": ["../ts-packages/src/*"]
+      "@/shared/*": ["../ts-packages/*"]
     },
     "strict": true,
     "esModuleInterop": true,

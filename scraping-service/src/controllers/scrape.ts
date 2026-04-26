@@ -1,11 +1,11 @@
-import { PUBSUB_TOPIC } from "@/shared/config";
+import { PUBSUB_TOPIC } from "@/shared/src/config";
 import {
   createProduct,
   getProducts,
   updateConversation,
-} from "@/shared/lib/methods";
-import { pubSub } from "@/shared/lib/pubsub";
-import { ConversationStatus } from "@/shared/lib/schema";
+} from "@/shared/src/lib/methods";
+import { pubSub } from "@/shared/src/lib/pubsub";
+import { ConversationStatus } from "@/shared/src/lib/schema";
 import { config } from "@/utils/config";
 import { Request, Response } from "express";
 import puppeteer from "puppeteer";

@@ -1,5 +1,5 @@
-import { config, PUBSUB_TOPIC } from "@/shared/config";
-import { pubSub } from "@/shared/lib/pubsub";
+import { config, PUBSUB_TOPIC } from "@/shared/src/config";
+import { pubSub } from "@/shared/src/lib/pubsub";
 import express, { Request, Response } from "express";
 import { runScrape, scrapeProducts } from "./controllers/scrape";
 import { logger } from "./lib/logger";

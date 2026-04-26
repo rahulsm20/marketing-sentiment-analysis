@@ -25,13 +25,13 @@ jobs:
 
       - name: Build and Push Scheduler Docker Image
         run: |
-          docker build -f Dockerfile.scheduler --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/scheduler:latest . && 
-          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/scheduler:latest
+          docker build -f Dockerfile.scheduler --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/scheduler:latest . && 
+          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/scheduler:latest
 
       - name: Deploy Scheduler Service to Cloud Run
         run: |
           gcloud run deploy scheduler \
-          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/scheduler:latest \
+          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/scheduler:latest \
           --region us-west1 \
           --platform managed \
           --allow-unauthenticated
@@ -53,13 +53,13 @@ jobs:
 
       - name: Build and Push Generation Docker Image
         run: |
-          docker build -f Dockerfile.generation --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/generation-service:latest . && 
-          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/generation-service:latest
+          docker build -f Dockerfile.generation --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/generation-service:latest . && 
+          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/generation-service:latest
 
       - name: Deploy Generation Service to Cloud Run
         run: |
           gcloud run deploy generation-service \
-          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/generation-service:latest \
+          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/generation-service:latest \
           --region us-west1 \
           --platform managed \
           --allow-unauthenticated
@@ -82,13 +82,13 @@ jobs:
 
       - name: Build and Push Embedding Docker Image
         run: |
-          docker build -f Dockerfile.embedding --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/embedding-service:latest . && 
-          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/embedding-service:latest
+          docker build -f Dockerfile.embedding --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/embedding-service:latest . && 
+          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/embedding-service:latest
 
       - name: Deploy Embedding Service to Cloud Run
         run: |
           gcloud run deploy embedding-service \
-          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/embedding-service:latest \
+          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/embedding-service:latest \
           --region us-west1 \
           --platform managed \
           --allow-unauthenticated
@@ -110,13 +110,41 @@ jobs:
 
       - name: Build and Push Chat Docker Image
         run: |
-          docker build -f Dockerfile.chat --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/chat:latest . && 
-          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/chat:latest
+          docker build -f Dockerfile.chat --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/chat:latest . && 
+          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/chat:latest
 
       - name: Deploy Chat Service to Cloud Run
         run: |
-          gcloud run deploy chat-service \
-          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/market_sentience/chat_service:latest \
+          gcloud run deploy chat \
+          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/chat:latest \
+          --region us-west1 \
+          --platform managed \
+          --allow-unauthenticated
+  deploy_scraping_service:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Authenticate to GCP
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker us-west1-docker.pkg.dev --quiet
+
+      - name: Build and Push Scraping Docker Image
+        run: |
+          docker build -f Dockerfile.scraper --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/scraper:latest . && 
+          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/scraper:latest
+
+      - name: Deploy Scraping Service to Cloud Run
+        run: |
+          gcloud run deploy scraper \
+          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/scraper:latest \
           --region us-west1 \
           --platform managed \
           --allow-unauthenticated
