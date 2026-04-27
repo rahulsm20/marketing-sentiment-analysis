@@ -7,144 +7,52 @@ on:
       - main
 
 jobs:
-  deploy_scheduler:
+  deploy:
     runs-on: ubuntu-latest
     environment: production
+
+    strategy:
+      matrix:
+        service:
+          - name: scheduler
+            dockerfile: Dockerfile.scheduler
+            image: scheduler
+          - name: generation-service
+            dockerfile: Dockerfile.generation
+            image: generation-service
+          - name: embedding-service
+            dockerfile: Dockerfile.embedding
+            image: embedding-service
+          - name: chat
+            dockerfile: Dockerfile.chat
+            image: chat
+          - name: scraper
+            dockerfile: Dockerfile.scraper
+            image: scraper
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
       - name: Authenticate to GCP
-        id: auth
         uses: google-github-actions/auth@v3
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
       - name: Configure Docker
-        run: |
-          gcloud auth configure-docker us-west1-docker.pkg.dev --quiet
+        run: gcloud auth configure-docker us-west1-docker.pkg.dev --quiet
 
-      - name: Build and Push Scheduler Docker Image
+      - name: Build and Push Docker Image
         run: |
-          docker build -f Dockerfile.scheduler --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/scheduler:latest . && 
-          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/scheduler:latest
+          docker build -f ${{ matrix.service.dockerfile }} \
+            --platform linux/amd64 \
+            -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/${{ matrix.service.image }}:latest . && \
+          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/${{ matrix.service.image }}:latest
 
-      - name: Deploy Scheduler Service to Cloud Run
+      - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy scheduler \
-          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/scheduler:latest \
-          --region us-west1 \
-          --platform managed \
-          --allow-unauthenticated
-  deploy_generation_service:
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Authenticate to GCP
-        id: auth
-        uses: google-github-actions/auth@v3
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-      - name: Configure Docker
-        run: |
-          gcloud auth configure-docker us-west1-docker.pkg.dev --quiet
-
-      - name: Build and Push Generation Docker Image
-        run: |
-          docker build -f Dockerfile.generation --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/generation-service:latest . && 
-          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/generation-service:latest
-
-      - name: Deploy Generation Service to Cloud Run
-        run: |
-          gcloud run deploy generation-service \
-          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/generation-service:latest \
-          --region us-west1 \
-          --platform managed \
-          --allow-unauthenticated
-
-  deploy_embedding_service:
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Authenticate to GCP
-        id: auth
-        uses: google-github-actions/auth@v3
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-      - name: Configure Docker
-        run: |
-          gcloud auth configure-docker us-west1-docker.pkg.dev --quiet
-
-      - name: Build and Push Embedding Docker Image
-        run: |
-          docker build -f Dockerfile.embedding --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/embedding-service:latest . && 
-          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/embedding-service:latest
-
-      - name: Deploy Embedding Service to Cloud Run
-        run: |
-          gcloud run deploy embedding-service \
-          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/embedding-service:latest \
-          --region us-west1 \
-          --platform managed \
-          --allow-unauthenticated
-  deploy_chat_service:
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Authenticate to GCP
-        id: auth
-        uses: google-github-actions/auth@v3
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-      - name: Configure Docker
-        run: |
-          gcloud auth configure-docker us-west1-docker.pkg.dev --quiet
-
-      - name: Build and Push Chat Docker Image
-        run: |
-          docker build -f Dockerfile.chat --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/chat:latest . && 
-          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/chat:latest
-
-      - name: Deploy Chat Service to Cloud Run
-        run: |
-          gcloud run deploy chat \
-          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/chat:latest \
-          --region us-west1 \
-          --platform managed \
-          --allow-unauthenticated
-  deploy_scraping_service:
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Authenticate to GCP
-        id: auth
-        uses: google-github-actions/auth@v3
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-      - name: Configure Docker
-        run: |
-          gcloud auth configure-docker us-west1-docker.pkg.dev --quiet
-
-      - name: Build and Push Scraping Docker Image
-        run: |
-          docker build -f Dockerfile.scraper --platform linux/amd64 -t us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/scraper:latest . && 
-          docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/scraper:latest
-
-      - name: Deploy Scraping Service to Cloud Run
-        run: |
-          gcloud run deploy scraper \
-          --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/scraper:latest \
-          --region us-west1 \
-          --platform managed \
-          --allow-unauthenticated
+          gcloud run deploy ${{ matrix.service.name }} \
+            --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/${{ matrix.service.image }}:latest \
+            --region us-west1 \
+            --platform managed \
+            --allow-unauthenticated
