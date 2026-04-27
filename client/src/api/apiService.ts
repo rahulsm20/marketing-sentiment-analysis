@@ -45,10 +45,9 @@ export class ApiService {
     return data;
   }
 
-  async sendMessage(conversationId: string, message: string, type: string) {
+  async sendMessage(conversationId: string, message: string) {
     const { data } = await this.api.post(`/conversation/${conversationId}`, {
       message,
-      type,
     });
     return data;
   }

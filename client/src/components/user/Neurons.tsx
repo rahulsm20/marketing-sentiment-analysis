@@ -9,15 +9,9 @@ type NodeType = {
   fy?: number | null;
 };
 
-type LinkType = {
-  source: number | NodeType;
-  target: number | NodeType;
-};
+type LinkType = d3.SimulationLinkDatum<NodeType>;
 
-type SimLink = d3.SimulationLinkDatum<NodeType> & {
-  source: NodeType;
-  target: NodeType;
-};
+type SimLink = d3.SimulationLinkDatum<NodeType>;
 
 function generateBrainNodes(
   count: number,
@@ -159,10 +153,10 @@ export const NeuralNetwork: React.FC = () => {
 
     simulation.on("tick", () => {
       link
-        .attr("x1", (d: SimLink) => d.source.x!)
-        .attr("y1", (d: SimLink) => d.source.y!)
-        .attr("x2", (d: SimLink) => d.target.x!)
-        .attr("y2", (d: SimLink) => d.target.y!);
+        .attr("x1", (d) => (d.source as NodeType).x!)
+        .attr("y1", (d) => (d.source as NodeType).y!)
+        .attr("x2", (d) => (d.target as NodeType).x!)
+        .attr("y2", (d) => (d.target as NodeType).y!);
 
       node.attr("cx", (d) => d.x!).attr("cy", (d) => d.y!);
     });
