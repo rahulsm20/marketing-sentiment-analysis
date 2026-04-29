@@ -4,9 +4,11 @@
 
 Market Sentience is a sentiment analysis platform powered by real-time data collection and a microservices architecture.
 
-It leverages a CNN-LSTM deep learning model to analyze market sentiment from scraped data. The system orchestrates asynchronous tasks through a scheduler service and RabbitMQ, with dedicated services for scraping, embedding, and generation.
+It leverages a CNN-LSTM deep learning model to analyze market sentiment from scraped data. The system orchestrates asynchronous tasks through a scheduler service and GCP Pub/Sub, with dedicated services for scraping, embedding, and generation.
 
-MongoDB stores conversation and message data, while Pinecone manages semantic embeddings for efficient retrieval. The generation service uses LLM-powered reasoning to produce actionable insights, delivered back to the client in real time.
+PostgreSQL stores conversation and message data, while Pinecone manages semantic embeddings for efficient retrieval. The generation service uses the custom CNN-LSTM model to categorize reviews based on perceived sentiment and LLM-powered reasoning to produce actionable insights, delivered back to the client in real time.
+
+The system also provides users a PDF compiled with the information from the generation service including charts, strategies and the ability to converse with an AI chat assistant to explore the data and answer any questions they may have.
 
 ## Index
 
@@ -32,7 +34,6 @@ MongoDB stores conversation and message data, while Pinecone manages semantic em
   - FastAPI
   - Pinecone
   - LangChain
-  - MongoDB
   - GCP Pub/Sub
   - Puppeteer
   - Docker
@@ -45,7 +46,7 @@ MongoDB stores conversation and message data, while Pinecone manages semantic em
   #### Using start script
 
   ```bash
-  chmod +x start.sh && ./start.sh
+  chmod +x run.sh && ./run.sh
   ```
 
   #### Using Docker
@@ -57,9 +58,3 @@ MongoDB stores conversation and message data, while Pinecone manages semantic em
 ## System Design
 
 ![system](client/public/market-sentience.png)
-
-## Code Generation
-
-- Client code generation is employed in this project using OpenAPI for certain services
-  that are used across multiple microservices to maintain consistency in behaviour and make
-  sure changes in one service don't break in prod but even before commit.
