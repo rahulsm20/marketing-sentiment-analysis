@@ -1,7 +1,8 @@
+import dotenv from "dotenv";
 import winston from "winston";
-import { ElasticsearchTransport } from "winston-elasticsearch";
-
-const { combine, timestamp, printf, colorize } = winston.format;
+import LokiTransport from "winston-loki";
+import { config } from "../config";
+const { combine, printf, timestamp, colorize } = winston.format;
 
 const logFormat = printf(({ level, message, timestamp, ...meta }) => {
   const metaString = Object.keys(meta).length ? JSON.stringify(meta) : "";
@@ -10,43 +11,42 @@ const logFormat = printf(({ level, message, timestamp, ...meta }) => {
 
 /**
  * Creates a logger for the given service. Logs to console always; logs to
- * Elasticsearch when ELASTICSEARCH_URL is set in the environment.
+ * Grafana Loki when LOKI_HOST, LOKI_API_KEY and LOKI_USER_ID is set in the environment.
  *
  * Usage:
  *   import { createLogger } from "@/lib/logger";
  *   const logger = createLogger("my-service");
  *   logger.info("hello");
  */
-export function createLogger(service: string): winston.Logger {
-  const transports: winston.transport[] = [
-    new winston.transports.Console({
-      format: combine(colorize(), timestamp({ format: "YYYY-MM-DD HH:mm:ss" }), logFormat),
-    }),
-  ];
-
-  const esUrl = process.env.ELASTICSEARCH_URL;
-  if (esUrl) {
-    transports.push(
-      new ElasticsearchTransport({
-        level: "info",
-        index: `logs-${service}`,
-        clientOpts: {
-          node: esUrl,
-          auth: {
-            username: process.env.ELASTICSEARCH_USERNAME ?? "elastic",
-            password: process.env.ELASTICSEARCH_PASSWORD ?? "",
-          },
-        },
-      })
-    );
-  }
+export function createLogger(service_name: string): winston.Logger {
+  dotenv.config();
+  const basicAuth = `${config.LOKI_USER_ID}:${config.LOKI_API_KEY}`;
 
   const logger = winston.createLogger({
-    level: process.env.NODE_ENV === "production" ? "info" : "debug",
-    defaultMeta: { service },
+    level: "info",
     format: combine(timestamp({ format: "YYYY-MM-DD HH:mm:ss" }), logFormat),
-    transports,
+    transports: [
+      new winston.transports.File({ filename: "error.log", level: "error" }),
+      new winston.transports.File({ filename: "combined.log" }),
+      new LokiTransport({
+        host: config.LOKI_HOST,
+        labels: { service_name },
+        json: true,
+        basicAuth,
+        format: winston.format.json(),
+        replaceTimestamp: true,
+        onConnectionError: (err) => console.error("loki erro: ", err),
+      }),
+    ],
   });
+
+  if (process.env.NODE_ENV !== "production") {
+    logger.add(
+      new winston.transports.Console({
+        format: combine(colorize(), logFormat),
+      }),
+    );
+  }
 
   // Override console so existing console.log calls also flow through winston
   console.log = (...args) => logger.info(args.join(" "));

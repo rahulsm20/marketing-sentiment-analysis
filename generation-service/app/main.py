@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
+from py_packages.lib.mutex import acquire, is_processing, set_status
 from py_packages.lib.pubsub import subscribe
 from app.core.generate import generate
 
@@ -37,7 +38,13 @@ def _on_generation_event(data: dict) -> None:
     if not query.strip("+"):
         print("Generation event received with no query/company/category — skipping.")
         return
-
+    if is_processing(id):
+        print(f"Conversation {id}:{query} is already processing")
+        return
+    if acquire(id):
+        print(f"Conversation {id}:{query} is already processing")
+        return
+    set_status(id, "GENERATION")
     print(f"Generation event received for query: {query}")
     asyncio.run(generate(query, id))
 

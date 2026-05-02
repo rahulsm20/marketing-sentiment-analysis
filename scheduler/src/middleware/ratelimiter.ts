@@ -1,4 +1,4 @@
-import { cacheData, retrieveCachedData } from "@/shared/lib/redis";
+import { cacheData, retrieveCachedData } from "@/shared/src/lib/redis";
 import { NextFunction, Request, Response } from "express";
 import ip from "ip";
 

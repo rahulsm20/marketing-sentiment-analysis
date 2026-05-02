@@ -2,9 +2,9 @@
 
 import { cacheData, retrieveCachedData } from "./redis";
 
-const DEFAULT_TTL = "1 day";
+const DEFAULT_TTL = "5 mins";
 
-const generateMutexKey = (key: string) => `mutex:${key}`;
+const generateMutexKey = (key: string) => `conversation:lock:${key}`;
 
 export const mutex = async (
   key: string,

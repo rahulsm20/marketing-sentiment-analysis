@@ -82,6 +82,8 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ message: "Conversation not found" });
     }
 
+    // check mutex if it's already in progress
+    // await mutex(conversation.id, async () => {
     switch (conversation.status) {
       case "pending":
         // await rabbitMQ.sendToQueue(
@@ -98,14 +100,19 @@ router.get("/:id", async (req, res) => {
         //   conversation.status,
         //   JSON.stringify(conversation),
         // );
-        const conversationStatus = conversation.status.toUpperCase();
-        if (Object.keys(PUBSUB_TOPIC).includes(conversationStatus)) {
-          await pubSub.publish(PUBSUB_TOPIC[conversationStatus], conversation);
+        if (conversation.status != "completed") {
+          const conversationStatus = conversation.status.toUpperCase();
+          if (Object.keys(PUBSUB_TOPIC).includes(conversationStatus)) {
+            await pubSub.publish(
+              PUBSUB_TOPIC[conversationStatus],
+              conversation,
+            );
+          }
         }
 
         break;
     }
-
+    // });
     return res.status(200).json(conversation);
   } catch (error) {
     console.error("Error fetching conversation:", error);

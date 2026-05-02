@@ -9,6 +9,7 @@ from app.core.db import pc
 from langchain_pinecone import PineconeEmbeddings
 
 # from app.lib.db_service import db_service
+from py_packages.lib.mutex import release
 from py_packages.lib.pubsub import publish
 from py_packages.lib.methods import get_products
 from py_packages.lib.db import engine
@@ -19,7 +20,7 @@ from fastapi.responses import JSONResponse
 from py_packages.lib.methods import ConversationStatus, update_conversation
 
 # --------------------------------------------------------------------------
-EMBEDDING_TOPIC = "market_sentience_embedding"
+GENERATION_TOPIC = "market_sentience_generation"
 embeddings = PineconeEmbeddings(model="llama-text-embed-v2")
 index_name = "market-sentience-product-embeddings"
 
@@ -93,7 +94,7 @@ async def embed(query: str = None, conversation_id: str = None):
                             status="generation",
                         )
                     publish(
-                        topic=EMBEDDING_TOPIC,
+                        topic=GENERATION_TOPIC,
                         data={
                             "query": query,
                             "id": conversation_id,
@@ -158,7 +159,7 @@ async def embed(query: str = None, conversation_id: str = None):
                     "id": conversation_id,
                 },
             )
-
+            release(conversation_id)
             return {
                 "message": f"Embedded {len(vectors)} products for query {query}.",
                 "duration": duration.total_seconds(),

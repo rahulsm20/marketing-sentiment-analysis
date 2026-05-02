@@ -5,6 +5,7 @@ import {
   updateConversation,
 } from "@/shared/src/lib/methods";
 import { pubSub } from "@/shared/src/lib/pubsub";
+import { retrieveCachedData } from "@/shared/src/lib/redis";
 import { ConversationStatus } from "@/shared/src/lib/schema";
 import { config } from "@/utils/config";
 import { Request, Response } from "express";
@@ -56,7 +57,14 @@ export async function runScrape(data: { query: string; id?: string }) {
       message: "Company and category are required",
     };
   }
-
+  const mutexKey = `conversation:lock:${conversationId}`;
+  const isProcessing = await retrieveCachedData(mutexKey);
+  if (isProcessing) {
+    return {
+      status: 400,
+      message: "Scraping is already in progress",
+    };
+  }
   const items = await getProducts({
     query,
   });
@@ -85,7 +93,9 @@ export async function runScrape(data: { query: string; id?: string }) {
     });
     if (config.NODE_ENV === "development") {
       browser = await puppeteer.launch({
-        executablePath: "",
+        executablePath:
+          process.env.CHROME_BIN ||
+          "/Users/rahul/.cache/puppeteer/chrome/mac_arm-148.0.7778.97/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
         headless: false,
         defaultViewport: null,
       });
@@ -316,6 +326,7 @@ export async function runScrape(data: { query: string; id?: string }) {
           noOfRatings: parseFloat(product?.ratingsNumber),
           company,
           category,
+          reviews: product.reviews,
         });
       } catch (error) {
         console.log(error);

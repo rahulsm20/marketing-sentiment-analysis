@@ -1,10 +1,11 @@
+import { createLogger } from "@/shared/src/lib/logger";
 import express, { Request, Response } from "express";
 import { config } from "./config";
 import { chatRouter } from "./routes/chatRoutes";
 
 const app = express();
 const port = config.PORT || 3000;
-
+const logger = createLogger("chat_service");
 app.use(express.json());
 
 app.use("/chat", chatRouter);
@@ -22,5 +23,5 @@ app.get("*", async (_req: Request, res: Response) => {
 });
 
 app.listen(port, () => {
-  console.log(`Chat service is running on port ${port}`);
+  logger.info(`Chat service is running on port ${port}`);
 });

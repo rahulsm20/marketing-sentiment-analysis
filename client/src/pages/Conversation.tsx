@@ -7,7 +7,7 @@ import { ConversationItem, MessageType } from "@/types";
 import { getLoadingTitle } from "@/utils";
 import { LOCAL_CACHE_KEYS } from "@/utils/constants";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -32,8 +32,7 @@ const Conversation = () => {
         : false;
     },
     queryFn: async () => {
-      if (!id) throw new Error("No id");
-
+      if (!id) return;
       const res = await schedulerApi!.getConversation(id);
       setConversation(res);
       return res;
@@ -54,24 +53,33 @@ const Conversation = () => {
       setMessages(res);
     },
   });
-  if (error) {
-    toast(`Failed to fetch conversation ${id}`, {
-      position: "top-center",
-      action: {
-        label: "Dismiss",
-        onClick: () => console.log("Dismiss"),
-      },
-    });
-  }
-  if (messagesError) {
-    toast(`Failed to fetch messages for conversation ${id}`, {
-      position: "top-center",
-      action: {
-        label: "Dismiss",
-        onClick: () => console.log("Dismiss"),
-      },
-    });
-  }
+
+  useEffect(() => {
+    if (error && !conversation) {
+      toast(`Failed to fetch conversation ${id}`, {
+        position: "top-center",
+        action: {
+          label: "Dismiss",
+          onClick: () => console.log("Dismiss"),
+        },
+      });
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (messagesError && !messages) {
+      toast(
+        `Failed to fetch messages for conversation ${id}: ${messagesError}`,
+        {
+          position: "top-center",
+          action: {
+            label: "Dismiss",
+            onClick: () => console.log("Dismiss"),
+          },
+        },
+      );
+    }
+  }, [messagesError]);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">

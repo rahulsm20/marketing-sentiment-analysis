@@ -195,8 +195,14 @@ export async function createProduct(data: {
   category?: string;
   ratings?: number;
   noOfRatings?: number;
+  reviews?: string[];
 }): CreateProductResult {
   const [row] = await db.insert(productsTable).values(data).returning();
+  if (row) {
+    for (const review of data.reviews || []) {
+      await createProductReview({ productId: row.id, reviewText: review });
+    }
+  }
   return row;
 }
 

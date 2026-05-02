@@ -6,11 +6,11 @@
  */
 //---------------------------------------------------------
 
+import { createLogger } from "@/shared/src/lib/logger";
 import cors from "cors";
 import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 import { auth } from "express-oauth2-jwt-bearer";
-import { logger } from "./lib/logger";
 import { checkUser } from "./middleware";
 import { requestLogger } from "./middleware/loggerMiddleware";
 import { conversationRoutes } from "./routes/conversationRoutes";
@@ -22,7 +22,7 @@ dotenv.config();
 
 const app = express();
 const port = config.PORT;
-
+const logger = createLogger("scheduler");
 const jwtCheck = auth({
   audience: config.AUTH0_AUDIENCE,
   issuerBaseURL: config.AUTH0_BASE_URL,

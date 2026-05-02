@@ -20,6 +20,10 @@ export const config = {
   NODE_ENV: process.env.NODE_ENV || "development",
   S3_BUCKET: process.env.S3_BUCKET || "market-sentience",
   PINECONE_API_KEY: process.env.PINECONE_API_KEY || "",
+  SERVICE: process.env.SERVICE || "",
+  LOKI_HOST: process.env.LOKI_HOST || "",
+  LOKI_USER_ID: process.env.LOKI_USER_ID || "",
+  LOKI_API_KEY: process.env.LOKI_API_KEY || "",
 };
 
 export const PUBSUB_TOPIC: { [key: string]: string } = {

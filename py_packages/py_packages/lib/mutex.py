@@ -24,8 +24,7 @@ Usage
 
 from typing import Optional
 
-from lib import redis
-
+from py_packages.lib import redis
 # Default lock TTL in seconds. Guards against a service crashing without
 # releasing the lock.
 DEFAULT_LOCK_TTL = 300  # 5 minutes
@@ -66,6 +65,24 @@ def release(conversation_id: str) -> None:
     """Release the processing lock for *conversation_id*."""
     redis.delete(_lock_key(conversation_id))
 
+
+def get_lock(conversation_id: str) -> Optional[str]:
+    """
+    Return the current pipeline stage for *conversation_id*, or None if no
+    status has been recorded (conversation not yet started or already cleaned up).
+    """
+    return redis.get(_lock_key(conversation_id))
+
+
+def set_lock(conversation_id: str, status: str) -> None:
+    """
+    Update the pipeline stage for *conversation_id*.
+
+    *status* should be one of the conversationStatus enum values defined in
+    ts-packages/src/lib/schema.ts:
+        PENDING | IN_PROGRESS | COMPLETED | SCRAPING | GENERATION | EMBEDDING
+    """
+    redis.set(_lock_key(conversation_id), status)
 
 # ---------------------------------------------------------------------------
 # Status helpers
