@@ -15,7 +15,6 @@ WORKDIR /app
 
 COPY embedding-service/pyproject.toml embedding-service/uv.lock ./
 COPY py_packages /py_packages
-COPY pip install /app/py_packages/
 RUN uv sync --frozen --no-dev --no-editable
 # Verify
 RUN ls /app/.venv/bin 

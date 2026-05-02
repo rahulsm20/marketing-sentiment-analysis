@@ -15,7 +15,6 @@ WORKDIR /app
 
 COPY generation-service/pyproject.toml generation-service/uv.lock ./
 COPY py_packages /py_packages
-COPY pip install /app/py_packages/
 
 RUN uv sync --frozen --no-dev --no-editable
 # Verify
