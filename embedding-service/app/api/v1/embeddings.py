@@ -122,10 +122,7 @@ async def embed(query: str = None, conversation_id: str = None):
                             text += f"{review_text}"
                     vector = await embed_text(text)
                     # print(f"review_text: {review_text}")
-                    if (
-                        not product.product_reviews
-                        or product.product_reviews.count() == 0
-                    ):
+                    if not product.product_reviews or len(product.product_reviews) == 0:
                         continue
                     metadata = {
                         "product_id": str(product.id),

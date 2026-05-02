@@ -5,7 +5,7 @@ Summary: Add your description here
 Requires-Python: >=3.12
 Description-Content-Type: text/markdown
 Requires-Dist: dotenv>=0.9.9
-Requires-Dist: psycopg2>=2.9.11
+Requires-Dist: psycopg2-binary>=2.9.11
 Requires-Dist: python-dotenv[cli]>=1.2.2
 Requires-Dist: sqlacodegen>=4.0.2
 Requires-Dist: sqlalchemy>=2.0.48

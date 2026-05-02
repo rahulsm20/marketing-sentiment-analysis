@@ -3,13 +3,17 @@ cd client && npm run dev &
 client_pid=$!
 cd scraping-service && bun dev &
 scraping_pid=$!
-( cd generation-service || exit 1
+(
+  cd generation-service || exit 1
   source .venv/bin/activate
+  uv pip install -e ../py_packages
   fastapi dev app/main.py --port 4001
 ) &
 generation_pid=$!
-(  cd embedding-service || exit 1
+(
+  cd embedding-service || exit 1
   source .venv/bin/activate
+  uv pip install -e ../py_packages
   fastapi dev app/main.py --port 4000
 ) &
 embedding_pid=$!
