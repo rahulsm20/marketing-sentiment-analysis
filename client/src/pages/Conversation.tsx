@@ -12,6 +12,7 @@ import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 //--------------------------------------------------------------------------
+const POLLING_INTERVAL = 20000; // MILLISECONDS
 
 const Conversation = () => {
   const { schedulerApi } = useApi();
@@ -19,29 +20,39 @@ const Conversation = () => {
   const [conversation, setConversation] = useState<ConversationItem | null>(
     null,
   );
-  const [messages, setMesages] = useState<MessageType[]>([]);
+  const [messages, setMessages] = useState<MessageType[]>([]);
   const LOADING_STATES = ["scraping", "generation", "embedding", "pending"];
-  const { isPending, error } = useQuery({
+  const { isPending, error } = useQuery<ConversationItem>({
     queryKey: [LOCAL_CACHE_KEYS.CONVERSATION(id || "")],
     enabled: !!id,
-    retry: false,
-    queryFn: () =>
-      id &&
-      schedulerApi?.getConversation(id).then((res) => {
-        setConversation(res);
-        return res;
-      }),
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      return data && LOADING_STATES.includes(data.status)
+        ? POLLING_INTERVAL
+        : false;
+    },
+    queryFn: async () => {
+      if (!id) throw new Error("No id");
+
+      const res = await schedulerApi!.getConversation(id);
+      setConversation(res);
+      return res;
+    },
   });
   const { isPending: messagesPending, error: messagesError } = useQuery({
     queryKey: [LOCAL_CACHE_KEYS.MESSAGES(id || "")],
     enabled: !!id,
     retry: false,
-    queryFn: () =>
-      id &&
-      schedulerApi?.getMessages(id).then((res) => {
-        setMesages(res);
-        return res;
-      }),
+    refetchInterval: () => {
+      return conversation && LOADING_STATES.includes(conversation.status)
+        ? POLLING_INTERVAL
+        : false;
+    },
+    queryFn: async () => {
+      if (!id) throw new Error("No id");
+      const res = await schedulerApi!.getMessages(id);
+      setMessages(res);
+    },
   });
   if (error) {
     toast(`Failed to fetch conversation ${id}`, {

@@ -104,7 +104,7 @@ const Landing = () => {
         <div className="flex flex-col gap-10 p-5 xl:w-1/2">
           <h1 className="text-3xl border-b py-3 font-semibold">How it works</h1>
           <img
-            src="market-sentience.png"
+            src="market-sentience-arch.png"
             alt="Market Sentience"
             className="w-full"
           />

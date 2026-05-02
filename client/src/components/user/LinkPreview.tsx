@@ -55,7 +55,7 @@ const S3LinkPreview = ({
   return (
     <Button
       className="hover:cursor-pointer"
-      variant="ghost"
+      variant="outline"
       onClick={handleClick}
       disabled={loading}
     >
