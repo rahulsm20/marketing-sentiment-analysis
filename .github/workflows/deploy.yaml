@@ -1,10 +1,10 @@
-name: Deploy services
+name: Deploy
 
 on:
   workflow_dispatch:
 
 jobs:
-  deploy_servers:
+  deploy:
     runs-on: ubuntu-latest
     environment: production
 
@@ -26,20 +26,30 @@ jobs:
           - name: scraper
             dockerfile: Dockerfile.scraper
             image: scraper
+          - name: client
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Deploy client
+        if: matrix.service.name=='client'
+        run: cd client && npm install -g vercel && vercel pull --yes
+          --environment=production --token=${{ secrets.VERCEL_TOKEN}} &&  vercel
+          build --prod --token=${{ secrets.VERCEL_TOKEN }} && vercel deploy
+          --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Authenticate to GCP
+        if: matrix.service.name!='client'
         uses: google-github-actions/auth@v3
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
       - name: Configure Docker
+        if: matrix.service.name!='client'
         run: gcloud auth configure-docker us-west1-docker.pkg.dev --quiet
 
       - name: Build and Push Docker Image
+        if: matrix.service.name!='client'
         run: |
           docker build -f ${{ matrix.service.dockerfile }} \
             --platform linux/amd64 \
@@ -47,32 +57,10 @@ jobs:
           docker push us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/${{ matrix.service.image }}:latest
 
       - name: Deploy to Cloud Run
+        if: matrix.service.name!='client'
         run: |
           gcloud run deploy ${{ matrix.service.name }} \
             --image us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/marketing-sentiment-analysis/${{ matrix.service.image }}:latest \
             --region us-west1 \
             --platform managed \
             --allow-unauthenticated
-
-  deploy_frontend:
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Move to client directory
-        run: cd client
-
-      - name: Install Vercel CLI
-        run: npm install -g vercel
-
-      - name: Pull Vercel Environment Info
-        run: vercel pull --yes --environment=production --token=${{
-          secrets.VERCEL_TOKEN}}
-
-      - name: Build Project
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy Project
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
