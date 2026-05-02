@@ -97,7 +97,8 @@ dependencies = [
     "google-cloud-pubsub>=2.33.0",
     "auth0-python>=4.13.0",
     "openapi-client>=1.1.7",
-    "py_packages"
+    "py_packages",
+    "redis>=7.4.0",
 ]
 [tool.uv]
 environments = ["platform_python_implementation == 'CPython'"]
