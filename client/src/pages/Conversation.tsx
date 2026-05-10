@@ -3,16 +3,17 @@ import ChatUI from "@/components/user/ChatUI";
 import Navbar from "@/components/user/Navbar";
 import Sidebar from "@/components/user/Sidebar";
 import { Stopwatch } from "@/components/user/Stopwatch";
-import { ConversationItem, MessageType } from "@/types";
+import { useChat } from "@/hooks/useChat";
+import { ConversationItem } from "@/types";
 import { getLoadingTitle } from "@/utils";
-import { LOCAL_CACHE_KEYS } from "@/utils/constants";
+import { LOADING_STATES, LOCAL_CACHE_KEYS } from "@/utils/constants";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 //--------------------------------------------------------------------------
-const POLLING_INTERVAL = 20000; // MILLISECONDS
+// const POLLING_INTERVAL = 20000; // MILLISECONDS
 
 const Conversation = () => {
   const { schedulerApi } = useApi();
@@ -20,17 +21,15 @@ const Conversation = () => {
   const [conversation, setConversation] = useState<ConversationItem | null>(
     null,
   );
-  const [messages, setMessages] = useState<MessageType[]>([]);
-  const LOADING_STATES = ["scraping", "generation", "embedding", "pending"];
   const { isPending, error } = useQuery<ConversationItem>({
     queryKey: [LOCAL_CACHE_KEYS.CONVERSATION(id || "")],
     enabled: !!id,
-    refetchInterval: (query) => {
-      const data = query.state.data;
-      return data && LOADING_STATES.includes(data.status)
-        ? POLLING_INTERVAL
-        : false;
-    },
+    // refetchInterval: (query) => {
+    //   const data = query.state.data;
+    //   return data && LOADING_STATES.includes(data.status)
+    //     ? POLLING_INTERVAL
+    //     : false;
+    // },
     queryFn: async () => {
       if (!id) return;
       const res = await schedulerApi!.getConversation(id);
@@ -38,21 +37,8 @@ const Conversation = () => {
       return res;
     },
   });
-  const { isPending: messagesPending, error: messagesError } = useQuery({
-    queryKey: [LOCAL_CACHE_KEYS.MESSAGES(id || "")],
-    enabled: !!id,
-    retry: false,
-    refetchInterval: () => {
-      return conversation && LOADING_STATES.includes(conversation.status)
-        ? POLLING_INTERVAL
-        : false;
-    },
-    queryFn: async () => {
-      if (!id) throw new Error("No id");
-      const res = await schedulerApi!.getMessages(id);
-      setMessages(res);
-    },
-  });
+
+  const { messages, loading: messagesPending } = useChat();
 
   useEffect(() => {
     if (error && !conversation) {
@@ -65,21 +51,6 @@ const Conversation = () => {
       });
     }
   }, [error]);
-
-  useEffect(() => {
-    if (messagesError && !messages) {
-      toast(
-        `Failed to fetch messages for conversation ${id}: ${messagesError}`,
-        {
-          position: "top-center",
-          action: {
-            label: "Dismiss",
-            onClick: () => console.log("Dismiss"),
-          },
-        },
-      );
-    }
-  }, [messagesError]);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">

@@ -14,3 +14,10 @@ export const LOCAL_CACHE_KEYS = {
   CONVERSATION: (id: string) => `conversation?${id}`,
   MESSAGES: (id: string) => `messages?${id}`,
 };
+
+export const LOADING_STATES = [
+  "scraping",
+  "generation",
+  "embedding",
+  "pending",
+];

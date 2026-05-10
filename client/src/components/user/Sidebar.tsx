@@ -268,7 +268,12 @@ const ConversationItems = ({
                 <DropdownMenuContent>
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                  >
                     <DeleteDialog _id={id} refetch={refetch} />
                   </DropdownMenuItem>
                 </DropdownMenuContent>

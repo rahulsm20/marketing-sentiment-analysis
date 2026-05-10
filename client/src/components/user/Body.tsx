@@ -1,5 +1,5 @@
 import { useApi } from "@/api/ApiContext";
-import { ChatInputValidation } from "@/utils/validators";
+import { QueryInputValidation } from "@/utils/validators";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MenuSquare, Search, Stamp } from "lucide-react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
@@ -18,10 +18,14 @@ import {
 } from "../ui/select";
 import { Separator } from "../ui/separator";
 import Layout from "./Layout";
+
+/**
+ * Body of the home page.
+ */
 const Body = () => {
   const { schedulerApi } = useApi();
   const form = useForm<FieldValues>({
-    resolver: zodResolver(ChatInputValidation),
+    resolver: zodResolver(QueryInputValidation),
   });
 
   const categories = [
@@ -32,34 +36,17 @@ const Body = () => {
     "Headphones",
   ];
 
-  // const [loading, setLoading] = useState(false);
-  // const [showStopwatch, setShowStopwatch] = useState(false);
-  // const [strategies, setStrategies] = useState("");
-  // const [productData, setProductData] = useState([]);
-  // const [sentiments, setSentiments] = useState([]);
   const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    // setLoading(true);
-    // setShowStopwatch(true);
-    // console.log("Submitting task", data);
-
     try {
       const task = await schedulerApi?.addTask(data.company, data.category);
       if (task && task.conversationId) {
         navigate(`/conversation/${task.conversationId}`);
-        // const res = await generateStrategies(data.company, data.category);
-        // const { data: result, productData } = res;
-        // setStrategies(result?.response?.output?.[0]?.content?.[0]?.text || "");
-        // setProductData(productData);
-        // setSentiments(result?.sentiments);
       }
     } catch (err) {
       alert("An error occurred. Please try again.");
       console.log(err);
-    } finally {
-      // setLoading(false);
-      // setShowStopwatch(false);
     }
   };
 
@@ -149,20 +136,6 @@ const Body = () => {
             <Button type="submit">Submit</Button>
           </form>
         </Form>
-        {/* <div className="flex flex-col gap-2 w-full lg:w-2/3 overflow-x-clip">
-        {loading && <Loader2 className="animate-spin" />}
-        {showStopwatch && <Stopwatch />}
-        <div className="flex flex-col flex-wrap gap-5 w-full">
-          {productData && sentiments && strategies && !loading && (
-            <Analytics sentiments={sentiments} productData={productData} />
-          )}
-          {strategies && !loading && (
-            <Markdown className="flex flex-col gap-5 w-full">
-              {strategies}
-            </Markdown>
-          )}
-        </div>
-      </div> */}
       </Card>
     </Layout>
   );

@@ -8,6 +8,10 @@ const ApiContext = createContext<{
   chatApi: ApiService | null;
 }>({ schedulerApi: null, chatApi: null });
 
+/**
+ * ApiProvider is a wrapper around the ApiService that provides the API Clients for the scheduler and chat services
+ *
+*/
 export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
   const { getAccessTokenSilently } = useAuth0();
   const schedulerApi = useMemo(

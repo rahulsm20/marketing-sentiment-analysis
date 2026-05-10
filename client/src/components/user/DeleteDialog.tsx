@@ -73,8 +73,10 @@ export function DeleteDialog({
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             disabled={isLoading}
-            onClick={() => {
+            onClick={(e) => {
               setEnabled(true);
+              e.preventDefault();
+              e.stopPropagation();
             }}
           >
             Continue

@@ -1,3 +1,4 @@
+import { MessageType } from "@/types";
 import axios, { AxiosInstance } from "axios";
 
 type GetTokenFn = () => Promise<string>;
@@ -45,7 +46,10 @@ export class ApiService {
     return data;
   }
 
-  async sendMessage(conversationId: string, message: string) {
+  async sendMessage(
+    conversationId: string,
+    message: string,
+  ): Promise<MessageType> {
     const { data } = await this.api.post(`/conversation/${conversationId}`, {
       message,
     });
