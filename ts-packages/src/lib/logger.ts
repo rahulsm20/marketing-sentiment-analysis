@@ -4,10 +4,11 @@ import LokiTransport from "winston-loki";
 import { config } from "../config";
 const { combine, printf, timestamp, colorize } = winston.format;
 
-const logFormat = printf(({ level, message, timestamp, ...meta }) => {
-  const metaString = Object.keys(meta).length ? JSON.stringify(meta) : "";
-  return `[${timestamp}] ${level}: ${message} ${metaString}`;
-});
+const logFormat = (service_name: string) =>
+  printf(({ level, message, timestamp, ...meta }) => {
+    const metaString = Object.keys(meta).length ? JSON.stringify(meta) : "";
+    return `[${timestamp}] ${level}: ${message} ${metaString} ${service_name}`;
+  });
 
 /**
  * Creates a logger for the given service. Logs to console always; logs to
@@ -24,7 +25,10 @@ export function createLogger(service_name: string): winston.Logger {
 
   const logger = winston.createLogger({
     level: "info",
-    format: combine(timestamp({ format: "YYYY-MM-DD HH:mm:ss" }), logFormat),
+    format: combine(
+      timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+      logFormat(service_name),
+    ),
     transports: [
       new winston.transports.File({ filename: "error.log", level: "error" }),
       new winston.transports.File({ filename: "combined.log" }),
@@ -43,7 +47,7 @@ export function createLogger(service_name: string): winston.Logger {
   if (process.env.NODE_ENV !== "production") {
     logger.add(
       new winston.transports.Console({
-        format: combine(colorize(), logFormat),
+        format: combine(colorize(), logFormat(service_name)),
       }),
     );
   }

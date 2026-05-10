@@ -56,4 +56,4 @@ The system also provides users a PDF compiled with the information from the gene
 
 ## System Design
 
-![system](client/public/market-sentience-arch.png)
+![system](client/public/market-sentience-arch-2.png)

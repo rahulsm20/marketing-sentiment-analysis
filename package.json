@@ -15,7 +15,7 @@
     "dotenv": "^16.6.1",
     "drizzle-orm": "^0.44.7",
     "express": "^4.19.2",
-    "express-oauth2-jwt-bearer": "^1.7.1",
+    "express-oauth2-jwt-bearer": "^1.6.1",
     "mongoose": "^8.18.2",
     "openai": "^6.9.1",
     "postgres": "^3.4.7",

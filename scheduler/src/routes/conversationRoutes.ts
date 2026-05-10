@@ -4,7 +4,6 @@
  */
 //-----------------------------------------------------------------------------------
 
-import { PUBSUB_TOPIC } from "@/shared/src/config";
 import {
   deleteConversation,
   getConversationById,
@@ -13,7 +12,6 @@ import {
   getPdfDocuments,
   getUserById,
 } from "@/shared/src/lib/methods";
-import { pubSub } from "@/shared/src/lib/pubsub";
 import { getFileFromS3 } from "@/shared/src/lib/s3";
 import express from "express";
 
@@ -82,37 +80,6 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ message: "Conversation not found" });
     }
 
-    // check mutex if it's already in progress
-    // await mutex(conversation.id, async () => {
-    switch (conversation.status) {
-      case "pending":
-        // await rabbitMQ.sendToQueue(
-        //   PUBSUB_TOPIC.SCRAPING,
-        //   JSON.stringify(conversation)
-        // );
-        await pubSub.publish(PUBSUB_TOPIC.SCRAPING, conversation);
-        // conversation.status = PUBSUB_TOPIC.SCRAPING;
-        // await conversation.save();
-
-        break;
-      default:
-        // await rabbitMQ.sendToQueue(
-        //   conversation.status,
-        //   JSON.stringify(conversation),
-        // );
-        if (conversation.status != "completed") {
-          const conversationStatus = conversation.status.toUpperCase();
-          if (Object.keys(PUBSUB_TOPIC).includes(conversationStatus)) {
-            await pubSub.publish(
-              PUBSUB_TOPIC[conversationStatus],
-              conversation,
-            );
-          }
-        }
-
-        break;
-    }
-    // });
     return res.status(200).json(conversation);
   } catch (error) {
     console.error("Error fetching conversation:", error);

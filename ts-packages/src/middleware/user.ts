@@ -1,7 +1,14 @@
-import { logger } from "@/lib/logger";
 import { NextFunction, Request, Response } from "express";
-
+import { AuthResult } from "express-oauth2-jwt-bearer";
 //-----------------------------------------------------------------------------------
+
+declare global {
+  namespace Express {
+    interface Request {
+      user: AuthResult | undefined;
+    }
+  }
+}
 
 export const checkUser = async (
   req: Request,
@@ -10,7 +17,6 @@ export const checkUser = async (
 ) => {
   try {
     const user = req.auth;
-    // logger.info(JSON.stringify({ user }));
     if (!user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -18,7 +24,6 @@ export const checkUser = async (
     // const token = user.token;
     // if (!userId) throw new Error("no userid provided");
     // const auth0User = await getUserInfo(token);
-    // if (!auth0User) throw new Error("no auth0 entry");
     // const dbUser = await getUserById(userId);
     // if (!auth0User?.email) throw new Error("no auth0 entry with email");
 
@@ -29,11 +34,11 @@ export const checkUser = async (
     //   });
     //   req.user = fromDb;
     // } else {
-    // req.user = user as Auth0User;
+    //   req.user = dbUser;
     // }
     next();
   } catch (error) {
-    logger.info(`couldn't determine the user: `, error);
+    // logger.info(error);
     return res.status(500).json({ message: "Internal server error", error });
   }
 };

@@ -5,9 +5,9 @@ const EMBEDDING_INDEX_NAME = "market-sentience-product-embeddings";
 
 const pc = new Pinecone({ apiKey: config.PINECONE_API_KEY });
 
-export const pineconeIndex = pc.index({ name: EMBEDDING_INDEX_NAME });
+const pineconeIndex = pc.index({ name: EMBEDDING_INDEX_NAME });
 
-export async function searchProducts(query: string) {
+export async function searchProductsVectors(query: string) {
   if (!query) return [];
   const [company, category] = query.split("+");
 
@@ -30,13 +30,17 @@ export async function searchProducts(query: string) {
       rankFields: ["review"],
     },
   });
-  const badRecords = response.result.hits.filter((r: any) => {
+  const goodRecords = response.result.hits.filter((r: any) => {
     const review = r.fields?.review || "";
-    return !review || review.trim() === "";
+    return review && review.trim() !== "";
   });
+  // const badRecords = response.result.hits.filter((r: any) => {
+  //   const review = r.fields?.review || "";
+  //   return !review || review.trim() === "";
+  // });
 
   const hits =
-    response?.result?.hits?.map((hit: any) => ({
+    goodRecords.map((hit: any) => ({
       id: hit.fields?.product_id || "",
       title: hit.fields?.title || "",
       score: hit._score,

@@ -74,6 +74,7 @@ export async function runScrape(data: { query: string; id?: string }) {
       id: conversationId,
       status: ConversationStatus.EMBEDDING,
     });
+    console.log("sending event to embedding 1");
     // send pub sub even to emebedding service
     await pubSub.publish(PUBSUB_TOPIC.EMBEDDING, {
       query,
@@ -83,279 +84,286 @@ export async function runScrape(data: { query: string; id?: string }) {
       data: { products: items, conversationId },
       status: 200,
     };
-  }
-
-  try {
-    // if no products found, update the conversation status to scraping
-    await updateConversation({
-      id: conversationId,
-      status: ConversationStatus.SCRAPING,
-    });
-    if (config.NODE_ENV === "development") {
-      browser = await puppeteer.launch({
-        executablePath:
-          process.env.CHROME_BIN ||
-          "/Users/rahul/.cache/puppeteer/chrome/mac_arm-148.0.7778.97/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
-        headless: false,
-        defaultViewport: null,
+  } else {
+    try {
+      // if no products found, update the conversation status to scraping
+      await updateConversation({
+        id: conversationId,
+        status: ConversationStatus.SCRAPING,
       });
-    } else {
-      browser = await puppeteer.launch({
-        executablePath: process.env.CHROME_BIN || "/usr/bin/chromium-browser",
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      });
-    }
-    const page = await browser.newPage();
-    page.setDefaultNavigationTimeout(60000);
-    page.setDefaultTimeout(60000);
-
-    const searchPhrase = company + " " + category;
-    const scrapeToPage = 1;
-
-    const homeUrl = `https://www.amazon.in/s?k=${encodeURIComponent(searchPhrase)}`;
-    await page.goto(homeUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
-
-    await handleCookiesPopup(page);
-    await page.waitForSelector("#twotabsearchtextbox");
-    await page.type("#twotabsearchtextbox", searchPhrase);
-    await page.click("#nav-search-submit-button");
-
-    await page.waitForSelector(".s-widget-container");
-
-    const url = page.url();
-
-    const cardData: CardType[] = [];
-    const scrapePage = async (
-      url: string,
-      currentPage = 1,
-      scrapeToPage = 1,
-    ) => {
-      if (!url || (scrapeToPage !== null && currentPage > scrapeToPage)) {
-        return;
+      if (config.NODE_ENV === "development") {
+        browser = await puppeteer.launch({
+          executablePath:
+            process.env.CHROME_BIN ||
+            "/Users/rahul/.cache/puppeteer/chrome/mac_arm-148.0.7778.97/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+          headless: false,
+          defaultViewport: null,
+        });
+      } else {
+        browser = await puppeteer.launch({
+          executablePath: process.env.CHROME_BIN || "/usr/bin/chromium-browser",
+          args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        });
       }
-      await page.goto(url);
-      // console.log("Navigated to: ", url);
+      const page = await browser.newPage();
+      page.setDefaultNavigationTimeout(60000);
+      page.setDefaultTimeout(60000);
+
+      const searchPhrase = company + " " + category;
+      const scrapeToPage = 1;
+
+      const homeUrl = `https://www.amazon.in/s?k=${encodeURIComponent(searchPhrase)}`;
+      await page.goto(homeUrl, {
+        waitUntil: "domcontentloaded",
+        timeout: 60000,
+      });
+
       await handleCookiesPopup(page);
+      await page.waitForSelector("#twotabsearchtextbox");
+      await page.type("#twotabsearchtextbox", searchPhrase);
+      await page.click("#nav-search-submit-button");
 
       await page.waitForSelector(".s-widget-container");
-      let pageCardData: CardType[] = await page.evaluate((query: string) => {
-        const cards = Array.from(
-          document.querySelectorAll(".s-widget-container"),
+
+      const url = page.url();
+
+      const cardData: CardType[] = [];
+      const scrapePage = async (
+        url: string,
+        currentPage = 1,
+        scrapeToPage = 1,
+      ) => {
+        if (!url || (scrapeToPage !== null && currentPage > scrapeToPage)) {
+          return;
+        }
+        await page.goto(url);
+        // console.log("Navigated to: ", url);
+        await handleCookiesPopup(page);
+
+        await page.waitForSelector(".s-widget-container");
+        let pageCardData: CardType[] = await page.evaluate((query: string) => {
+          const cards = Array.from(
+            document.querySelectorAll(".s-widget-container"),
+          );
+
+          const cardInfo = cards
+            .map((card) => {
+              const productName = card.querySelector("h2")?.textContent?.trim();
+
+              const anchorTag = card.querySelector(
+                "a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal",
+              );
+              if (!anchorTag || !anchorTag?.getAttribute) return null;
+              const cardURL =
+                "https://www.amazon.in" + anchorTag.getAttribute("href") ||
+                "N/A";
+
+              const sponsoredTag = card.querySelector(
+                ".puis-sponsored-label-text",
+              );
+              const sponsored = sponsoredTag ? "yes" : "no";
+
+              const badgeElement = card.querySelector(
+                "span.a-badge-label-inner",
+              );
+              const badge = badgeElement ? badgeElement.textContent : "N/A";
+
+              const priceElement = card.querySelector(".a-price .a-offscreen");
+              const price = priceElement
+                ? (priceElement.textContent?.split("₹")[1] ?? "N/A")
+                : "N/A";
+
+              const basePriceElement = card.querySelector(
+                "span.a-price.a-text-price > span.a-offscreen",
+              );
+              const basePrice = basePriceElement
+                ? basePriceElement.textContent
+                : "N/A";
+
+              const ratingElement = card.querySelector(
+                ".a-row > span:nth-child(1)[aria-label]",
+              );
+              const decimalRegex = /^\d+([,.]\d+)?$/;
+              const ariaLabel =
+                ratingElement?.getAttribute("aria-label") || "N/A";
+              const firstThreeCharacters = ariaLabel.substring(0, 3);
+              const rating = decimalRegex.test(firstThreeCharacters)
+                ? firstThreeCharacters.replace(",", ".")
+                : "N/A";
+
+              const ratingsNumberElement = card.querySelector(
+                ".a-row > span:nth-child(2)[aria-label]",
+              );
+              const numberRegex = /^-?\d+(\.\d+)?$/;
+              const numberFormated =
+                ratingsNumberElement
+                  ?.getAttribute("aria-label")
+                  ?.replace(/[\s.,]+/g, "") || "N/A";
+              const ratingsNumber = numberRegex.test(numberFormated)
+                ? numberFormated
+                : "N/A";
+
+              const boughtPastMonthElement = card.querySelector(
+                ".a-row.a-size-base > .a-size-base.a-color-secondary",
+              );
+              const textContent = boughtPastMonthElement
+                ? (boughtPastMonthElement.textContent ?? "N/A")
+                : "N/A";
+              const plusSignRegex = /\b.*?\+/;
+              const plusSignText = textContent.match(plusSignRegex);
+              if (!plusSignText) return null;
+              const boughtPastMonth = plusSignRegex.test(plusSignText[0])
+                ? plusSignText[0]
+                : "N/A";
+              // const query = "${query}";
+              if (productName) {
+                return {
+                  cardURL,
+                  productName,
+                  sponsored,
+                  badge,
+                  price,
+                  basePrice,
+                  rating,
+                  ratingsNumber,
+                  boughtPastMonth,
+                  query,
+                };
+              } else {
+                return null;
+              }
+            })
+            .filter((card) => card !== null);
+
+          return cardInfo;
+        }, query);
+        pageCardData = pageCardData.filter(
+          (card: CardType) =>
+            card.productName &&
+            card.productName.toLowerCase().includes(company.toLowerCase()) &&
+            card.cardURL !== "N/A",
         );
 
-        const cardInfo = cards
-          .map((card) => {
-            const productName = card.querySelector("h2")?.textContent?.trim();
-
-            const anchorTag = card.querySelector(
-              "a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal",
-            );
-            if (!anchorTag || !anchorTag?.getAttribute) return null;
-            const cardURL =
-              "https://www.amazon.in" + anchorTag.getAttribute("href") || "N/A";
-
-            const sponsoredTag = card.querySelector(
-              ".puis-sponsored-label-text",
-            );
-            const sponsored = sponsoredTag ? "yes" : "no";
-
-            const badgeElement = card.querySelector("span.a-badge-label-inner");
-            const badge = badgeElement ? badgeElement.textContent : "N/A";
-
-            const priceElement = card.querySelector(".a-price .a-offscreen");
-            const price = priceElement
-              ? (priceElement.textContent?.split("₹")[1] ?? "N/A")
-              : "N/A";
-
-            const basePriceElement = card.querySelector(
-              "span.a-price.a-text-price > span.a-offscreen",
-            );
-            const basePrice = basePriceElement
-              ? basePriceElement.textContent
-              : "N/A";
-
-            const ratingElement = card.querySelector(
-              ".a-row > span:nth-child(1)[aria-label]",
-            );
-            const decimalRegex = /^\d+([,.]\d+)?$/;
-            const ariaLabel =
-              ratingElement?.getAttribute("aria-label") || "N/A";
-            const firstThreeCharacters = ariaLabel.substring(0, 3);
-            const rating = decimalRegex.test(firstThreeCharacters)
-              ? firstThreeCharacters.replace(",", ".")
-              : "N/A";
-
-            const ratingsNumberElement = card.querySelector(
-              ".a-row > span:nth-child(2)[aria-label]",
-            );
-            const numberRegex = /^-?\d+(\.\d+)?$/;
-            const numberFormated =
-              ratingsNumberElement
-                ?.getAttribute("aria-label")
-                ?.replace(/[\s.,]+/g, "") || "N/A";
-            const ratingsNumber = numberRegex.test(numberFormated)
-              ? numberFormated
-              : "N/A";
-
-            const boughtPastMonthElement = card.querySelector(
-              ".a-row.a-size-base > .a-size-base.a-color-secondary",
-            );
-            const textContent = boughtPastMonthElement
-              ? (boughtPastMonthElement.textContent ?? "N/A")
-              : "N/A";
-            const plusSignRegex = /\b.*?\+/;
-            const plusSignText = textContent.match(plusSignRegex);
-            if (!plusSignText) return null;
-            const boughtPastMonth = plusSignRegex.test(plusSignText[0])
-              ? plusSignText[0]
-              : "N/A";
-            // const query = "${query}";
-            if (productName) {
-              return {
-                cardURL,
-                productName,
-                sponsored,
-                badge,
-                price,
-                basePrice,
-                rating,
-                ratingsNumber,
-                boughtPastMonth,
-                query,
-              };
-            } else {
-              return null;
+        for (const card of pageCardData) {
+          if (card.productName.toLowerCase().includes(company.toLowerCase())) {
+            if (card.cardURL.includes("amazon.in")) {
+              await page.goto(card.cardURL);
+            } else continue;
+            try {
+              await page.waitForSelector("#acrCustomerReviewText", {
+                timeout: 5000,
+              });
+            } catch (error) {
+              console.log(
+                "Element #acrCustomerReviewText not found. Moving to the next card.",
+              );
+              continue;
             }
-          })
-          .filter((card) => card !== null);
+            await page.waitForSelector("span.a-size-base.a-color-base");
+            await page.waitForSelector('[data-hook="review-collapsed"]');
 
-        return cardInfo;
-      }, query);
-      pageCardData = pageCardData.filter(
-        (card: CardType) =>
-          card.productName &&
-          card.productName.toLowerCase().includes(company.toLowerCase()) &&
-          card.cardURL !== "N/A",
-      );
-
-      for (const card of pageCardData) {
-        if (card.productName.toLowerCase().includes(company.toLowerCase())) {
-          if (card.cardURL.includes("amazon.in")) {
-            await page.goto(card.cardURL);
-          } else continue;
-          try {
-            await page.waitForSelector("#acrCustomerReviewText", {
-              timeout: 5000,
-            });
-          } catch (error) {
-            console.log(
-              "Element #acrCustomerReviewText not found. Moving to the next card.",
+            // extract ratings count
+            const ratingsCountText = await page.$eval(
+              "#acrCustomerReviewText",
+              (element) => element.textContent,
             );
-            continue;
-          }
-          await page.waitForSelector("span.a-size-base.a-color-base");
-          await page.waitForSelector('[data-hook="review-collapsed"]');
-
-          // extract ratings count
-          const ratingsCountText = await page.$eval(
-            "#acrCustomerReviewText",
-            (element) => element.textContent,
-          );
-          card.ratingsCount = parseInt(
-            ratingsCountText.split(" ")[0].replace(",", ""),
-            10,
-          );
-
-          // extract rating
-          const ratingText = await page.$eval(
-            "span.a-size-base.a-color-base",
-            (element) => element.textContent,
-          );
-          card.rating = ratingText;
-
-          // Extract reviews
-          const reviewElements = await page.$$(
-            "div[data-hook='review-collapsed'] > span",
-          );
-          // // console.log("reviews: ", reviewElements);
-          const extractedReviews = [];
-          for (const element of reviewElements) {
-            const reviewText = await page.evaluate(
-              (el) => el.textContent.trim(),
-              element,
+            card.ratingsCount = parseInt(
+              ratingsCountText.split(" ")[0].replace(",", ""),
+              10,
             );
-            extractedReviews.push(reviewText);
+
+            // extract rating
+            const ratingText = await page.$eval(
+              "span.a-size-base.a-color-base",
+              (element) => element.textContent,
+            );
+            card.rating = ratingText;
+
+            // Extract reviews
+            const reviewElements = await page.$$(
+              "div[data-hook='review-collapsed'] > span",
+            );
+            // // console.log("reviews: ", reviewElements);
+            const extractedReviews = [];
+            for (const element of reviewElements) {
+              const reviewText = await page.evaluate(
+                (el) => el.textContent.trim(),
+                element,
+              );
+              extractedReviews.push(reviewText);
+            }
+            card.reviews = extractedReviews;
           }
-          card.reviews = extractedReviews;
+        }
+        cardData.push(...pageCardData);
+
+        if (scrapeToPage === null || currentPage < scrapeToPage) {
+          const nextPageButton = await page.$(".s-pagination-next");
+          if (nextPageButton) {
+            const isDisabled = await page.evaluate(
+              (btn) => btn.hasAttribute("aria-disabled"),
+              nextPageButton,
+            );
+            if (!isDisabled) {
+              const nextPageUrl = encodeURI(
+                await page.evaluate(
+                  (nextBtn) => (nextBtn as HTMLAnchorElement).href,
+                  nextPageButton,
+                ),
+              );
+              await scrapePage(nextPageUrl, currentPage + 1, scrapeToPage);
+            } else {
+            }
+          } else if (!scrapeToPage || currentPage < scrapeToPage) {
+            // // console.log("All available pages scraped:", currentPage);
+          }
+        }
+      };
+      await scrapePage(url, 1, scrapeToPage);
+
+      for (const product of cardData) {
+        try {
+          await createProduct({
+            name: product.productName,
+            url: product?.cardURL,
+            price: parseFloat(product?.price),
+            query,
+            ratings: parseFloat(product?.rating),
+            noOfRatings: parseFloat(product?.ratingsNumber),
+            company,
+            category,
+            reviews: product.reviews,
+          });
+        } catch (error) {
+          console.log(error);
+          return { error, status: 500 };
         }
       }
-      cardData.push(...pageCardData);
-
-      if (scrapeToPage === null || currentPage < scrapeToPage) {
-        const nextPageButton = await page.$(".s-pagination-next");
-        if (nextPageButton) {
-          const isDisabled = await page.evaluate(
-            (btn) => btn.hasAttribute("aria-disabled"),
-            nextPageButton,
-          );
-          if (!isDisabled) {
-            const nextPageUrl = encodeURI(
-              await page.evaluate(
-                (nextBtn) => (nextBtn as HTMLAnchorElement).href,
-                nextPageButton,
-              ),
-            );
-            await scrapePage(nextPageUrl, currentPage + 1, scrapeToPage);
-          } else {
-          }
-        } else if (!scrapeToPage || currentPage < scrapeToPage) {
-          // // console.log("All available pages scraped:", currentPage);
-        }
+      if (cardData.length === 0) {
+        return {
+          message: "No products found.",
+          status: 404,
+        };
       }
-    };
-    await scrapePage(url, 1, scrapeToPage);
-
-    for (const product of cardData) {
-      try {
-        await createProduct({
-          name: product.productName,
-          url: product?.cardURL,
-          price: parseFloat(product?.price),
-          query,
-          ratings: parseFloat(product?.rating),
-          noOfRatings: parseFloat(product?.ratingsNumber),
-          company,
-          category,
-          reviews: product.reviews,
-        });
-      } catch (error) {
-        console.log(error);
-        return { error, status: 500 };
+      console.log("sending event to embedding 2");
+      await pubSub.publish(PUBSUB_TOPIC.EMBEDDING, {
+        query,
+        id: conversationId,
+      });
+      return {
+        data: { products: cardData, conversationId },
+      };
+    } catch (error) {
+      console.log(error);
+      if (error instanceof Error) {
+        return {
+          error: { message: error.message || "An error occurred." },
+        };
       }
-    }
-    if (cardData.length === 0) {
-      return {
-        message: "No products found.",
-        status: 404,
-      };
-    }
-    await pubSub.publish(PUBSUB_TOPIC.EMBEDDING, {
-      query,
-      id: conversationId,
-    });
-    return {
-      data: { products: cardData, conversationId },
-    };
-  } catch (error) {
-    console.log(error);
-    if (error instanceof Error) {
-      return {
-        error: { message: error.message || "An error occurred." },
-      };
-    }
-  } finally {
-    if (browser) {
-      await browser.close();
+    } finally {
+      if (browser) {
+        await browser.close();
+      }
     }
   }
 }

@@ -1,17 +1,22 @@
 //---------------------------------------------------------------------------------
 
 import { PUBSUB_TOPIC } from "@/shared/src/config";
-import { createConversation, getUserById } from "@/shared/src/lib/methods";
+import {
+  createConversation,
+  getUserById,
+  updateConversation,
+} from "@/shared/src/lib/methods";
 import { pubSub } from "@/shared/src/lib/pubsub";
+import { ConversationStatus } from "@/shared/src/lib/schema";
 import { Request, Response } from "express";
-import { IUser } from "../../types";
+import { AuthResult } from "express-oauth2-jwt-bearer";
 
 //---------------------------------------------------------------------------------
 
 declare global {
   namespace Express {
     interface Request {
-      user: IUser | undefined;
+      user: AuthResult | undefined;
     }
   }
 }
@@ -59,6 +64,10 @@ export const addTaskToQueue = async (req: Request, res: Response) => {
   //   content: "Generating analysis for " + query.split("+").join(" ") + "...",
   // });
 
+  await updateConversation({
+    id: conversation.id,
+    status: ConversationStatus.SCRAPING,
+  });
   await pubSub.publish(PUBSUB_TOPIC.SCRAPING, {
     company,
     category,

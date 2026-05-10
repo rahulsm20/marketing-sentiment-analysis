@@ -55,3 +55,11 @@ export type Auth0User = {
   nickname: string;
   picture: string;
 };
+
+export interface IUser {
+  id?: string | null | undefined;
+  email: string | null;
+  conversations?: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
