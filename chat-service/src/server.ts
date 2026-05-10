@@ -1,12 +1,37 @@
 import { createLogger } from "@/shared/src/lib/logger";
+import { checkUser } from "@/shared/src/middleware/user";
+import dotenv from "dotenv";
 import express, { Request, Response } from "express";
+import { auth, AuthResult } from "express-oauth2-jwt-bearer";
 import { config } from "./config";
 import { chatRouter } from "./routes/chatRoutes";
+dotenv.config();
+
+//----------------------------------------------------------
+declare global {
+  namespace Express {
+    interface Request {
+      user: AuthResult | undefined;
+    }
+  }
+}
+
+//----------------------------------------------------------
 
 const app = express();
 const port = config.PORT || 3000;
 const logger = createLogger("chat_service");
+const jwtCheck = auth({
+  audience: config.AUTH0_AUDIENCE,
+  issuerBaseURL: config.AUTH0_BASE_URL,
+  tokenSigningAlg: "RS256",
+});
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
+app.use(jwtCheck as express.RequestHandler);
+app.use(checkUser as express.RequestHandler);
 
 app.use("/chat", chatRouter);
 app.get("/", async (_req: Request, res: Response) => {

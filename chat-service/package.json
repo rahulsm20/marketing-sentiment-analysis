@@ -14,20 +14,23 @@
   "dependencies": {
     "@neondatabase/serverless": "^0.9.3",
     "@types/redis": "^4.0.11",
+    "cors": "^2.8.6",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "express-oauth2-jwt-bearer": "^1.6.1",
     "langchain": "^1.0.6",
     "openai": "^6.9.1",
     "redis": "^4.6.14",
     "ws": "^8.17.0"
   },
   "devDependencies": {
+    "@types/bun": "latest",
+    "@types/cors": "^2.8.19",
     "@types/express": "^4.17.21",
     "@types/node": "^20.14.2",
     "@types/ws": "^8.5.10",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.4.5",
-    "@types/bun": "latest"
+    "typescript": "^5.4.5"
   },
   "private": true
 }
