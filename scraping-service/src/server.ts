@@ -7,8 +7,11 @@ import { runScrape, scrapeProducts } from "./controllers/scrape";
 const app = express();
 const port = process.env.PORT || 3002;
 const logger = createLogger("scraping_service");
+
+console.log("NODE_ENV: ", config.NODE_ENV);
 if (config.NODE_ENV === "development") {
   pubSub.subscribe(PUBSUB_TOPIC.SCRAPING, async (data) => {
+    console.log("scraping data", JSON.stringify({ data }));
     await runScrape(data);
   });
 }

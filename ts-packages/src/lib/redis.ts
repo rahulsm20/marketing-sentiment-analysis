@@ -42,7 +42,7 @@ export const disconnectRedis = async () => {
 export const cacheData = async (
   key: string,
   data: string,
-  lifetime?: "5 mins" | "1 day" | "1 minute" | "1 hour"
+  lifetime?: "5 mins" | "1 day" | "1 minute" | "1 hour",
 ) => {
   await connectRedis();
   const cached = await redisClient.set(key, data, {
@@ -50,10 +50,10 @@ export const cacheData = async (
       !lifetime || lifetime == "1 hour"
         ? 60 * 60
         : lifetime == "5 mins"
-        ? 60 * 5
-        : lifetime == "1 minute"
-        ? 60 * 1
-        : 60 * 60 * 24,
+          ? 60 * 5
+          : lifetime == "1 minute"
+            ? 60 * 1
+            : 60 * 60 * 24,
   });
   return cached;
 };
@@ -69,4 +69,10 @@ export const retrieveCachedData = async (key: string) => {
   await connectRedis();
   const cached = await redisClient.get(key);
   return cached;
+};
+
+export const deleteCachedData = async (key: string) => {
+  await connectRedis();
+  const deleted = await redisClient.del(key);
+  return deleted;
 };

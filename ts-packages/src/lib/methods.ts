@@ -43,60 +43,45 @@ export async function getProducts(filters?: {
   ratings?: number;
   noOfRatings?: number;
 }): GetProductsResult {
-  if (!filters) return await db.select().from(productsTable);
+  if (!filters) return await db.select().from(productsTable).limit(10);
 
   const sortByMap = {
     createdAt: desc(productsTable.createdAt),
     price: desc(productsTable.price),
     name: desc(productsTable.name),
   };
-
+  const conditions = [];
   let sortBy = sortByMap[filters.sortBy ?? "createdAt"];
   let where;
-  let company;
-  let category;
+  if (filters?.query) {
+    conditions.push(eq(productsTable.query, filters.query));
+  }
+
+  if (filters?.company) {
+    conditions.push(eq(productsTable.company, filters.company));
+  }
+
+  if (filters?.category) {
+    conditions.push(eq(productsTable.category, filters.category));
+  }
+
+  if (filters?.ratings) {
+    conditions.push(eq(productsTable.ratings, filters.ratings));
+  }
+
+  if (filters?.noOfRatings) {
+    conditions.push(eq(productsTable.noOfRatings, filters.noOfRatings));
+  }
+
   let take = filters.take ?? 10;
 
-  if (filters.query) {
-    where = eq(productsTable.query, filters.query);
-  }
-  if (filters.company) {
-    if (where !== undefined) {
-      company = and(where, eq(productsTable.company, filters.company));
-    } else {
-      company = eq(productsTable.company, filters.company);
-    }
-  }
-  if (filters.category) {
-    if (where !== undefined) {
-      category = and(where, eq(productsTable.category, filters.category));
-    } else {
-      category = eq(productsTable.category, filters.category);
-    }
-  }
-  if (filters.ratings) {
-    if (where !== undefined) {
-      where = and(where, eq(productsTable.ratings, filters.ratings));
-    } else {
-      where = eq(productsTable.ratings, filters.ratings);
-    }
-  }
-
-  if (filters.noOfRatings) {
-    if (where !== undefined) {
-      where = and(where, eq(productsTable.noOfRatings, filters.noOfRatings));
-    } else {
-      where = eq(productsTable.noOfRatings, filters.noOfRatings);
-    }
-  }
-
-  const rows = await db
+  const query = db
     .select()
     .from(productsTable)
-    .where(where)
-    .orderBy(sortBy)
+    .where(conditions.length ? and(...conditions) : undefined)
+    .orderBy(sortByMap[filters?.sortBy ?? "createdAt"])
     .limit(take);
-  return rows;
+  return await query;
 }
 
 export async function getProductById(id: string): GetProductByIdResult {

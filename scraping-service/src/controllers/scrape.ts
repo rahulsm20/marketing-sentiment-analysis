@@ -5,11 +5,10 @@ import {
   updateConversation,
 } from "@/shared/src/lib/methods";
 import { pubSub } from "@/shared/src/lib/pubsub";
-import { retrieveCachedData } from "@/shared/src/lib/redis";
 import { ConversationStatus } from "@/shared/src/lib/schema";
 import { config } from "@/utils/config";
 import { Request, Response } from "express";
-import puppeteer from "puppeteer";
+import puppeteer, { Browser } from "puppeteer";
 import { CardType } from "../../types";
 
 async function handleCookiesPopup(page: any) {
@@ -41,32 +40,34 @@ export async function scrapeProducts(req: Request, res: Response) {
 /**
  * Scrapes product data from a given input
  */
-export async function runScrape(data: { query: string; id?: string }) {
-  let browser;
-  const { query, id: conversationId } = data;
-  if (!query) return { status: 400, message: "Query is required" };
+export async function runScrape(data: {
+  company: string;
+  category: string;
+  conversationId: string;
+}) {
+  let browser: Browser | null = null;
+  const { company, category, conversationId } = data;
   if (!conversationId)
     return { status: 400, message: "Conversation ID is required" };
 
-  const [rawCompany, rawCategory] = query.split("+");
-  const company = (rawCompany as string).toLowerCase();
-  const category = (rawCategory as string).toLowerCase();
-  if (!company || !rawCategory) {
+  if (!company || !category) {
     return {
       status: 400,
       message: "Company and category are required",
     };
   }
+  const query = `${company}+${category}`;
   const mutexKey = `conversation:lock:${conversationId}`;
-  const isProcessing = await retrieveCachedData(mutexKey);
-  if (isProcessing) {
-    return {
-      status: 400,
-      message: "Scraping is already in progress",
-    };
-  }
+  // const isProcessing = await retrieveCachedData(mutexKey);
+  // if (isProcessing) {
+  //   return {
+  //     status: 400,
+  //     message: "Scraping is already in progress",
+  //   };
+  // }
   const items = await getProducts({
-    query,
+    company,
+    category,
   });
 
   if (items.length > 0) {
@@ -106,6 +107,21 @@ export async function runScrape(data: { query: string; id?: string }) {
         });
       }
       const page = await browser.newPage();
+      // await page.setRequestInterception(true);
+      // page.on("request", (req) => {
+      //   const resourceType = req.resourceType();
+
+      //   if (
+      //     resourceType === "image" ||
+      //     resourceType === "font" ||
+      //     resourceType === "stylesheet" ||
+      //     resourceType === "media"
+      //   ) {
+      //     req.abort();
+      //   } else {
+      //     req.continue();
+      //   }
+      // });
       page.setDefaultNavigationTimeout(60000);
       page.setDefaultTimeout(60000);
 
@@ -136,8 +152,10 @@ export async function runScrape(data: { query: string; id?: string }) {
         if (!url || (scrapeToPage !== null && currentPage > scrapeToPage)) {
           return;
         }
-        await page.goto(url);
-        // console.log("Navigated to: ", url);
+        await page.goto(url, {
+          waitUntil: "domcontentloaded",
+          timeout: 60000,
+        }); // console.log("Navigated to: ", url);
         await handleCookiesPopup(page);
 
         await page.waitForSelector(".s-widget-container");
@@ -244,57 +262,67 @@ export async function runScrape(data: { query: string; id?: string }) {
             card.cardURL !== "N/A",
         );
 
-        for (const card of pageCardData) {
+        for (let card of pageCardData) {
           if (card.productName.toLowerCase().includes(company.toLowerCase())) {
-            if (card.cardURL.includes("amazon.in")) {
-              await page.goto(card.cardURL);
-            } else continue;
+            if (!card.cardURL.includes("amazon.in")) continue;
+            const productPage = browser && (await browser.newPage());
+            if (!productPage) throw new Error("Product page is not available");
             try {
-              await page.waitForSelector("#acrCustomerReviewText", {
+              await productPage.goto(card.cardURL, {
+                waitUntil: "domcontentloaded",
+                timeout: 30000,
+              });
+
+              await productPage.waitForSelector("#acrCustomerReviewText", {
                 timeout: 5000,
               });
-            } catch (error) {
-              console.log(
-                "Element #acrCustomerReviewText not found. Moving to the next card.",
+              // scrape here using productPage
+              await productPage.waitForSelector(
+                "span.a-size-base.a-color-base",
               );
-              continue;
-            }
-            await page.waitForSelector("span.a-size-base.a-color-base");
-            await page.waitForSelector('[data-hook="review-collapsed"]');
-
-            // extract ratings count
-            const ratingsCountText = await page.$eval(
-              "#acrCustomerReviewText",
-              (element) => element.textContent,
-            );
-            card.ratingsCount = parseInt(
-              ratingsCountText.split(" ")[0].replace(",", ""),
-              10,
-            );
-
-            // extract rating
-            const ratingText = await page.$eval(
-              "span.a-size-base.a-color-base",
-              (element) => element.textContent,
-            );
-            card.rating = ratingText;
-
-            // Extract reviews
-            const reviewElements = await page.$$(
-              "div[data-hook='review-collapsed'] > span",
-            );
-            // // console.log("reviews: ", reviewElements);
-            const extractedReviews = [];
-            for (const element of reviewElements) {
-              const reviewText = await page.evaluate(
-                (el) => el.textContent.trim(),
-                element,
+              await productPage.waitForSelector(
+                '[data-hook="review-collapsed"]',
               );
-              extractedReviews.push(reviewText);
+
+              // extract ratings count
+              const ratingsCountText = await productPage.$eval(
+                "#acrCustomerReviewText",
+                (element) => element.textContent,
+              );
+              card.ratingsCount = parseInt(
+                ratingsCountText.split(" ")[0].replace(",", ""),
+                10,
+              );
+
+              // extract rating
+              const ratingText = await productPage.$eval(
+                "span.a-size-base.a-color-base",
+                (element) => element.textContent,
+              );
+              card.rating = ratingText;
+
+              // Extract reviews
+              const reviewElements = await productPage.$$(
+                'div[data-hook="review-collapsed"] > span',
+              );
+              // // console.log("reviews: ", reviewElements);
+              const extractedReviews = [];
+              for (const element of reviewElements) {
+                const reviewText = await productPage.evaluate(
+                  (el) => el.textContent.trim(),
+                  element,
+                );
+                extractedReviews.push(reviewText);
+              }
+              card.reviews = extractedReviews;
+            } catch (err) {
+              console.log("error scraping product page", err, card.cardURL);
+            } finally {
+              await productPage.close();
             }
-            card.reviews = extractedReviews;
           }
         }
+
         cardData.push(...pageCardData);
 
         if (scrapeToPage === null || currentPage < scrapeToPage) {
@@ -315,7 +343,7 @@ export async function runScrape(data: { query: string; id?: string }) {
             } else {
             }
           } else if (!scrapeToPage || currentPage < scrapeToPage) {
-            // // console.log("All available pages scraped:", currentPage);
+            console.log("All available pages scraped:", currentPage);
           }
         }
       };
@@ -349,6 +377,10 @@ export async function runScrape(data: { query: string; id?: string }) {
       await pubSub.publish(PUBSUB_TOPIC.EMBEDDING, {
         query,
         id: conversationId,
+      });
+      await updateConversation({
+        id: conversationId,
+        status: ConversationStatus.EMBEDDING,
       });
       return {
         data: { products: cardData, conversationId },
