@@ -18,9 +18,9 @@ from app.core.db import pc
 from fastapi.responses import JSONResponse
 
 from py_packages.lib.methods import ConversationStatus, update_conversation
+from py_packages.utils.constants import PUBSUB_TOPICS
 
 # --------------------------------------------------------------------------
-GENERATION_TOPIC = "market_sentience_generation"
 embeddings = PineconeEmbeddings(model="llama-text-embed-v2")
 index_name = "market-sentience-product-embeddings"
 
@@ -61,7 +61,8 @@ async def embed(query: str = None, conversation_id: str = None):
                 search_with_text = index.search(
                     namespace="__default__",
                     query={"inputs": {"text": query}, "top_k": 4},
-                    fields=["query", "title", "review", "price", "url", "product_id"],
+                    fields=["query", "title", "review",
+                            "price", "url", "product_id"],
                     rerank={
                         "model": "bge-reranker-v2-m3",
                         "top_n": 2,
@@ -69,9 +70,13 @@ async def embed(query: str = None, conversation_id: str = None):
                     },
                 )
 
+                compnay, category = query.split("+")
+                all_hits = search_with_text["result"]["hits"]
+                filtered_hits = [x for x in all_hits if x.fields.get("company").lower() == compnay.lower() and x.fields.get("category").to_lower() == category.lower()]
+                print("filtered_hits:", filtered_hits)
                 if (
-                    search_with_text["result"]["hits"]
-                    and len(search_with_text["result"]["hits"]) > 0
+                    all_hits and 
+                   len(filtered_hits) > 0
                 ):
                     hits = [
                         {
@@ -84,6 +89,64 @@ async def embed(query: str = None, conversation_id: str = None):
                         }
                         for hit in search_with_text["result"]["hits"]
                     ]
+                    end = datetime.now()
+                    duration = end - start
+                    
+                    with Session(engine) as session:
+                        update_conversation(
+                            session=session,
+                            conversation_id=conversation_id,
+                            status="generation",
+                        )
+                    publish(
+                        topic=PUBSUB_TOPICS["GENERATION"],
+                        data={
+                            "query": query,
+                            "id": conversation_id,
+                        },
+                    )
+                    return JSONResponse(
+                        content={"message": "Embeddings found.", "data": hits},
+                        status_code=200,
+                    ) 
+                else:
+                    with Session(engine) as session:
+                        products = get_products(session, query=query)
+                        if not products:
+                            return {"message": "No new products to embed."}
+                        vectors = []
+                        print("products: ", products)
+                        for product in products:
+                            text = f"{product.name}"
+                            review_text = None
+                            for review in product.product_reviews:
+                                review_text = review.review_text
+                                if review_text:
+                                    text += f"{review_text}"
+                            vector = await embed_text(review_text)
+                            # print("ingested: ", product.name)
+                            if not product.product_reviews or len(product.product_reviews) == 0:
+                                continue
+                            metadata = {
+                                "product_id": str(product.id),
+                                "title": product.name,
+                                "price": product.price,
+                                "url": product.url,
+                                "company": product.company,
+                                "category": product.category,
+                            }
+                            if review_text:
+                                metadata["review"] = review_text
+                            vectors.append(
+                                {
+                                    "id": str(product.id),
+                                    "values": vector,
+                                    "metadata": metadata,
+                                }
+                            )
+
+                    index = pc.Index(name=index_name)
+                    index.upsert(vectors)
 
                     end = datetime.now()
                     duration = end - start
@@ -94,77 +157,18 @@ async def embed(query: str = None, conversation_id: str = None):
                             status="generation",
                         )
                     publish(
-                        topic=GENERATION_TOPIC,
+                        topic=PUBSUB_TOPICS["GENERATION"],
                         data={
                             "query": query,
                             "id": conversation_id,
                         },
                     )
-                    return JSONResponse(
-                        content={"message": "Embeddings found.", "data": hits},
-                        status_code=200,
-                    )
-                # return JSONResponse(
-                #     content={"message": "No embeddings found."},
-                #     status_code=404,
-                # )
-            with Session(engine) as session:
-                products = get_products(session, query=query)
-                if not products:
-                    return {"message": "No new products to embed."}
-                vectors = []
-
-                for product in products:
-                    text = f"{product.name}"
-                    review_text = None
-                    for review in product.product_reviews:
-                        review_text = review.review_text
-                        if review_text:
-                            text += f"{review_text}"
-                    vector = await embed_text(text)
-                    # print(f"review_text: {review_text}")
-                    if not product.product_reviews or len(product.product_reviews) == 0:
-                        continue
-                    metadata = {
-                        "product_id": str(product.id),
-                        "title": product.name,
-                        "price": product.price,
-                        "url": product.url,
-                    }
-                    if review_text:
-                        metadata["review"] = review_text
-                    vectors.append(
-                        {
-                            "id": str(product.id),
-                            "values": vector,
-                            "metadata": metadata,
-                        }
-                    )
-
-            index = pc.Index(name=index_name)
-            index.upsert(vectors)
-
-            end = datetime.now()
-            duration = end - start
-            with Session(engine) as session:
-                update_conversation(
-                    session=session,
-                    conversation_id=conversation_id,
-                    status="generation",
-                )
-            publish(
-                topic=f"market_sentience_generation",
-                data={
-                    "query": query,
-                    "id": conversation_id,
-                },
-            )
-            release(conversation_id)
-            return {
-                "message": f"Embedded {len(vectors)} products for query {query}.",
-                "duration": duration.total_seconds(),
-                "embedded_count": len(vectors),
-            }
+                    release(conversation_id)
+                    return JSONResponse({
+                        "message": f"Embedded {len(vectors)} products for query {query}.",
+                        "duration": duration.total_seconds(),
+                        "embedded_count": len(vectors),
+                    })
     except Exception as e:
         print(f"Error embedding: {e}")
         return JSONResponse(content={"message": "Error embedding."}, status_code=500)

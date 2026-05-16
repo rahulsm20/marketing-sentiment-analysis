@@ -85,7 +85,7 @@ def subscribe(topic: str, callback: Callable[[Any], None]) -> None:
 
         def _on_message(message: pubsub_v1.types.PubsubMessage) -> None:  # type: ignore[name-defined]
             try:
-                print(f"Received message from {topic}:", message.data.decode())
+                print(f"Received message for {topic}:", message.data.decode())
                 payload = json.loads(message.data.decode("utf-8"))
                 callback(payload)
             except Exception as exc:

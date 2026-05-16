@@ -11,7 +11,7 @@ from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
 
-from app.api.v1.embeddings import embed
+from app.api.v1.embeddings import embed, truncate_embeddings
 from py_packages.lib.pubsub import subscribe
 from py_packages.lib.mutex import acquire, release, get_status, set_status, is_processing
 
@@ -37,9 +37,6 @@ def _on_embedding_event(data: dict) -> None:
         print("Embedding event received with no query/company/category — skipping.")
         return
     if is_processing(id):
-        print(f"Conversation {id}:{query} is already processing")
-        return
-    if acquire(id):
         print(f"Conversation {id}:{query} is already processing")
         return
     set_status(id, "EMBEDDING")
@@ -82,6 +79,13 @@ async def create_embedding(query: str):
     response = await embed(query)
     return response
 
+# @app_router.get("/clear")
+# async def clear():
+#     """
+#     Endpoint to create an embedding for a specific query.
+#     """
+#     response = await truncate_embeddings()
+#     return response
 
 @app_router.get("/")
 async def read_root():

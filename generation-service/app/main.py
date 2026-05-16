@@ -13,12 +13,12 @@ from fastapi.security import HTTPBearer
 from py_packages.lib.mutex import acquire, is_processing, set_status
 from py_packages.lib.pubsub import subscribe
 from app.core.generate import generate
+from py_packages.utils.constants import PUBSUB_TOPICS
 
 _IS_LOCAL = os.getenv("NODE_ENV", "development") == "development"
 
 #########################################
 
-GENERATION_TOPIC = "market_sentience_generation"
 
 
 load_dotenv()
@@ -33,15 +33,11 @@ def _on_generation_event(data: dict) -> None:
 
     id = data.get("id")
     query = data.get("query")
-    # print(data)
 
     if not query.strip("+"):
         print("Generation event received with no query/company/category — skipping.")
         return
     if is_processing(id):
-        print(f"Conversation {id}:{query} is already processing")
-        return
-    if acquire(id):
         print(f"Conversation {id}:{query} is already processing")
         return
     set_status(id, "GENERATION")
@@ -52,7 +48,7 @@ def _on_generation_event(data: dict) -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     if _IS_LOCAL:
-        subscribe(GENERATION_TOPIC, _on_generation_event)
+        subscribe(PUBSUB_TOPICS["GENERATION"], _on_generation_event)
     yield
 
 
