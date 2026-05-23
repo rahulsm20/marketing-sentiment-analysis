@@ -255,6 +255,7 @@ export async function runScrape(data: {
 
           return cardInfo;
         }, query);
+
         pageCardData = pageCardData.filter(
           (card: CardType) =>
             card.productName &&
@@ -283,7 +284,12 @@ export async function runScrape(data: {
               await productPage.waitForSelector(
                 '[data-hook="review-collapsed"]',
               );
-
+              await productPage.waitForSelector("#productTitle");
+              const productTitle = await productPage.$eval(
+                "#productTitle",
+                (element) => element.textContent,
+              );
+              card.productName = productTitle;
               // extract ratings count
               const ratingsCountText = await productPage.$eval(
                 "#acrCustomerReviewText",
