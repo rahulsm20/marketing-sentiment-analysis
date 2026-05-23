@@ -30,13 +30,15 @@ declare global {
  * @returns A response indicating the result of the operation.
  */
 export const addTaskToQueue = async (req: Request, res: Response) => {
-  const { company, category } = req.body;
+  const { company: rawCompany, category: rawCategory } = req.body;
 
-  if (!company || !category) {
+  if (!rawCompany || !rawCategory) {
     return res
       .status(400)
       .json({ message: "Company and category are required" });
   }
+  const company = rawCompany.toLowerCase();
+  const category = rawCategory.toLowerCase();
   const query = `${company}+${category}`;
 
   const userId = req.auth?.payload.sub;

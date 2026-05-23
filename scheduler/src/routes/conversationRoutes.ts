@@ -4,6 +4,7 @@
  */
 //-----------------------------------------------------------------------------------
 
+import { PUBSUB_TOPIC } from "@/shared/src/config";
 import {
   deleteConversation,
   getConversationById,
@@ -12,6 +13,9 @@ import {
   getPdfDocuments,
   getUserById,
 } from "@/shared/src/lib/methods";
+import { generateMutexKey } from "@/shared/src/lib/mutex";
+import { pubSub } from "@/shared/src/lib/pubsub";
+import { retrieveCachedData } from "@/shared/src/lib/redis";
 import { getFileFromS3 } from "@/shared/src/lib/s3";
 import express from "express";
 
@@ -80,6 +84,20 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ message: "Conversation not found" });
     }
 
+    // for retriggering the processing if it fails in between
+    switch (conversation.status) {
+      case "completed":
+        break;
+      default:
+        const existingLock = await retrieveCachedData(generateMutexKey(id));
+        if (existingLock) {
+          return res.status(200).json(conversation);
+        }
+        await pubSub.publish(
+          PUBSUB_TOPIC[conversation.status.toUpperCase()],
+          conversation,
+        );
+    }
     return res.status(200).json(conversation);
   } catch (error) {
     console.error("Error fetching conversation:", error);
