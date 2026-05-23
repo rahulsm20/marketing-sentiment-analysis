@@ -21,3 +21,5 @@ export const LOADING_STATES = [
   "embedding",
   "pending",
 ];
+
+export const POLLING_INTERVAL = 20000; // MILLISECONDS

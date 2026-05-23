@@ -15,10 +15,9 @@ import { LOCAL_CACHE_KEYS } from "@/utils/constants";
 import {
   QueryObserverResult,
   RefetchOptions,
-  useQuery,
+  useMutation,
 } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 
@@ -35,18 +34,16 @@ export function DeleteDialog({
 }) {
   const { schedulerApi } = useApi();
   const navigate = useNavigate();
-  const [enabled, setEnabled] = useState(false);
-  const { isLoading } = useQuery({
-    queryKey: [LOCAL_CACHE_KEYS.CONVERSATION(_id)],
-    enabled,
+  const deleteMutation = useMutation({
+    mutationKey: ["delete", LOCAL_CACHE_KEYS.CONVERSATION(_id)],
     retry: false,
-    queryFn: () =>
-      schedulerApi?.deleteConversation(_id).then(() => {
-        setEnabled(false);
-        refetch && refetch();
-        navigate("/");
-        return null;
-      }),
+    mutationFn: async () => {
+      await schedulerApi?.deleteConversation(_id);
+    },
+    onSuccess: async () => {
+      await refetch?.();
+      navigate("/home", { replace: true });
+    },
   });
 
   return (
@@ -72,11 +69,11 @@ export function DeleteDialog({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            disabled={isLoading}
+            disabled={deleteMutation.isPending}
             onClick={(e) => {
-              setEnabled(true);
               e.preventDefault();
               e.stopPropagation();
+              deleteMutation.mutate();
             }}
           >
             Continue

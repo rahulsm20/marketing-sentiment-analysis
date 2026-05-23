@@ -20,8 +20,12 @@ const ChatMessage = ({ message }: { message: MessageType }) => {
         <p>{cleanedContent}</p>
         {s3Links.length > 0 && (
           <div className="flex gap-2 items-center">
-            {s3Links.map((link) => (
-              <S3LinkPreview url={link} conversationId={conversationId} />
+            {s3Links.map((link, idx) => (
+              <S3LinkPreview
+                url={link}
+                key={idx}
+                conversationId={conversationId}
+              />
             ))}
           </div>
         )}

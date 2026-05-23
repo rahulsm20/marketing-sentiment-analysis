@@ -29,7 +29,7 @@ const Body = () => {
   });
 
   const categories = [
-    "Mobiles",
+    "Phones",
     "Television",
     "Refridgerators",
     "Laptops",
@@ -40,6 +40,8 @@ const Body = () => {
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     try {
+      if (!data.company || !data.category)
+        throw new Error("Company and Category are required");
       const task = await schedulerApi?.addTask(data.company, data.category);
       if (task && task.conversationId) {
         navigate(`/conversation/${task.conversationId}`);

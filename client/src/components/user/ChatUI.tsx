@@ -3,10 +3,9 @@ import { MessageType } from "@/types";
 import { ChatInputValidation } from "@/utils/validators";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowUpCircle } from "lucide-react";
-import { FieldValues, Form, SubmitHandler, useForm } from "react-hook-form";
+import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { Button } from "../ui/button";
-import { FieldError } from "../ui/field";
-import { FormField, FormItem } from "../ui/form";
+import { Form } from "../ui/form";
 import { Input } from "../ui/input";
 import { Separator } from "../ui/separator";
 import ChatMessage from "./ChatMessage";
@@ -21,7 +20,7 @@ const ChatUI = ({ messages = [] }: { messages: MessageType[] }) => {
     "What is the most expensive product?",
     "What is the cheapest product?",
   ];
-  const { sendMessage } = useChat();
+  const { sendMessage, sendingMessage, loading } = useChat();
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(ChatInputValidation),
@@ -29,13 +28,10 @@ const ChatUI = ({ messages = [] }: { messages: MessageType[] }) => {
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     try {
-      await sendMessage(data.question);
+      await sendMessage(data.message);
     } catch (err) {
       alert("An error occurred. Please try again.");
       console.log(err);
-    } finally {
-      // setLoading(false);
-      // setShowStopwatch(false);
     }
   };
   return (
@@ -53,36 +49,26 @@ const ChatUI = ({ messages = [] }: { messages: MessageType[] }) => {
       </div>
       <Form {...form}>
         <form
-          className="w-full lg:w-2/3 flex flex-col gap-5"
           onSubmit={form.handleSubmit(onSubmit)}
+          className="w-full justify-center items-center flex"
         >
           <div className="fixed bottom-10 w-2/3 md:w-1/3 flex flex-col border justify-center gap-2 p-4 bg-background backdrop-blur-lg rounded-[--radius] border-border">
-            <FormField
-              control={form.control}
-              name="question"
-              render={({ field, fieldState }) => (
-                <FormItem>
-                  <div className="flex">
-                    <Input
-                      onChange={field.onChange}
-                      defaultValue={field.value}
-                      className="border-0 focus:border-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-background backdrop-blur-lg focus-within:border-0 focus-within:ring-0"
-                      placeholder="Ask anything regarding your report"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full p-0"
-                    >
-                      <ArrowUpCircle className="bottom-10 right-10 block" />
-                    </Button>
-                  </div>{" "}
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </FormItem>
-              )}
-            />
+            <div className="flex">
+              <Input
+                {...form.register("message")}
+                className="border-0 focus:border-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-background backdrop-blur-lg focus-within:border-0 focus-within:ring-0"
+                placeholder="Ask anything regarding your report"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                type="submit"
+                disabled={sendingMessage || loading}
+                className="rounded-full p-0"
+              >
+                <ArrowUpCircle className="bottom-10 right-10 block" />
+              </Button>
+            </div>
 
             <Separator />
             <div className="flex gap-2 flex-wrap items-start w-full">
@@ -91,6 +77,7 @@ const ChatUI = ({ messages = [] }: { messages: MessageType[] }) => {
                   key={index}
                   variant="outline"
                   size="icon"
+                  disabled={sendingMessage || loading}
                   className="dark:bg-zinc-900 rounded-xl dark:hover:bg-zinc-800 p-2 backdrop-blur-lg w-auto justify-start"
                 >
                   <p className="text-muted-foreground text-xs">{suggestion}</p>

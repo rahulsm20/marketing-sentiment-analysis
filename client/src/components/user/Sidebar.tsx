@@ -251,7 +251,7 @@ const ConversationItems = ({
     <ul className="flex flex-col gap-2">
       {conversations.length > 0 ? (
         conversations.map(({ query, id }) => (
-          <Link to={`/conversation/${id}`}>
+          <Link to={`/conversation/${id}`} key={id}>
             <div
               key={id}
               className={`flex items-center justify-between text-sm px-2 py-1 rounded ${

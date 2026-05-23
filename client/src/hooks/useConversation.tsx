@@ -8,9 +8,7 @@ import { useParams } from "react-router-dom";
 export const useConversation = () => {
   const { schedulerApi } = useApi();
   const id = useParams().id;
-  const [conversation, setConversation] = useState<ConversationItem | null>(
-    null,
-  );
+  const [conversation, setConversation] = useState<ConversationItem | null>();
   const { isPending, error } = useQuery<ConversationItem>({
     queryKey: [LOCAL_CACHE_KEYS.CONVERSATION(id || "")],
     enabled: !!id,
