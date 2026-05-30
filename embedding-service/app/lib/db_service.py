@@ -1,6 +1,6 @@
 from .utils import fetch_url
 from app.core import config
-
+from py_packages.lib.logger import logger
 
 class DBService:
     def __init__(self, db_connection_string=config.config["DB_SERVICE_URL"]):
@@ -11,7 +11,7 @@ class DBService:
             res = await fetch_url(self.db_connection_string + f"/conversations/{id}")
             return res
         except Exception as e:
-            print(f"Error fetching conversation by ID {id}: {e}")
+            logger.error(f"Error fetching conversation by ID {id}: {e}")
             return None
 
     async def get_conversation_by_query(self, query):
@@ -29,7 +29,7 @@ class DBService:
             )
             return res
         except Exception as e:
-            print(f"Error updating conversation: {e}")
+            logger.error(f"Error updating conversation: {e}")
             return None
 
     async def get_products_by_query(self, query):
@@ -39,7 +39,7 @@ class DBService:
             )
             return res
         except Exception as e:
-            print(f"Error fetching products for query {query}: {e}")
+            logger.error(f"Error fetching products for query {query}: {e}")
             return None
 
 

@@ -1,6 +1,6 @@
 from .utils import fetch_url
 from app.core import config
-
+from py_packages.lib.logger import logger
 
 class LoggingService:
     def __init__(self, db_connection_string=config.config["DB_SERVICE_URL"]):
@@ -15,7 +15,7 @@ class LoggingService:
             )
             return res
         except Exception as e:
-            print(f"Error sending log with level {level} and message {message}: {e}")
+            logger.error(f"Error sending log with level {level} and message {message}: {e}")
             return None
 
 

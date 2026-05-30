@@ -11,6 +11,7 @@ from typing import Any, Callable
 from dotenv import load_dotenv
 from google.api_core.exceptions import AlreadyExists
 from google.cloud import pubsub_v1
+from py_packages.lib.logger import logger
 
 load_dotenv()
 
@@ -66,7 +67,7 @@ def publish(topic: str, data: Any) -> None:
         future.result()
         print(f"Published message to {topic}:", data)
     except Exception as exc:
-        print(f"Error publishing message to {topic}:", exc)
+        logger.error(f"Error publishing message to {topic}:", exc)
 
 
 def subscribe(topic: str, callback: Callable[[Any], None]) -> None:
@@ -89,7 +90,7 @@ def subscribe(topic: str, callback: Callable[[Any], None]) -> None:
                 payload = json.loads(message.data.decode("utf-8"))
                 callback(payload)
             except Exception as exc:
-                print(f"Error handling message from {topic}:", exc)
+                logger.error(f"Error handling message from {topic}:", exc)
             finally:
                 message.ack()
 
@@ -99,7 +100,7 @@ def subscribe(topic: str, callback: Callable[[Any], None]) -> None:
         try:
             future.result()
         except Exception as exc:
-            print(f"Subscription {topic} closed:", exc)
+            logger.error(f"Subscription {topic} closed:", exc)
         finally:
             subscriber.close()
 

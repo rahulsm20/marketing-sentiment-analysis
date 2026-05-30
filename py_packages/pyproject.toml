@@ -16,6 +16,7 @@ dependencies = [
     "auth0-api-python>=1.0.0b6",
     "boto3>=1.42.83",
     "redis>=7.4.0",
+    "python-logging-loki>=0.3.1",
 ]
 
 [tool.sqlacodegen]

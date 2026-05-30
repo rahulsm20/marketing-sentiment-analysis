@@ -11,15 +11,15 @@ from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
 
-from app.api.v1.embeddings import embed, truncate_embeddings
+from app.api.v1.embeddings import embed 
 from py_packages.lib.pubsub import subscribe
-from py_packages.lib.mutex import acquire, release, get_status, set_status, is_processing
+from py_packages.lib.mutex import  set_status, is_processing
+from py_packages.utils.constants import PUBSUB_TOPICS
 
 _IS_LOCAL = os.getenv("NODE_ENV", "development") == "development"
 # 
 ###################################
 
-EMBEDDING_TOPIC = "market_sentience_embedding"
 
 token_auth_scheme = HTTPBearer()
 
@@ -39,7 +39,7 @@ def _on_embedding_event(data: dict) -> None:
     if is_processing(id):
         print(f"Conversation {id}:{query} is already processing")
         return
-    set_status(id, "EMBEDDING")
+    set_status(id, "EMBEDDING", 500)
     print(f"Embedding event received for query: {query}")
     asyncio.run(embed(query, conversation_id=id))
 
@@ -47,7 +47,7 @@ def _on_embedding_event(data: dict) -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     if _IS_LOCAL:
-        subscribe(EMBEDDING_TOPIC, _on_embedding_event)
+        subscribe(PUBSUB_TOPICS["EMBEDDING"], _on_embedding_event)
     yield
 
 

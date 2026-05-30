@@ -1,91 +1,83 @@
+import builtins
 import logging
 import os
-from datetime import datetime, timezone
 from typing import Optional
+from py_packages.utils.config import CONFIG
+from dotenv import load_dotenv
 
 
-class ElasticsearchHandler(logging.Handler):
+def _make_formatter(service_name: str) -> logging.Formatter:
+    class _Fmt(logging.Formatter):
+        def format(self, record: logging.LogRecord) -> str:
+            ts = self.formatTime(record, "%Y-%m-%d %H:%M:%S")
+            return f"[{ts}] {record.levelname}: {record.getMessage()} {service_name}"
+
+    return _Fmt()
+
+
+def create_logger(service_name: str, level: Optional[str] = None) -> logging.Logger:
     """
-    Logging handler that indexes records directly into Elasticsearch.
-    Silently skips if the `elasticsearch` package is not installed or if
-    ELASTICSEARCH_URL is not set.
-    """
-
-    def __init__(self, service: str) -> None:
-        super().__init__()
-        self._client = None
-        self._service = service
-        self._index = f"logs-{service}"
-
-        es_url = os.getenv("ELASTICSEARCH_URL")
-        if not es_url:
-            return
-
-        try:
-            from elasticsearch import Elasticsearch
-
-            self._client = Elasticsearch(
-                es_url,
-                basic_auth=(
-                    os.getenv("ELASTICSEARCH_USERNAME", "elastic"),
-                    os.getenv("ELASTICSEARCH_PASSWORD", ""),
-                ),
-            )
-        except ImportError:
-            pass
-
-    def emit(self, record: logging.LogRecord) -> None:
-        if self._client is None:
-            return
-        try:
-            self._client.index(
-                index=self._index,
-                document={
-                    "@timestamp": datetime.now(timezone.utc).isoformat(),
-                    "level": record.levelname.lower(),
-                    "message": self.format(record),
-                    "service": self._service,
-                    "logger": record.name,
-                },
-            )
-        except Exception:
-            self.handleError(record)
-
-
-def get_logger(service: str, level: Optional[str] = None) -> logging.Logger:
-    """
-    Returns a logger for the given service. Logs to stdout always; logs to
-    Elasticsearch when ELASTICSEARCH_URL is set in the environment.
+    Creates a logger for the given service. Logs to console always (non-prod);
+    logs to file always; logs to Grafana Loki when LOKI_HOST, LOKI_API_KEY and
+    LOKI_USER_ID are set in the environment.
 
     Usage:
-        from lib.logger import get_logger
-        logger = get_logger("embedding-service")
+        from lib.logger import create_logger
+        logger = create_logger("my-service")
         logger.info("hello")
     """
+    load_dotenv()
+
+    loki_host = os.getenv("LOKI_HOST", "")
+    loki_user_id = os.getenv("LOKI_USER_ID", "")
+    loki_api_key = os.getenv("LOKI_API_KEY", "")
+
     log_level = getattr(
         logging,
-        (level or os.getenv("LOG_LEVEL", "DEBUG" if os.getenv("ENV") != "production" else "INFO")).upper(),
-        logging.DEBUG,
+        (level or os.getenv("LOG_LEVEL", "INFO")).upper(),
+        logging.INFO,
     )
 
-    logger = logging.getLogger(service)
+    logger = logging.getLogger(service_name)
     if logger.handlers:
-        # Already configured — return as-is to avoid duplicate handlers
         return logger
 
     logger.setLevel(log_level)
+    fmt = _make_formatter(service_name)
 
-    fmt = logging.Formatter(
-        fmt="[%(asctime)s] %(levelname)s (%(name)s): %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
+    error_handler = logging.FileHandler("error.log")
+    error_handler.setLevel(logging.ERROR)
+    error_handler.setFormatter(fmt)
+    logger.addHandler(error_handler)
 
-    console = logging.StreamHandler()
-    console.setFormatter(fmt)
-    logger.addHandler(console)
+    combined_handler = logging.FileHandler("combined.log")
+    combined_handler.setFormatter(fmt)
+    logger.addHandler(combined_handler)
 
-    es_handler = ElasticsearchHandler(service)
-    es_handler.setFormatter(fmt)
-    logger.addHandler(es_handler)
+    if loki_host:
+        try:
+            import logging_loki
+
+            loki_handler = logging_loki.LokiHandler(
+                url=f"{loki_host}/loki/api/v1/push",
+                tags={"service_name": service_name},
+                auth=(loki_user_id, loki_api_key),
+                version="1",
+            )
+            loki_handler.setFormatter(logging.Formatter("%(message)s"))
+            logger.addHandler(loki_handler)
+        except ImportError:
+            pass
+        except Exception as e:
+            builtins.print(f"loki error: {e}")
+
+    if os.getenv("ENV") != "production":
+        console = logging.StreamHandler()
+        console.setFormatter(fmt)
+        logger.addHandler(console)
+
+    builtins.print = lambda *args, **_: logger.info(" ".join(str(a) for a in args))  # type: ignore[assignment]
 
     return logger
+
+logger = create_logger(CONFIG["SERVICE"])

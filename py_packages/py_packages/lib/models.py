@@ -77,7 +77,7 @@ class Conversations(SQLModel, table=True):
 class ProductReviews(SQLModel, table=True):
     __tablename__ = 'product_reviews'
     __table_args__ = (
-        ForeignKeyConstraint(['product_id'], ['products.id'], name='product_reviews_product_id_products_id_fk'),
+        ForeignKeyConstraint(['product_id'], ['products.id'], ondelete='CASCADE', name='product_reviews_product_id_products_id_fk'),
         PrimaryKeyConstraint('id', name='product_reviews_pkey'),
         Index('product_reviews_product_id_index', 'product_id')
     )

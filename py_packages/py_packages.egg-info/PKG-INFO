@@ -15,6 +15,7 @@ Requires-Dist: google-cloud-pubsub>=2.36.0
 Requires-Dist: auth0-api-python>=1.0.0b6
 Requires-Dist: boto3>=1.42.83
 Requires-Dist: redis>=7.4.0
+Requires-Dist: python-logging-loki>=0.3.1
 
 This directory includes all packages across all python services in this repo
 

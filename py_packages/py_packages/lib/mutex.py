@@ -97,7 +97,7 @@ def get_status(conversation_id: str) -> Optional[str]:
     return redis.get(_status_key(conversation_id))
 
 
-def set_status(conversation_id: str, status: str) -> None:
+def set_status(conversation_id: str, status: str, ttl: Optional[int] = None) -> None:
     """
     Update the pipeline stage for *conversation_id*.
 
@@ -105,7 +105,7 @@ def set_status(conversation_id: str, status: str) -> None:
     ts-packages/src/lib/schema.ts:
         PENDING | IN_PROGRESS | COMPLETED | SCRAPING | GENERATION | EMBEDDING
     """
-    redis.set(_status_key(conversation_id), status)
+    redis.set(_status_key(conversation_id), status, ttl)
 
 
 def clear_status(conversation_id: str) -> None:

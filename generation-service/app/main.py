@@ -40,7 +40,7 @@ def _on_generation_event(data: dict) -> None:
     if is_processing(id):
         print(f"Conversation {id}:{query} is already processing")
         return
-    set_status(id, "GENERATION")
+    set_status(id, "GENERATION", 500)
     print(f"Generation event received for query: {query}")
     asyncio.run(generate(query, id))
 
