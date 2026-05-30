@@ -1,0 +1,4 @@
+import { createLogger } from "@/shared/src/lib/logger";
+
+export const logger = createLogger('chat_service');
+

@@ -5,6 +5,7 @@ import express, { Request, Response } from "express";
 import { AuthResult } from "express-oauth2-jwt-bearer";
 import { config } from "./config";
 import { chatRouter } from "./routes/chatRoutes";
+import { logger } from "./lib/logger";
 dotenv.config();
 
 //----------------------------------------------------------
@@ -20,7 +21,6 @@ declare global {
 
 const app = express();
 const port = config.PORT || 3000;
-const logger = createLogger("chat_service");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

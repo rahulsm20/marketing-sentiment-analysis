@@ -3,6 +3,7 @@
     "chat-service",
     "scheduler",
     "scraping-service",
+    "cron-service",
     "ts-packages"
   ],
   "dependencies": {

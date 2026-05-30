@@ -15,13 +15,13 @@ import { requestLogger } from "./middleware/loggerMiddleware";
 import { conversationRoutes } from "./routes/conversationRoutes";
 import { taskRoutes } from "./routes/taskRoutes";
 import { config } from "./utils/config";
+import { logger } from "./lib/logger";
 dotenv.config();
 
 //----------------------------------------------------------
 
 const app = express();
 const port = config.PORT;
-const logger = createLogger("scheduler");
 app.use(
   cors({
     origin: config.CLIENT_URL,
