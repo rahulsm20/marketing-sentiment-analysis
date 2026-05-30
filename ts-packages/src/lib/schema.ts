@@ -131,7 +131,9 @@ export const productReviewsTable = pgTable(
   "product_reviews",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    productId: uuid("product_id").references(() => productsTable.id),
+    productId: uuid("product_id").references(() => productsTable.id, {
+      onDelete: "cascade",
+    }),
     reviewText: text("review_text"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at")

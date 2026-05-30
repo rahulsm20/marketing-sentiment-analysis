@@ -8,4 +8,5 @@ export const config = {
   OPEN_AI_MODEL: process.env.OPEN_AI_MODEL || "gpt-5-nano",
   AUTH0_AUDIENCE: process.env.AUTH0_AUDIENCE || "",
   AUTH0_BASE_URL: process.env.AUTH0_BASE_URL || "",
+  SERVICE_NAME: process.env.SERVICE_NAME || "chat_service",
 };

@@ -7,11 +7,10 @@
 //---------------------------------------------------------
 
 import { createLogger } from "@/shared/src/lib/logger";
+import { checkUser, jwtCheck } from "@/shared/src/middleware/user";
 import cors from "cors";
 import dotenv from "dotenv";
 import express, { Request, Response } from "express";
-import { auth } from "express-oauth2-jwt-bearer";
-import { checkUser } from "./middleware";
 import { requestLogger } from "./middleware/loggerMiddleware";
 import { conversationRoutes } from "./routes/conversationRoutes";
 import { taskRoutes } from "./routes/taskRoutes";
@@ -23,12 +22,6 @@ dotenv.config();
 const app = express();
 const port = config.PORT;
 const logger = createLogger("scheduler");
-const jwtCheck = auth({
-  audience: config.AUTH0_AUDIENCE,
-  issuerBaseURL: config.AUTH0_BASE_URL,
-  tokenSigningAlg: "RS256",
-});
-
 app.use(
   cors({
     origin: config.CLIENT_URL,
@@ -45,8 +38,8 @@ app.use(requestLogger);
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static("public"));
-app.use(jwtCheck);
-app.use(checkUser);
+app.use(jwtCheck as express.RequestHandler);
+app.use(checkUser as express.RequestHandler);
 // app.use(rateLimiter);
 app.use("/v1/tasks", taskRoutes);
 app.use("/v1/conversation", conversationRoutes);

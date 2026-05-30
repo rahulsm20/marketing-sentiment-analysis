@@ -57,7 +57,7 @@ export async function runScrape(data: {
     };
   }
   const query = `${company}+${category}`;
-  const mutexKey = `conversation:lock:${conversationId}`;
+
   // const isProcessing = await retrieveCachedData(mutexKey);
   // if (isProcessing) {
   //   return {
@@ -75,7 +75,6 @@ export async function runScrape(data: {
       id: conversationId,
       status: ConversationStatus.EMBEDDING,
     });
-    console.log("sending event to embedding 1");
     // send pub sub even to emebedding service
     await pubSub.publish(PUBSUB_TOPIC.EMBEDDING, {
       query,
@@ -379,7 +378,6 @@ export async function runScrape(data: {
           status: 404,
         };
       }
-      console.log("sending event to embedding 2");
       await pubSub.publish(PUBSUB_TOPIC.EMBEDDING, {
         query,
         id: conversationId,

@@ -15,6 +15,27 @@
       "when": 1775902446040,
       "tag": "0001_natural_romulus",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779536401724,
+      "tag": "0002_concerned_scalphunter",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1779536453772,
+      "tag": "0003_lush_speed_demon",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1779536703511,
+      "tag": "0004_violet_vivisector",
+      "breakpoints": true
     }
   ]
 }

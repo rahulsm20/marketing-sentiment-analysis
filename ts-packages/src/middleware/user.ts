@@ -1,5 +1,6 @@
+import { config } from "@/config";
 import { NextFunction, Request, Response } from "express";
-import { AuthResult } from "express-oauth2-jwt-bearer";
+import { auth, AuthResult } from "express-oauth2-jwt-bearer";
 //-----------------------------------------------------------------------------------
 
 declare global {
@@ -42,3 +43,9 @@ export const checkUser = async (
     return res.status(500).json({ message: "Internal server error", error });
   }
 };
+
+export const jwtCheck = auth({
+  audience: config.AUTH0_AUDIENCE,
+  issuerBaseURL: config.AUTH0_BASE_URL,
+  tokenSigningAlg: "RS256",
+});
