@@ -1,6 +1,9 @@
 import { config } from "@/config";
+import { JWKS } from "@/utils/jwt";
 import { NextFunction, Request, Response } from "express";
-import { auth, AuthResult } from "express-oauth2-jwt-bearer";
+import { AuthResult } from "express-oauth2-jwt-bearer";
+import { jwtVerify } from "jose";
+
 //-----------------------------------------------------------------------------------
 
 declare global {
@@ -44,8 +47,34 @@ export const checkUser = async (
   }
 };
 
-export const jwtCheck = auth({
-  audience: config.AUTH0_AUDIENCE,
-  issuerBaseURL: config.AUTH0_BASE_URL,
-  tokenSigningAlg: "RS256",
-});
+export const jwtCheck = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    const { payload } = await jwtVerify(token, JWKS, {
+      issuer: config.AUTH0_BASE_URL,
+      audience: config.AUTH0_AUDIENCE,
+    });
+    console.log(
+      config.AUTH0_BASE_URL,
+      config.AUTH0_AUDIENCE,
+      token,
+      JSON.stringify(payload),
+    );
+    if (!payload) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    req.user = { header: {}, payload, token };
+    req.auth = req.user;
+    next();
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error", error });
+  }
+};

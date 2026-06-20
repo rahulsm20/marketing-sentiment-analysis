@@ -1,11 +1,10 @@
-import { createLogger } from "@/shared/src/lib/logger";
 import { checkUser, jwtCheck } from "@/shared/src/middleware/user";
 import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 import { AuthResult } from "express-oauth2-jwt-bearer";
 import { config } from "./config";
-import { chatRouter } from "./routes/chatRoutes";
 import { logger } from "./lib/logger";
+import { chatRouter } from "./routes/chatRoutes";
 dotenv.config();
 
 //----------------------------------------------------------

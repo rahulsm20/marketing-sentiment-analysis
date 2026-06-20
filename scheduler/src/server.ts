@@ -6,16 +6,16 @@
  */
 //---------------------------------------------------------
 
-import { createLogger } from "@/shared/src/lib/logger";
 import { checkUser, jwtCheck } from "@/shared/src/middleware/user";
 import cors from "cors";
 import dotenv from "dotenv";
 import express, { Request, Response } from "express";
+import { logger } from "./lib/logger";
 import { requestLogger } from "./middleware/loggerMiddleware";
+import { rateLimiter } from "./middleware/ratelimiter";
 import { conversationRoutes } from "./routes/conversationRoutes";
 import { taskRoutes } from "./routes/taskRoutes";
 import { config } from "./utils/config";
-import { logger } from "./lib/logger";
 dotenv.config();
 
 //----------------------------------------------------------
@@ -40,7 +40,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(jwtCheck as express.RequestHandler);
 app.use(checkUser as express.RequestHandler);
-// app.use(rateLimiter);
+if (config.NODE_ENV !== "development") {
+  app.use(rateLimiter);
+}
 app.use("/v1/tasks", taskRoutes);
 app.use("/v1/conversation", conversationRoutes);
 app.get("/", async (_req: Request, res: Response) => {
