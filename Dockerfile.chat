@@ -5,7 +5,10 @@ COPY package.json bun.lock ./
 
 COPY ts-packages ./ts-packages
 COPY chat-service ./chat-service
-RUN mkdir scraping-service scheduler && echo '{"name":"scraping-service","version":"1.0.0"}' > scraping-service/package.json \ && echo '{"name":"scheduler","version":"1.0.0"}' > scheduler/package.json
+RUN mkdir scraping-service scheduler cron-service \
+&& echo '{"name":"scraping-service","version":"1.0.0"}' > scraping-service/package.json \ 
+&& echo '{"name":"scheduler","version":"1.0.0"}' > scheduler/package.json \ 
+&& echo '{"name":"cron-service","version":"1.0.0"}' > cron-service/package.json
 
 RUN bun install
 
