@@ -45,14 +45,15 @@ def create_logger(service_name: str, level: Optional[str] = None) -> logging.Log
     logger.setLevel(log_level)
     fmt = _make_formatter(service_name)
 
-    error_handler = logging.FileHandler("error.log")
-    error_handler.setLevel(logging.ERROR)
-    error_handler.setFormatter(fmt)
-    logger.addHandler(error_handler)
+    if os.getenv("ENV") != "production": 
+        error_handler = logging.FileHandler("error.log")
+        error_handler.setLevel(logging.ERROR)
+        error_handler.setFormatter(fmt)
+        logger.addHandler(error_handler)
 
-    combined_handler = logging.FileHandler("combined.log")
-    combined_handler.setFormatter(fmt)
-    logger.addHandler(combined_handler)
+        combined_handler = logging.FileHandler("combined.log")
+        combined_handler.setFormatter(fmt)
+        logger.addHandler(combined_handler)
 
     if loki_host:
         try:
