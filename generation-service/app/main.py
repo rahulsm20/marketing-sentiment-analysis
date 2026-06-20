@@ -13,6 +13,7 @@ from fastapi.security import HTTPBearer
 from py_packages.lib.mutex import acquire, is_processing, set_status
 from py_packages.lib.pubsub import subscribe
 from app.core.generate import generate
+from py_packages.lib.types import EmbeddingEvent, PubSubEvent
 from py_packages.utils.constants import PUBSUB_TOPICS
 
 _IS_LOCAL = os.getenv("NODE_ENV", "development") == "development"
@@ -43,6 +44,25 @@ def _on_generation_event(data: dict) -> None:
     set_status(id, "GENERATION", 500)
     print(f"Generation event received for query: {query}")
     asyncio.run(generate(query, id))
+
+async def on_generation_event(data: dict) -> JSONResponse:
+    """
+    Handles an incoming generation Pub/Sub event.
+    Expected payload: { query, id }
+    """
+
+    id = data.get("id")
+    query = data.get("query")
+
+    if not query.strip("+"):
+        print("Generation event received with no query/company/category — skipping.")
+        return
+    if is_processing(id):
+        print(f"Conversation {id}:{query} is already processing")
+        return
+    set_status(id, "GENERATION", 500)
+    print(f"Generation event received for query: {query}")
+    return await generate(query, id)
 
 
 @asynccontextmanager
@@ -92,3 +112,10 @@ async def generate_strategies(request: Request):
             content={"message": "Company and category are required."}, status_code=400
         )
     return await generate(query, id)
+
+@app.post("/trigger")
+async def trigger_generation(event: PubSubEvent):
+    """
+    Endpoint to trigger an embedding for a specific query.
+    """
+    return await on_generation_event(event.model_dump())

@@ -36,7 +36,7 @@ async def embed_text(text: str) -> list[float]:
 # ---------------------------------------------------------------------------
 
 
-async def embed(query: str = None, conversation_id: str = None):
+async def embed(query: str = None, conversation_id: str = None)-> JSONResponse:
     try:
         start = datetime.now()
         if not query:
@@ -73,8 +73,8 @@ async def embed(query: str = None, conversation_id: str = None):
                 )
                 company, category = query.split("+")
                 all_hits = search_with_text["result"]["hits"]
-                filtered_hits = [x for x in all_hits if x.fields.get("company").lower() == company.lower() and x.fields.get("category").to_lower() == category.lower()]
-                
+                filtered_hits = [x for x in all_hits if x.fields.get("company").lower() == company.lower() and x.fields.get("category").lower() == category.lower()]
+                #print(f"filtered hits: {filtered_hits}")
                 if (
                     all_hits and 
                    len(filtered_hits) > 0
@@ -100,6 +100,7 @@ async def embed(query: str = None, conversation_id: str = None):
                             status="generation",
                         )
                     release(conversation_id)
+                    # print('is processing: ', is_processing(conversation_id), search_with_text["result"]["hits"])
                     if not is_processing(conversation_id):
                         publish(
                             topic=PUBSUB_TOPICS["GENERATION"],
@@ -174,7 +175,7 @@ async def embed(query: str = None, conversation_id: str = None):
                         "embedded_count": len(vectors),
                     })
     except Exception as e:
-        logger.error(f"Error embedding: {e}")
+        # print(f"Error embedding: {e}")
         return JSONResponse(content={"message": "Error embedding."}, status_code=500)
 
 
