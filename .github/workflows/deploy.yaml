@@ -43,6 +43,12 @@ jobs:
           - name: client
     env:
       SELECTED: ${{ github.event.inputs.service == 'all' || github.event.inputs.service == matrix.service.name }}
+      VITE_CLIENT_URL: ${{ secrets.VITE_CLIENT_URL }}
+      VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
+      VITE_GENERATION_SERVICE_URL: ${{ secrets.VITE_GENERATION_SERVICE_URL }}
+      VITE_SCRAPING_SERVICE_URL: ${{ secrets.VITE_SCRAPING_SERVICE_URL }}
+      VITE_SCHEDULER_SERVICE_URL: ${{ secrets.VITE_SCHEDULER_SERVICE_URL }}
+      VITE_CHAT_SERVICE_URL: ${{ secrets.VITE_CHAT_SERVICE_URL }}
 
     steps:
       - id: skip_check
@@ -75,6 +81,12 @@ jobs:
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VITE_CLIENT_URL: ${{ secrets.VITE_CLIENT_URL }}
+          VITE_SERVER_URL: ${{secrets.VITE_SERVER_URL}}
+          VITE_GENERATION_SERVICE_URL: ${{secrets.VITE_GENERATION_SERVICE_URL}}
+          VITE_SCRAPING_SERVICE_URL: ${{secrets.VITE_SCRAPING_SERVICE_URL}}
+          VITE_SCHEDULER_SERVICE_URL: ${{secrets.VITE_SCHEDULER_SERVICE_URL}}
+          VITE_CHAT_SERVICE_URL: ${{secrets.VITE_CHAT_SERVICE_URL}}
 
       - name: Authenticate to GCP
         if: env.SELECTED == 'true' && matrix.service.name!='client'
