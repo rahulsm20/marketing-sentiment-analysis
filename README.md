@@ -1,4 +1,7 @@
-# Marketing Sentience
+<div style="display: flex; justify-content: center; align-items: center;">
+<h1>Marketing Sentience</h1>
+<img src="client/public/gantt-chart.svg" width="30" height="30" align="right" />
+</div>
 
 ## Introduction
 
@@ -41,6 +44,14 @@ The system also provides users a PDF compiled with the information from the gene
 ## Setup
 
 - Add .env variables according to .env.example files
+
+  ### Run
+
+  #### Using Makefile
+
+  ```bash
+  make run
+  ```
 
   #### Using start script
 
