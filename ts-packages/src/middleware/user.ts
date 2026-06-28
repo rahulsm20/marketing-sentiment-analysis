@@ -61,12 +61,6 @@ export const jwtCheck = async (
       issuer: config.AUTH0_BASE_URL,
       audience: config.AUTH0_AUDIENCE,
     });
-    console.log(
-      config.AUTH0_BASE_URL,
-      config.AUTH0_AUDIENCE,
-      token,
-      JSON.stringify(payload),
-    );
     if (!payload) {
       return res.status(401).json({ message: "Unauthorized" });
     }

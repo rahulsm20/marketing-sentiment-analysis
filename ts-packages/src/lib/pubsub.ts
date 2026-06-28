@@ -38,7 +38,11 @@ export const pubSub = {
       await topicObj.publishMessage({ data: messageBuffer });
       console.log(`Published message to ${topic}:`, data);
     } catch (error) {
-      console.error(`Error publishing message to ${topic}:`, error);
+      console.error(
+        `Error publishing message to ${topic}:`,
+        error,
+        JSON.stringify(data),
+      );
     }
   },
 

@@ -67,7 +67,8 @@ def publish(topic: str, data: Any) -> None:
         future.result()
         print(f"Published message to {topic}:", data)
     except Exception as exc:
-        logger.error(f"Error publishing message to {topic}:", exc)
+        stringified_data = json.dumps(data)
+        logger.error(f"Error publishing message to {topic}:", exc, stringified_data)
 
 
 def subscribe(topic: str, callback: Callable[[Any], None]) -> None:
