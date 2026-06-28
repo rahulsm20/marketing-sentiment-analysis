@@ -29,5 +29,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <VercelAnalytics />
       </ThemeProvider>
     </BrowserRouter>
-  </Auth0Provider>
+  </Auth0Provider>,
 );

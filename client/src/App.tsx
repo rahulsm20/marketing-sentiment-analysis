@@ -20,7 +20,7 @@ function App() {
       </div>
     );
   }
-  let routes;
+  let routes: React.ReactNode;
   if (!isAuthenticated) {
     routes = (
       <Routes>
