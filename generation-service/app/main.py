@@ -13,7 +13,7 @@ from fastapi.security import HTTPBearer
 from py_packages.lib.mutex import acquire, is_processing, set_status
 from py_packages.lib.pubsub import subscribe
 from app.core.generate import generate
-from py_packages.lib.types import EmbeddingEvent, PubSubEvent
+from py_packages.lib.types import  PubSubEvent
 from py_packages.utils.constants import PUBSUB_TOPICS
 
 _IS_LOCAL = os.getenv("NODE_ENV", "development") == "development"
