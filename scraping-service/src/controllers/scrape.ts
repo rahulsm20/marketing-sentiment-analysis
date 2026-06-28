@@ -321,7 +321,7 @@ export async function runScrape(data: {
               }
               card.reviews = extractedReviews;
             } catch (err) {
-              console.log("error scraping product page", err, card.cardURL);
+              console.error("error scraping product page", err, card.cardURL);
             } finally {
               await productPage.close();
             }
@@ -348,7 +348,7 @@ export async function runScrape(data: {
             } else {
             }
           } else if (!scrapeToPage || currentPage < scrapeToPage) {
-            console.log("All available pages scraped:", currentPage);
+            console.error("All available pages scraped:", currentPage);
           }
         }
       };
@@ -368,7 +368,7 @@ export async function runScrape(data: {
             reviews: product.reviews,
           });
         } catch (error) {
-          console.log(error);
+          console.error(error);
           return { error, status: 500 };
         }
       }
@@ -390,7 +390,7 @@ export async function runScrape(data: {
         data: { products: cardData, conversationId },
       };
     } catch (error) {
-      console.log(error);
+      console.error(error);
       if (error instanceof Error) {
         return {
           error: { message: error.message || "An error occurred." },

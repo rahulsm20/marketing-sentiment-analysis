@@ -1,9 +1,10 @@
 /**
  * Scheduler Service
  * This service is responsible for scheduling tasks and managing their execution.
- * It uses RabbitMQ for message queuing.
+ * It uses PubSub for message queuing.
  * The service exposes a REST API for creating, updating, and deleting tasks.
- */
+ * Also for fetching, updating and deleting conversations.
+  */
 //---------------------------------------------------------
 
 import { checkUser, jwtCheck } from "@/shared/src/middleware/user";

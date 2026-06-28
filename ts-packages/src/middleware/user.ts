@@ -74,7 +74,7 @@ export const jwtCheck = async (
     req.auth = req.user;
     next();
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({ message: "Internal server error", error });
   }
 };

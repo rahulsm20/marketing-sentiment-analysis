@@ -43,7 +43,7 @@ router.get("/:id/report", async (req, res) => {
       try {
         url = await getFileFromS3(key);
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     }
     if (!url) return res.status(404).json({ message: "Report not found" });
