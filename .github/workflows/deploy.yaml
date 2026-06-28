@@ -50,7 +50,7 @@ jobs:
       VITE_SCHEDULER_SERVICE_URL: ${{ secrets.VITE_SCHEDULER_SERVICE_URL }}
       VITE_CHAT_SERVICE_URL: ${{ secrets.VITE_CHAT_SERVICE_URL }}
       VITE_AUTH0_AUDIENCE: ${{ secrets.VITE_AUTH0_AUDIENCE }}
-
+      VITE_NODE_ENV: ${{ secrets.VITE_NODE_ENV }}
     steps:
       - id: skip_check
         if: env.SELECTED == 'true'
@@ -89,6 +89,7 @@ jobs:
           VITE_SCHEDULER_SERVICE_URL: ${{secrets.VITE_SCHEDULER_SERVICE_URL}}
           VITE_CHAT_SERVICE_URL: ${{secrets.VITE_CHAT_SERVICE_URL}}
           VITE_AUTH0_AUDIENCE: ${{secrets.VITE_AUTH0_AUDIENCE}}
+          VITE_NODE_ENV: ${{ secrets.VITE_NODE_ENV }}
 
       - name: Authenticate to GCP
         if: env.SELECTED == 'true' && matrix.service.name!='client'
