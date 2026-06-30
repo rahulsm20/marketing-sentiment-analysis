@@ -26,23 +26,32 @@ export const pubSub = {
     const messageBuffer = Buffer.from(JSON.stringify(data));
     try {
       const topicObj = pubSubClient.topic(topic);
-      await topicObj.create().catch((err) => {
-        if (err.code === 6) {
-          // Topic already exists, ignore the error
-          console.log(`Topic ${topic} already exists.`);
-        } else {
-          throw err;
-        }
-      });
-
+      const topics = await pubSubClient.getTopics()
+      console.log(JSON.stringify({ topics }))
+      //   await topicObj.create().catch((err) => {
+      //   if (err.code === 6) {
+      //     // Topic already exists, ignore the error
+      //     console.log(`Topic ${topic} already exists.`);
+      //   } else {
+      //     throw err;
+      //   }
+      // });
+      //
       await topicObj.publishMessage({ data: messageBuffer });
       console.log(`Published message to ${topic}:`, data);
-    } catch (error) {
-      console.error(
-        `Error publishing message to ${topic}:`,
-        error,
-        JSON.stringify(data),
-      );
+    } catch (err: any) {
+      console.error("Publish failed: ", JSON.stringify(err));
+      console.error("cause:", err.cause);
+      console.error("errors:", err.errors);
+
+      if (err.cause) {
+        console.error({
+          code: err.cause.code,
+          details: err.cause.details,
+          message: err.cause.message,
+          metadata: err.cause.metadata,
+        });
+      }
     }
   },
 
