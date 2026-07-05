@@ -33,16 +33,7 @@ export const pubSub = {
     const messageBuffer = Buffer.from(JSON.stringify(data));
     try {
       const topicObj = pubSubClient.topic(topic);
-
-      //   await topicObj.create().catch((err) => {
-      //   if (err.code === 6) {
-      //     // Topic already exists, ignore the error
-      //     console.log(`Topic ${topic} already exists.`);
-      //   } else {
-      //     throw err;
-      //   }
-      // });
-      //
+      console.log(JSON.stringify({ topic, data, pubSubClient }));
       await topicObj.publishMessage({ data: messageBuffer });
       console.log(`Published message to ${topic}:`, data);
     } catch (err: any) {
