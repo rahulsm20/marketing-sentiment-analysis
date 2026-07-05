@@ -52,6 +52,7 @@ jobs:
       VITE_AUTH0_AUDIENCE: ${{ secrets.VITE_AUTH0_AUDIENCE }}
       VITE_NODE_ENV: ${{ secrets.VITE_NODE_ENV }}
       NODE_ENV: ${{ secrets.NODE_ENV }}
+      GOOGLE_PUBSUB_PROJECT_ID: ${{ secrets.GOOGLE_PUBSUB_PROJECT_ID }}
     steps:
       - id: skip_check
         if: env.SELECTED == 'true'
