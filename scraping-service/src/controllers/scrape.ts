@@ -40,24 +40,19 @@ export async function scrapeProducts(req: Request, res: Response) {
 /**
  * Scrapes product data from a given input
  */
-export async function runScrape(data: {
-  company: string;
-  category: string;
-  conversationId: string;
-}) {
+export async function runScrape(data: { query: string; id: string }) {
   let browser: Browser | null = null;
-  const { company, category, conversationId } = data;
+  const { query, id: conversationId } = data;
   if (!conversationId)
     return { status: 400, message: "Conversation ID is required" };
 
-  if (!company || !category) {
+  if (!query) {
     return {
       status: 400,
-      message: "Company and category are required",
+      message: "Query is required",
     };
   }
-  const query = `${company}+${category}`;
-
+  const [company, category] = query.split("+");
   // const isProcessing = await retrieveCachedData(mutexKey);
   // if (isProcessing) {
   //   return {
@@ -281,7 +276,7 @@ export async function runScrape(data: {
                 "span.a-size-base.a-color-base",
               );
               await productPage.waitForSelector(
-                '[data-hook="review-collapsed"]',
+                '[data-hook="reviewRichContentContainer"]',
               );
               await productPage.waitForSelector("#productTitle");
               const productTitle = await productPage.$eval(
@@ -308,7 +303,7 @@ export async function runScrape(data: {
 
               // Extract reviews
               const reviewElements = await productPage.$$(
-                'div[data-hook="review-collapsed"] > span',
+                'div[data-hook="reviewRichContentContainer"] > p > span',
               );
               // // console.log("reviews: ", reviewElements);
               const extractedReviews = [];
