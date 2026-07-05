@@ -4,7 +4,7 @@
  * It uses PubSub for message queuing.
  * The service exposes a REST API for creating, updating, and deleting tasks.
  * Also for fetching, updating and deleting conversations.
-  */
+ */
 //---------------------------------------------------------
 
 import { checkUser, jwtCheck } from "@/shared/src/middleware/user";
@@ -29,6 +29,8 @@ app.use(
     credentials: true,
   }),
 );
+
+console.log("NODE_ENV:", process.env.NODE_ENV);
 
 //----------------------------------------------------------
 

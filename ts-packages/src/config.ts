@@ -27,6 +27,7 @@ export const config = {
 };
 
 const isProduction = config.NODE_ENV === "production";
+console.log(isProduction, JSON.stringify(config));
 export const PUBSUB_TOPIC: { [key: string]: string } = {
   SCRAPING: isProduction
     ? `projects/${config.GOOGLE_PUBSUB_PROJECT_ID}/topics/market_sentience_scraper`
