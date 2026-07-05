@@ -18,9 +18,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       scope: "openid profile email offline_access",
     }}
     useRefreshTokens={true}
-    cacheLocation={
-      import.meta.env.VITE_NODE_ENV == "development" ? "localstorage" : "memory"
-    }
+    cacheLocation={"localstorage"}
   >
     <BrowserRouter>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
