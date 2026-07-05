@@ -15,7 +15,7 @@ export const config = {
   AWS_REGION: process.env.AWS_REGION || "",
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || "",
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || "",
-  GOOGLE_PUBSUB_PROJECT_ID: process.env.GOOGLE_PUBSUB_PROJECT_ID || "",
+  GOOGLE_PUBSUB_PROJECT_ID: process.env.GOOGLE_CLOUD_PROJECT || "",
   GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || "",
   NODE_ENV: process.env.NODE_ENV || "development",
   S3_BUCKET: process.env.S3_BUCKET || "market-sentience",
@@ -26,19 +26,17 @@ export const config = {
   LOKI_API_KEY: process.env.LOKI_API_KEY || "",
 };
 
+const isProduction = config.NODE_ENV === "production";
 export const PUBSUB_TOPIC: { [key: string]: string } = {
-  SCRAPING:
-    config.NODE_ENV == "production"
-      ? `projects/${config.GOOGLE_PUBSUB_PROJECT_ID}/topics/market_sentience_scraper`
-      : "market_sentience_scraper",
-  GENERATION:
-    config.NODE_ENV == "production"
-      ? `projects/${config.GOOGLE_PUBSUB_PROJECT_ID}/topics/market_sentience_generation`
-      : "market_sentience_generation",
-  EMBEDDING:
-    config.NODE_ENV == "production"
-      ? `projects/${config.GOOGLE_PUBSUB_PROJECT_ID}/topics/market_sentience_embedding`
-      : "market_sentience_embedding",
+  SCRAPING: isProduction
+    ? `projects/${config.GOOGLE_PUBSUB_PROJECT_ID}/topics/market_sentience_scraper`
+    : "market_sentience_scraper",
+  GENERATION: isProduction
+    ? `projects/${config.GOOGLE_PUBSUB_PROJECT_ID}/topics/market_sentience_generation`
+    : "market_sentience_generation",
+  EMBEDDING: isProduction
+    ? `projects/${config.GOOGLE_PUBSUB_PROJECT_ID}/topics/market_sentience_embedding`
+    : "market_sentience_embedding",
 };
 
 export const PUBSUB_TOPIC_MAP: { [key: string]: string } = {
