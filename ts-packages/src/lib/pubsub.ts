@@ -16,9 +16,9 @@ const pubSubClient = new PubSub({
   projectId: config.GOOGLE_PUBSUB_PROJECT_ID,
   apiKey: config.GOOGLE_API_KEY,
   apiEndpoint:
-    config.NODE_ENV === "development"
-      ? "http://localhost:8085"
-      : "pubsub.googleapis.com",
+    config.NODE_ENV === "production"
+      ? "pubsub.googleapis.com"
+      : 'http://localhost:8085"',
 });
 
 export const pubSub = {
@@ -26,8 +26,7 @@ export const pubSub = {
     const messageBuffer = Buffer.from(JSON.stringify(data));
     try {
       const topicObj = pubSubClient.topic(topic);
-      const topics = await pubSubClient.getTopics()
-      console.log(JSON.stringify({ topics }))
+
       //   await topicObj.create().catch((err) => {
       //   if (err.code === 6) {
       //     // Topic already exists, ignore the error

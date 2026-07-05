@@ -27,9 +27,18 @@ export const config = {
 };
 
 export const PUBSUB_TOPIC: { [key: string]: string } = {
-  SCRAPING: "market_sentience_scraper",
-  GENERATION: "market_sentience_generation",
-  EMBEDDING: "market_sentience_embedding",
+  SCRAPING:
+    config.NODE_ENV == "production"
+      ? `projects/${config.GOOGLE_PUBSUB_PROJECT_ID}/topics/market_sentience_scraper`
+      : "market_sentience_scraper",
+  GENERATION:
+    config.NODE_ENV == "production"
+      ? `projects/${config.GOOGLE_PUBSUB_PROJECT_ID}/topics/market_sentience_generation`
+      : "market_sentience_generation",
+  EMBEDDING:
+    config.NODE_ENV == "production"
+      ? `projects/${config.GOOGLE_PUBSUB_PROJECT_ID}/topics/market_sentience_embedding`
+      : "market_sentience_embedding",
 };
 
 export const PUBSUB_TOPIC_MAP: { [key: string]: string } = {
