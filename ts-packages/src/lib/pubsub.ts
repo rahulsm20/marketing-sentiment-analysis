@@ -12,15 +12,22 @@ dotenv.config();
 
 //-----------------------------------------------------------------------------------
 
-const pubSubClient = new PubSub({
-  projectId: config.GOOGLE_PUBSUB_PROJECT_ID,
-  apiKey: config.GOOGLE_API_KEY,
-  apiEndpoint:
-    config.NODE_ENV === "production"
-      ? "pubsub.googleapis.com"
-      : 'http://localhost:8085"',
-});
+let pubSubClient;
 
+if (config.NODE_ENV === "production") {
+  pubSubClient = new PubSub({
+    projectId: config.GOOGLE_PUBSUB_PROJECT_ID,
+  });
+} else {
+  pubSubClient = new PubSub({
+    projectId: config.GOOGLE_PUBSUB_PROJECT_ID,
+    apiKey: config.GOOGLE_API_KEY,
+    apiEndpoint:
+      config.NODE_ENV === "production"
+        ? "pubsub.googleapis.com"
+        : 'http://localhost:8085"',
+  });
+}
 export const pubSub = {
   publish: async (topic: string, data: any) => {
     const messageBuffer = Buffer.from(JSON.stringify(data));
