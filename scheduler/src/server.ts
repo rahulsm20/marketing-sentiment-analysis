@@ -7,6 +7,7 @@
  */
 //---------------------------------------------------------
 
+import { config as sharedConfig } from "@/shared/src/config";
 import { checkUser, jwtCheck } from "@/shared/src/middleware/user";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -30,7 +31,12 @@ app.use(
   }),
 );
 
-console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log(
+  "NODE_ENV:",
+  process.env.NODE_ENV,
+  config.NODE_ENV,
+  sharedConfig.NODE_ENV,
+);
 
 //----------------------------------------------------------
 
