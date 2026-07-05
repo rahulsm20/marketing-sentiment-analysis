@@ -13,7 +13,7 @@ dotenv.config();
 //-----------------------------------------------------------------------------------
 
 let pubSubClient;
-
+console.log("env:", config.NODE_ENV);
 if (config.NODE_ENV === "production") {
   pubSubClient = new PubSub({
     projectId: config.GOOGLE_PUBSUB_PROJECT_ID,

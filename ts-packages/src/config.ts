@@ -17,7 +17,7 @@ export const config = {
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || "",
   GOOGLE_PUBSUB_PROJECT_ID: process.env.GOOGLE_CLOUD_PROJECT || "",
   GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || "",
-  NODE_ENV: process.env.NODE_ENV || "development",
+  NODE_ENV: process.env.NODE_ENV || "production",
   S3_BUCKET: process.env.S3_BUCKET || "market-sentience",
   PINECONE_API_KEY: process.env.PINECONE_API_KEY || "",
   SERVICE: process.env.SERVICE || "",
