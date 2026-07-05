@@ -16,6 +16,7 @@ from app.utils.constants import CACHE_KEY
 from openai import OpenAI
 from sqlmodel import Session
 from py_packages.lib.db import engine
+from py_packages.lib.mutex import release
 from py_packages.lib.s3 import upload_bytes
 from py_packages.lib.methods import create_message
 
@@ -125,7 +126,7 @@ async def generate(query: str, id: str):
             key=f"{doc.id}_{company}_{category}_sentiment_analysis.pdf",
             content_type="application/pdf",
         )
-
+        release(id)
         update_conversation(session=session, conversation_id=id, status="completed")
 
         response_text = f"Hello, we have analyzed the sentiment of the reviews for {

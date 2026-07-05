@@ -74,7 +74,7 @@ def get_lock(conversation_id: str) -> Optional[str]:
     return redis.get(_lock_key(conversation_id))
 
 
-def set_lock(conversation_id: str, status: str) -> None:
+def set_lock(conversation_id: str, status: str, ttl: Optional[int] = None) -> None:
     """
     Update the pipeline stage for *conversation_id*.
 
@@ -82,7 +82,7 @@ def set_lock(conversation_id: str, status: str) -> None:
     ts-packages/src/lib/schema.ts:
         PENDING | IN_PROGRESS | COMPLETED | SCRAPING | GENERATION | EMBEDDING
     """
-    redis.set(_lock_key(conversation_id), status)
+    redis.set(_lock_key(conversation_id), status, ttl)
 
 # ---------------------------------------------------------------------------
 # Status helpers

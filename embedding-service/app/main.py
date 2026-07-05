@@ -16,7 +16,7 @@ from fastapi.security import HTTPBearer
 
 from app.api.v1.embeddings import embed 
 from py_packages.lib.pubsub import subscribe
-from py_packages.lib.mutex import  set_status, is_processing
+from py_packages.lib.mutex import  set_status, is_processing, set_lock
 from py_packages.lib.types import PubSubEvent
 from py_packages.utils.constants import PUBSUB_TOPICS
 from pydantic import BaseModel
@@ -44,7 +44,7 @@ def _on_embedding_event(data: dict) -> None:
     if is_processing(id):
         print(f"Conversation {id}:{query} is already processing")
         return
-    set_status(id, "EMBEDDING", 500)
+    set_lock(id, "EMBEDDING", 500)
     print(f"Embedding event received for query: {query}")
     asyncio.run(embed(query, conversation_id=id))
 
@@ -63,7 +63,7 @@ async def on_embedding_event(data: dict) -> JSONResponse:
     if is_processing(id):
         print(f"Conversation {id}:{query} is already processing")
         return
-    set_status(id, "EMBEDDING", 500)
+    set_lock(id, "EMBEDDING", 500)
     print(f"Embedding event received for query: {query}")
     return await embed(query, conversation_id=id)
 

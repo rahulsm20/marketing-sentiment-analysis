@@ -114,10 +114,14 @@ async def embed(query: str = None, conversation_id: str = None)-> JSONResponse:
                         status_code=200,
                     ) 
                 else:
+                    print("no hits, embedding from db")
                     with Session(engine) as session:
                         products = get_products(session, query=query)
                         if not products:
-                            return {"message": "No new products to embed."}
+                            release(conversation_id)
+                            return JSONResponse({
+                            "message": f"no products found for query: {query}",
+                            })
                         vectors = []
                         for product in products:
                             text = f"{product.name}"
@@ -175,7 +179,8 @@ async def embed(query: str = None, conversation_id: str = None)-> JSONResponse:
                         "embedded_count": len(vectors),
                     })
     except Exception as e:
-        # print(f"Error embedding: {e}")
+        logger.error(f"Error embedding: {e}")
+        release(conversation_id)
         return JSONResponse(content={"message": "Error embedding."}, status_code=500)
 
 

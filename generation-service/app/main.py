@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
-from py_packages.lib.mutex import acquire, is_processing, set_status
+from py_packages.lib.mutex import acquire, is_processing, set_status, set_lock
 from py_packages.lib.pubsub import subscribe
 from app.core.generate import generate
 from py_packages.lib.types import  PubSubEvent
@@ -41,7 +41,7 @@ def _on_generation_event(data: dict) -> None:
     if is_processing(id):
         print(f"Conversation {id}:{query} is already processing")
         return
-    set_status(id, "GENERATION", 500)
+    set_lock(id, "GENERATION", 500)
     print(f"Generation event received for query: {query}")
     asyncio.run(generate(query, id))
 
@@ -60,7 +60,7 @@ async def on_generation_event(data: dict) -> JSONResponse:
     if is_processing(id):
         print(f"Conversation {id}:{query} is already processing")
         return
-    set_status(id, "GENERATION", 500)
+    set_lock(id, "GENERATION", 500)
     print(f"Generation event received for query: {query}")
     return await generate(query, id)
 
