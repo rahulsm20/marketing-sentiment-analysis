@@ -11,8 +11,8 @@ import { generateMutexKey } from "@/shared/src/lib/mutex";
 import { pubSub } from "@/shared/src/lib/pubsub";
 import { retrieveCachedData } from "@/shared/src/lib/redis";
 import { getFileFromS3 } from "@/shared/src/lib/s3";
+import { generateDocKey } from "@/shared/src/lib/utils";
 import { Request, Response } from "express";
-
 // ----------------------------------------------------------------------------------
 export const conversationController = {
   getConversationById: async (req: Request, res: Response) => {
@@ -75,26 +75,35 @@ export const conversationController = {
   },
 
   getReport: async (req: Request, res: Response) => {
-    const { id } = req.params;
-    if (!id) {
-      return res.status(400).json({ message: "Conversation ID is required" });
-    }
-    const conversation = await getConversationById(id);
-    if (!conversation) {
-      return res.status(404).json({ message: "Conversation not found" });
-    }
-    const reports = await getPdfDocuments(id);
-    if (!reports || reports.length === 0) {
-      return res.status(404).json({ message: "Report not found" });
-    }
-    let url = "";
-    for (const report of reports) {
-      const key = `${report.id}_${report.fileName}`;
-      try {
-        url = await getFileFromS3(key);
-      } catch (err) {
-        console.error(err);
+    try {
+      const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ message: "Conversation ID is required" });
       }
+      const conversation = await getConversationById(id);
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      const reports = await getPdfDocuments(id);
+      if (!reports || reports.length === 0) {
+        return res.status(404).json({ message: "Report not found" });
+      }
+      let url = "";
+      for (const report of reports) {
+        if (!report.fileName) continue;
+        const key = generateDocKey(report.id, report.fileName);
+        try {
+          url = await getFileFromS3(key);
+        } catch (err) {
+          console.error(err);
+          return res.status(500).json({ message: "Error retrieving report" });
+        }
+      }
+      if (!url) return res.status(404).json({ message: "Report not found" });
+      return res.status(200).json({ url });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ message: "Error retrieving report" });
     }
   },
 

@@ -18,7 +18,7 @@ export const config = {
   GOOGLE_PUBSUB_PROJECT_ID: process.env.GOOGLE_PUBSUB_PROJECT_ID || "",
   GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || "",
   NODE_ENV: process.env.NODE_ENV || "production",
-  S3_BUCKET: process.env.S3_BUCKET || "market-sentience",
+  S3_BUCKET: process.env.AWS_S3_BUCKET_NAME || "market-sentience",
   PINECONE_API_KEY: process.env.PINECONE_API_KEY || "",
   SERVICE: process.env.SERVICE || "",
   LOKI_HOST: process.env.LOKI_HOST || "",

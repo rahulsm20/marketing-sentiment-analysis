@@ -12,3 +12,7 @@ export const getUserInfo = async (token: string) => {
 
   return user;
 };
+
+export const generateDocKey = (id: string, fileName: string) => {
+  return `${id}_${fileName}`;
+};
