@@ -9,3 +9,6 @@ run:
 
 kill:
 	pkill 4001 
+
+lint:
+	chmod +x lint.sh && ./lint.sh

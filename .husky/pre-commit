@@ -1,1 +1,6 @@
 echo "pre-commit checks running"
+echo "linting..."
+chmod +x ./lint.sh
+./lint.sh
+echo "linting done"
+echo "pre-commit checks done"
