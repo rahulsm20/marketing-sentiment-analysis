@@ -16,7 +16,7 @@ from fastapi.security import HTTPBearer
 
 from app.api.v1.embeddings import embed 
 from py_packages.lib.pubsub import subscribe
-from py_packages.lib.mutex import  set_status, is_processing, set_lock
+from py_packages.lib.mutex import  is_processing, set_lock
 from py_packages.lib.types import PubSubEvent
 from py_packages.utils.constants import PUBSUB_TOPICS
 from pydantic import BaseModel

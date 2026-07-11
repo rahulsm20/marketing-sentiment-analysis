@@ -59,7 +59,7 @@ async def embed(query: str = None, conversation_id: str = None)-> JSONResponse:
         else:
             if pc:
                 index = pc.Index(name=index_name)
-                print(f"Searching for query: {query}")
+                # print(f"Searching for query: {query}")
                 search_with_text = index.search(
                     namespace="__default__",
                     query={"inputs": {"text": query}, "top_k": 4},
@@ -73,7 +73,8 @@ async def embed(query: str = None, conversation_id: str = None)-> JSONResponse:
                 )
                 company, category = query.split("+")
                 all_hits = search_with_text["result"]["hits"]
-                filtered_hits = [x for x in all_hits if x.fields.get("company").lower() == company.lower() and x.fields.get("category").lower() == category.lower()]
+                print(f"all hits: {all_hits}", company, category)
+                filtered_hits = [x for x in all_hits if (x.fields.get("company") or "").lower() == company.lower() and (x.fields.get("category") or "").lower() == category.lower() and x._score>=0.5]
                 #print(f"filtered hits: {filtered_hits}")
                 if (
                     all_hits and 
@@ -114,7 +115,7 @@ async def embed(query: str = None, conversation_id: str = None)-> JSONResponse:
                         status_code=200,
                     ) 
                 else:
-                    print("no hits, embedding from db")
+                    # print("no hits, embedding from db")
                     with Session(engine) as session:
                         products = get_products(session, query=query)
                         if not products:
@@ -131,9 +132,9 @@ async def embed(query: str = None, conversation_id: str = None)-> JSONResponse:
                                 if review_text:
                                     text += f"{review_text}"
                             vector = await embed_text(text)
-                            print("ingested: ", product.name, review_text)
+                            # print("ingested: ", product.name, review_text)
                             if not product.product_reviews or len(product.product_reviews) == 0:
-                                print(product.url + " has no reviews")
+                                # print(product.url + " has no reviews")
                                 continue
                             metadata = {
                                 "product_id": str(product.id),
@@ -152,7 +153,7 @@ async def embed(query: str = None, conversation_id: str = None)-> JSONResponse:
                                     "metadata": metadata,
                                 }
                             )
-                    print('vectors: ', vectors)
+                    # print('vectors: ', vectors)
                     index = pc.Index(name=index_name)
                     index.upsert(vectors)
 
