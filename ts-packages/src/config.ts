@@ -24,6 +24,8 @@ export const config = {
   LOKI_HOST: process.env.LOKI_HOST || "",
   LOKI_USER_ID: process.env.LOKI_USER_ID || "",
   LOKI_API_KEY: process.env.LOKI_API_KEY || "",
+  RATE_LIMIT: parseInt(process.env.RATE_LIMIT || "0") || 10, // no of requests
+  RATE_LIMIT_PERIOD: parseInt(process.env.RATE_LIMIT_PERIOD || "0") || 60, // in seconds
 };
 
 const isProduction = config.NODE_ENV === "production";
