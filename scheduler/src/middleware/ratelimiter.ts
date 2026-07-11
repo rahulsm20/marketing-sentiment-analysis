@@ -8,7 +8,8 @@ export const rateLimiter = async (
   next: NextFunction,
 ) => {
   const address = ip.address();
-  const cacheKey = `ip:${address}`;
+  const encoded = Buffer.from(address).toString("base64");
+  const cacheKey = `ip:${encoded}`;
   const data = await retrieveCachedData(cacheKey);
   if (data) {
     if (parseInt(data) > 5) {

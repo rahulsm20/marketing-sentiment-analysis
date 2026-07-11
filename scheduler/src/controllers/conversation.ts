@@ -36,12 +36,6 @@ export const conversationController = {
           if (existingLock) {
             return res.status(200).json(conversation);
           }
-          console.log(
-            JSON.stringify({
-              topic: PUBSUB_TOPIC[conversation.status.toUpperCase()],
-              conversation,
-            }),
-          );
           await pubSub.publish(
             PUBSUB_TOPIC[conversation.status.toUpperCase()],
             conversation,

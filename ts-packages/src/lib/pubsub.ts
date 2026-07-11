@@ -31,9 +31,7 @@ export const pubSub = {
     const messageBuffer = Buffer.from(JSON.stringify(data));
     try {
       const topicObj = pubSubClient.topic(topic);
-      console.log(JSON.stringify({ topic, data, pubSubClient }));
       await topicObj.publishMessage({ data: messageBuffer });
-      console.log(`Published message to ${topic}:`, data);
     } catch (err: any) {
       console.error("Publish failed: ", JSON.stringify(err));
       console.error("cause:", err.cause);

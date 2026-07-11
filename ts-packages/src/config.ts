@@ -27,7 +27,7 @@ export const config = {
 };
 
 const isProduction = config.NODE_ENV === "production";
-console.log(isProduction, JSON.stringify(config));
+
 export const PUBSUB_TOPIC: { [key: string]: string } = {
   SCRAPING: "market_sentience_scraper",
   GENERATION: "market_sentience_generation",
