@@ -23,11 +23,19 @@ export async function searchProductsVectors(query: string) {
       },
       topK: 4,
     },
-    fields: ["query", "title", "review", "price", "url", "product_id"],
+    fields: [
+      "company",
+      "title",
+      "review",
+      "category",
+      "price",
+      "url",
+      "product_id",
+    ],
     rerank: {
       model: "bge-reranker-v2-m3",
       topN: 2,
-      rankFields: ["review"],
+      rankFields: ["company"],
     },
   });
   const goodRecords = response.result.hits.filter((r: any) => {
