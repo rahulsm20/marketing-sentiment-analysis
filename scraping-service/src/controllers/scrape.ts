@@ -354,7 +354,7 @@ export async function runScrape(data: { query: string; id: string }) {
           await createProduct({
             name: product.productName,
             url: product?.cardURL,
-            price: parseFloat(product?.price),
+            price: parseFloat(product?.price?.split(",").join("")),
             query,
             ratings: parseFloat(product?.rating),
             noOfRatings: parseFloat(product?.ratingsNumber),
