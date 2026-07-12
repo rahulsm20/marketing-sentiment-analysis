@@ -1,9 +1,8 @@
 import { useChat } from "@/hooks/useChat";
-import { useConversation } from "@/hooks/useConversation";
 import { MessageType } from "@/types";
 import { ChatInputValidation } from "@/utils/validators";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpCircle } from "lucide-react";
+import { ArrowUpCircle, Square } from "lucide-react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { Button } from "../ui/button";
 import { Form } from "../ui/form";
@@ -22,24 +21,21 @@ const ChatUI = ({ messages = [] }: { messages: MessageType[] }) => {
     "What is the cheapest product?",
   ];
   const { sendMessage, sendingMessage, loading } = useChat();
-  const { refetch, setConversation } = useConversation();
   const form = useForm<FieldValues>({
     resolver: zodResolver(ChatInputValidation),
   });
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     try {
-      console.log({ message: data.message });
       await sendMessage(data.message);
-      const conversation = await refetch();
-      if (conversation && conversation.data) {
-        setConversation(conversation.data);
-      }
+      form.reset();
     } catch (err) {
       alert("An error occurred. Please try again.");
       console.log(err);
     }
   };
+  const doingSomething = sendingMessage || loading;
+
   return (
     <Layout className="flex-1 flex flex-col items-center pb-48">
       <div className="flex flex-col w-2/3 lg:w-1/2 gap-4 pb-40">
@@ -61,18 +57,27 @@ const ChatUI = ({ messages = [] }: { messages: MessageType[] }) => {
           <div className="fixed bottom-10 w-2/3 md:w-1/3 flex flex-col border justify-center gap-2 p-4 bg-background backdrop-blur-lg rounded-[--radius] border-border">
             <div className="flex">
               <Input
+                disabled={doingSomething}
                 {...form.register("message")}
                 className="border-0 focus:border-0 focus:ring-0 focus-visible:ring-0 shadow-none bg-background backdrop-blur-lg focus-within:border-0 focus-within:ring-0"
-                placeholder="Ask anything regarding your report"
+                placeholder={
+                  doingSomething
+                    ? "Sending..."
+                    : "Ask anything regarding your report"
+                }
               />
               <Button
                 variant="ghost"
                 size="icon"
                 type="submit"
-                disabled={sendingMessage || loading}
+                disabled={doingSomething}
                 className="rounded-full p-0"
               >
-                <ArrowUpCircle className="bottom-10 right-10 block" />
+                {doingSomething ? (
+                  <Square className="animate-spin" />
+                ) : (
+                  <ArrowUpCircle className="bottom-10 right-10 block" />
+                )}
               </Button>
             </div>
 
@@ -83,7 +88,10 @@ const ChatUI = ({ messages = [] }: { messages: MessageType[] }) => {
                   key={index}
                   variant="outline"
                   size="icon"
-                  disabled={sendingMessage || loading}
+                  disabled={doingSomething}
+                  onClick={() => {
+                    form.setValue("message", suggestion);
+                  }}
                   className="dark:bg-zinc-900 rounded-xl dark:hover:bg-zinc-800 p-2 backdrop-blur-lg w-auto justify-start"
                 >
                   <p className="text-muted-foreground text-xs">{suggestion}</p>

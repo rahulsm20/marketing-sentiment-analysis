@@ -1,4 +1,5 @@
 import { useApi } from "@/api/ApiContext";
+import { queryClient } from "@/api/client";
 import { ConversationItem, MessageType } from "@/types";
 import {
   LOADING_STATES,
@@ -6,7 +7,7 @@ import {
   POLLING_INTERVAL,
 } from "@/utils/constants";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 /**
@@ -20,8 +21,12 @@ import { toast } from "sonner";
 export const useChat = (conversation?: ConversationItem | null) => {
   const conversationId = useParams().id;
   const { chatApi, schedulerApi } = useApi();
-  const [messages, setMessages] = useState<MessageType[]>([]);
-  const { isPending: messagesPending, error: messagesError } = useQuery({
+  const {
+    data: messages = [],
+    isPending: messagesPending,
+    error: messagesError,
+    refetch,
+  } = useQuery({
     queryKey: [LOCAL_CACHE_KEYS.MESSAGES(conversationId || "")],
     enabled: !!conversationId,
     retry: false,
@@ -34,7 +39,6 @@ export const useChat = (conversation?: ConversationItem | null) => {
       if (!conversationId) throw new Error("No id");
       if (!schedulerApi) throw new Error("No schedulerApi");
       const res = await schedulerApi?.getMessages(conversationId);
-      setMessages(res);
       return res;
     },
   });
@@ -42,7 +46,7 @@ export const useChat = (conversation?: ConversationItem | null) => {
   const {
     isPending: sendingMessage,
     error: errorSendingMessage,
-    mutate: sendMessage,
+    mutateAsync: sendMessage,
   } = useMutation({
     mutationKey: [LOCAL_CACHE_KEYS.MESSAGES(conversationId || "")],
     // refetchInterval: () => {
@@ -62,6 +66,11 @@ export const useChat = (conversation?: ConversationItem | null) => {
       }
       const response = await chatApi.sendMessage(conversationId, message);
       return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [LOCAL_CACHE_KEYS.MESSAGES(conversationId || "")],
+      });
     },
   });
 
@@ -114,5 +123,6 @@ export const useChat = (conversation?: ConversationItem | null) => {
     error: messagesError,
     sendingMessage,
     errorSendingMessage,
+    refetch,
   };
 };

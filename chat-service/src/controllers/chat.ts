@@ -25,10 +25,12 @@ export const chatController = {
       // - mention that the score is just vector similarity score
       //
       const vectors = await searchProductsVectors(query);
+      const cleanedVectors = vectors.map(({ score, ...rest }) => ({ ...rest }));
 
       const fullContext =
         message +
-        `Given context of products and their reviews: ${JSON.stringify(vectors)}`;
+        `Given context of products and their reviews: ${JSON.stringify(cleanedVectors)}
+        `;
 
       const response = await openAIClient.responses.create({
         model: config.OPEN_AI_MODEL,
