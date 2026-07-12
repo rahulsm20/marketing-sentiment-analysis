@@ -236,3 +236,10 @@ def create_pdf_document(
     session.commit()
     session.refresh(doc)
     return doc
+
+
+def get_pdf_documents(session, conversation_id):
+    statement = select(PdfDocuments).where(
+        PdfDocuments.conversation_id == conversation_id
+    )   
+    return session.exec(statement).first()

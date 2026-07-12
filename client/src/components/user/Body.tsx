@@ -54,7 +54,7 @@ const Body = () => {
 
   return (
     <Layout className="flex flex-col gap-5 h-screen">
-      <Card className="flex flex-col w-2/3 justify-center items-center p-12 gap-3 h-2/3">
+      <Card className="flex flex-col lg:w-2/3 justify-center items-center p-12 gap-3 h-2/3">
         <div className="flex flex-col gap-2 p-2">
           <h1 className="text-2xl flex items-center gap-2">
             <Search />

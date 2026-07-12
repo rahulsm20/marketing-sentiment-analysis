@@ -71,4 +71,10 @@ export class ApiService {
     );
     return data;
   }
+  async generateReport(conversationId: string) {
+    const { data } = await this.api.post(
+      `/conversation/${conversationId}/report`,
+    );
+    return data;
+  }
 }

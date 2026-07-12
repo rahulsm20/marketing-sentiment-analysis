@@ -9,7 +9,7 @@ export const useConversation = () => {
   const { schedulerApi } = useApi();
   const id = useParams().id;
   const [conversation, setConversation] = useState<ConversationItem | null>();
-  const { isPending, error } = useQuery<ConversationItem>({
+  const { isPending, error, refetch } = useQuery<ConversationItem>({
     queryKey: [LOCAL_CACHE_KEYS.CONVERSATION(id || "")],
     enabled: !!id,
     // refetchInterval: (query) => {
@@ -29,5 +29,6 @@ export const useConversation = () => {
     loading: isPending,
     error,
     data: conversation,
+    refetch,
   };
 };

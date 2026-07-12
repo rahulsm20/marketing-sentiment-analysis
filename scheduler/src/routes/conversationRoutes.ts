@@ -13,6 +13,8 @@ const router = express.Router();
 
 router.get("/:id/report", conversationController.getReport);
 
+router.post("/:id/report", conversationController.createReport);
+
 router.get("/:id/messages", conversationController.getMessages);
 
 router.get("/:id", conversationController.getConversationById);

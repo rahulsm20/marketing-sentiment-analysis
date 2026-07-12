@@ -6,11 +6,13 @@ import {
   ChevronRight,
   Ellipsis,
   Eye,
+  RefreshCcw,
 } from "lucide-react";
 import { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 // import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 // import "react-pdf/dist/esm/Page/TextLayer.css";
+import { useConversation } from "@/hooks/useConversation";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -32,10 +34,14 @@ const S3LinkPreview = ({
   conversationId: string;
 }) => {
   const { schedulerApi } = useApi();
+  const { refetch } = useConversation();
   const pattern = new RegExp("^s3://[^/]+/([a-f0-9-]+)_");
   const file_name = url.match(pattern)?.[1];
   const [loading, setLoading] = useState(false);
   const [s3Link, setS3Link] = useState(null);
+  const [numPages, setNumPages] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+
   // on click, fetch the report from the server
   function downloadFile(blob: Blob | MediaSource) {
     if (!blob || !file_name) return;
@@ -73,12 +79,14 @@ const S3LinkPreview = ({
     setLoading(false);
   };
 
-  const handleViewdClick = async () => {
+  const handleViewClick = async () => {
+    console.log({ url, file_name, conversationId });
     if (!conversationId) return;
 
     setLoading(true);
 
     const data = await schedulerApi?.getReport(conversationId);
+
     if (!data?.url || !file_name) {
       setLoading(false);
       return;
@@ -98,51 +106,54 @@ const S3LinkPreview = ({
     setS3Link(data.url);
     setLoading(false);
   };
-  const [numPages, setNumPages] = useState(null);
-  const [pageNumber, setPageNumber] = useState(1);
+
+  const handleRegenerateClick = async () => {
+    if (!conversationId) return;
+
+    setLoading(true);
+
+    const data = await schedulerApi?.generateReport(conversationId);
+    if (!data || data.status != "ok") {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(false);
+    await refetch();
+  };
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex gap-2">
       <Button
         className="hover:cursor-pointer"
         variant="outline"
         onClick={handleDownloadClick}
         disabled={loading}
       >
-        <CardHeader>
-          <div className="flex gap-2 justify-center items-center">
-            <span>
-              {loading
-                ? "Fetching your report"
-                : "Click here to download your report"}
-            </span>
-            {loading ? (
-              <Ellipsis className="animate-pulse h-4 w-4" />
-            ) : (
-              <ArrowUpRight className="h-4 w-4" />
-            )}
-          </div>
-        </CardHeader>
+        <div className="flex gap-2 justify-center items-center">
+          <span>{loading ? "Fetching" : "Download"}</span>
+          {loading ? (
+            <Ellipsis className="animate-pulse h-4 w-4" />
+          ) : (
+            <ArrowUpRight className="h-4 w-4" />
+          )}
+        </div>
       </Button>
       <Dialog>
         <DialogTrigger asChild>
           <Button
             className="hover:cursor-pointer"
             variant="outline"
-            onClick={handleViewdClick}
+            onClick={handleViewClick}
             disabled={loading}
           >
             <CardHeader>
               <div className="flex gap-2 justify-center items-center">
-                <span>
-                  {loading
-                    ? "Fetching your report"
-                    : "Click here to view your report"}
-                </span>
+                <span>{loading ? "Fetching" : "View"}</span>
                 {loading ? (
                   <Ellipsis className="animate-pulse h-4 w-4" />
                 ) : (
@@ -204,6 +215,21 @@ const S3LinkPreview = ({
           </DialogDescription>
         </DialogContent>
       </Dialog>
+      <Button
+        className="hover:cursor-pointer flex gap-2"
+        variant="outline"
+        onClick={handleRegenerateClick}
+        disabled={loading}
+      >
+        <span className="flex items-center gap-2">
+          {loading ? "Fetching" : "Regenerate"}
+        </span>
+        {loading ? (
+          <Ellipsis className="animate-pulse h-4 w-4" />
+        ) : (
+          <RefreshCcw className="h-4 w-4" />
+        )}
+      </Button>
     </div>
   );
 };

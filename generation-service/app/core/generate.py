@@ -1,6 +1,7 @@
 import json
 import re
 from py_packages.lib.methods import (
+    get_pdf_documents,
     get_products,
     update_conversation,
     create_pdf_document,
@@ -128,13 +129,17 @@ async def generate(query: str, id: str):
         )
         release(id)
         update_conversation(session=session, conversation_id=id, status="completed")
-
+ 
         response_text = f"Hello, we have analyzed the sentiment of the reviews for {
             company
         } {category}. \nPlease find the sentiment analysis report attached. {url}"
+        # check if a generated report is already available
+        doc = get_pdf_documents(session=session, conversation_id=id)
+        if doc:
+            response_text = f"Hello, we have reanalyzed the sentiment of the reviews for {company} {category}. \nPlease find the sentiment analysis report attached. {url}" 
         create_message(
             session=session, conversation_id=id, content=response_text, role="assistant"
-        )
+        ) 
         result = {
             "sentiments": response["sentiments"],
             "response": response["output_text"],

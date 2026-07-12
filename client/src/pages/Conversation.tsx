@@ -43,7 +43,7 @@ const Conversation = () => {
           messagesPending ||
           (conversation?.status &&
             LOADING_STATES.includes(conversation?.status)) ? (
-            <div className="flex gap-5 items-center justify-center min-h-screen w-full">
+            <div className="flex gap-5 items-center justify-center min-h-screen w-[calc(100%-2rem)]">
               <Stopwatch title={getLoadingTitle(conversation?.status)} />
             </div>
           ) : (

@@ -15,12 +15,12 @@ const ChatMessage = ({ message }: { message: MessageType }) => {
       className={`flex justify-${message.role === "user" ? "end" : "start"}`}
     >
       <div
-        className={`p-4 border rounded-[var(--radius)] w-fit flex flex-col gap-5`}
+        className={`p-4 border rounded-[var(--radius)] max-w-prose flex flex-col gap-5`}
       >
         <p>{cleanedContent}</p>
         {s3Links.length > 0 && (
           <div className="flex gap-2 items-center">
-            {s3Links.map((link, idx) => (
+            {s3Links.map((link: string, idx: number) => (
               <S3LinkPreview
                 url={link}
                 key={idx}

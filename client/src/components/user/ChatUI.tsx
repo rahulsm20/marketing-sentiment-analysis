@@ -35,8 +35,8 @@ const ChatUI = ({ messages = [] }: { messages: MessageType[] }) => {
     }
   };
   return (
-    <Layout className="flex-1 flex flex-col items-center justify-center pb-36">
-      <div className="flex flex-col w-2/3 lg:w-1/2 gap-4">
+    <Layout className="flex-1 flex flex-col items-center pb-48">
+      <div className="flex flex-col w-2/3 lg:w-1/2 gap-4 pb-40">
         {messages.length > 0 ? (
           messages.map((message) => (
             <ChatMessage key={message.id} message={message} />

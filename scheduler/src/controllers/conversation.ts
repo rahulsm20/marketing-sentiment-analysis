@@ -1,4 +1,5 @@
 import { PUBSUB_TOPIC } from "@/shared/src/config";
+import { db } from "@/shared/src/lib/db";
 import {
   deleteConversation,
   getConversationById,
@@ -11,7 +12,12 @@ import { generateMutexKey } from "@/shared/src/lib/mutex";
 import { pubSub } from "@/shared/src/lib/pubsub";
 import { retrieveCachedData } from "@/shared/src/lib/redis";
 import { getFileFromS3 } from "@/shared/src/lib/s3";
+import {
+  conversationsTable,
+  ConversationStatus,
+} from "@/shared/src/lib/schema";
 import { generateDocKey } from "@/shared/src/lib/utils";
+import { eq } from "drizzle-orm";
 import { Request, Response } from "express";
 // ----------------------------------------------------------------------------------
 export const conversationController = {
@@ -94,6 +100,7 @@ export const conversationController = {
         const key = generateDocKey(report.id, report.fileName);
         try {
           url = await getFileFromS3(key);
+          if (url) break;
         } catch (err) {
           console.error(err);
           return res.status(500).json({ message: "Error retrieving report" });
@@ -159,6 +166,39 @@ export const conversationController = {
       return res.status(200).json(conversations);
     } catch (error) {
       console.error("Error fetching conversations:", error);
+      return res.status(500).json({ message: "Internal server error", error });
+    }
+  },
+  createReport: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const reqAuth = req.auth;
+      if (!reqAuth) {
+        return res.status(400).json({ error: "Unauthorized" });
+      }
+      const userId = reqAuth.payload.sub;
+      if (!userId) throw new Error("unauthorized");
+      const user = await getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const fetchedConversation = await getConversationById(id);
+      if (!fetchedConversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      // send event to retrigger generation async
+      await pubSub.publish(PUBSUB_TOPIC["GENERATION"], fetchedConversation);
+
+      await db
+        .update(conversationsTable)
+        .set({ status: ConversationStatus.GENERATION })
+        .where(eq(conversationsTable.id, id));
+
+      return res
+        .status(200)
+        .json({ message: "Report regeneration initiated", status: "ok" });
+    } catch (error) {
+      console.error("Error creating report:", error);
       return res.status(500).json({ message: "Internal server error", error });
     }
   },
