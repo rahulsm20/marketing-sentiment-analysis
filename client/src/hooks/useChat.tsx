@@ -56,7 +56,7 @@ export const useChat = (conversation?: ConversationItem | null) => {
     }: {
       conversationId: string;
       message: string;
-    }) => {
+    }): Promise<MessageType> => {
       if (!chatApi || !conversationId || !message) {
         throw new Error("No chatApi or conversationId");
       }

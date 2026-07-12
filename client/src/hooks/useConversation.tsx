@@ -25,10 +25,12 @@ export const useConversation = () => {
       return res;
     },
   });
+
   return {
     loading: isPending,
     error,
     data: conversation,
     refetch,
+    setConversation,
   };
 };

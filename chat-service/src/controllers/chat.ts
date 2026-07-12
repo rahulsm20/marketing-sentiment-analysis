@@ -18,18 +18,21 @@ export const chatController = {
       const query = conv.query;
       if (!query) return res.status(400).json({ error: "Query is required" });
 
-      // const products = await getProducts({
-      //   query,
-      // });
+      // write a proper util to get the full context
+      // - get the conversation history
+      // - collapse context when necessary
+      // improve prompt
+      // - mention that the score is just vector similarity score
+      //
       const vectors = await searchProductsVectors(query);
-      // console.log({ vectors });
-      // return res.status(200).json({ message: "ok", data: vectors });
-      // if (!message)
-      //   return res.status(400).json({ error: "Message is required" });
+
+      const fullContext =
+        message +
+        `Given context of products and their reviews: ${JSON.stringify(vectors)}`;
 
       const response = await openAIClient.responses.create({
         model: config.OPEN_AI_MODEL,
-        input: message,
+        input: fullContext,
       });
 
       await createMessage({

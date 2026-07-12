@@ -1,7 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { createContext, useContext, useMemo } from "react";
 import { ApiService } from "./apiService";
-import { createSchedulerApi } from "./auth0";
+import { createChatApi, createSchedulerApi } from "./auth0";
 
 const ApiContext = createContext<{
   schedulerApi: ApiService | null;
@@ -11,7 +11,7 @@ const ApiContext = createContext<{
 /**
  * ApiProvider is a wrapper around the ApiService that provides the API Clients for the scheduler and chat services
  *
-*/
+ */
 export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
   const { getAccessTokenSilently } = useAuth0();
   const schedulerApi = useMemo(
@@ -19,7 +19,7 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
     [getAccessTokenSilently],
   );
   const chatApi = useMemo(
-    () => createSchedulerApi(getAccessTokenSilently),
+    () => createChatApi(getAccessTokenSilently),
     [getAccessTokenSilently],
   );
   return (

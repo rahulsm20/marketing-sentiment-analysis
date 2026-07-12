@@ -1,4 +1,5 @@
 import { useChat } from "@/hooks/useChat";
+import { useConversation } from "@/hooks/useConversation";
 import { MessageType } from "@/types";
 import { ChatInputValidation } from "@/utils/validators";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,14 +22,19 @@ const ChatUI = ({ messages = [] }: { messages: MessageType[] }) => {
     "What is the cheapest product?",
   ];
   const { sendMessage, sendingMessage, loading } = useChat();
-
+  const { refetch, setConversation } = useConversation();
   const form = useForm<FieldValues>({
     resolver: zodResolver(ChatInputValidation),
   });
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     try {
+      console.log({ message: data.message });
       await sendMessage(data.message);
+      const conversation = await refetch();
+      if (conversation && conversation.data) {
+        setConversation(conversation.data);
+      }
     } catch (err) {
       alert("An error occurred. Please try again.");
       console.log(err);

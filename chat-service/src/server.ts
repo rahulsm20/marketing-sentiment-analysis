@@ -1,4 +1,5 @@
 import { checkUser, jwtCheck } from "@/shared/src/middleware/user";
+import cors from "cors";
 import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 import { AuthResult } from "express-oauth2-jwt-bearer";
@@ -6,7 +7,6 @@ import { config } from "./config";
 import { logger } from "./lib/logger";
 import { chatRouter } from "./routes/chatRoutes";
 dotenv.config();
-
 //----------------------------------------------------------
 declare global {
   namespace Express {
@@ -20,6 +20,12 @@ declare global {
 
 const app = express();
 const port = config.PORT || 3000;
+app.use(
+  cors({
+    origin: config.CLIENT_URL,
+    credentials: true,
+  }),
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

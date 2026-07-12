@@ -50,7 +50,8 @@ export class ApiService {
     conversationId: string,
     message: string,
   ): Promise<MessageType> {
-    const { data } = await this.api.post(`/conversation/${conversationId}`, {
+    const { data } = await this.api.post(`/chat`, {
+      conversationId,
       message,
     });
     return data;

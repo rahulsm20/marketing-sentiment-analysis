@@ -9,4 +9,5 @@ export const config = {
   AUTH0_AUDIENCE: process.env.AUTH0_AUDIENCE || "",
   AUTH0_BASE_URL: process.env.AUTH0_BASE_URL || "",
   SERVICE_NAME: process.env.SERVICE_NAME || "chat_service",
+  CLIENT_URL: process.env.CLIENT_URL || "",
 };
