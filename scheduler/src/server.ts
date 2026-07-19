@@ -46,6 +46,8 @@ if (config.NODE_ENV !== "development") {
 }
 app.use("/v1/tasks", taskRoutes);
 app.use("/v1/conversation", conversationRoutes);
+// for gateway requests
+app.use("/scheduler/v1/conversation", conversationRoutes);
 app.get("/", async (_req: Request, res: Response) => {
   return res
     .status(200)

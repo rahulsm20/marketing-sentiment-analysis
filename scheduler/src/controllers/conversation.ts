@@ -183,7 +183,7 @@ export const conversationController = {
         return res.status(404).json({ message: "User not found" });
       }
       const fetchedConversation = await getConversationById(id);
-      if (!fetchedConversation) {
+      if (!fetchedConversation || fetchedConversation.userId !== user.id) {
         return res.status(404).json({ message: "Conversation not found" });
       }
       // send event to retrigger generation async
