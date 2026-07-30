@@ -1,5 +1,7 @@
 import json
 import re
+
+from fastapi.responses import JSONResponse
 from py_packages.lib.methods import (
     get_pdf_documents,
     get_products,
@@ -20,6 +22,8 @@ from py_packages.lib.db import engine
 from py_packages.lib.mutex import release
 from py_packages.lib.s3 import upload_bytes
 from py_packages.lib.methods import create_message
+from py_packages.lib.pubsub import publish
+from py_packages.utils.constants import PUBSUB_TOPICS
 
 PROMPT = os.getenv("PROMPT")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -43,11 +47,19 @@ async def generate(query: str, id: str):
         productWithReviews = {}
         company = query.split("+")[0]
         category = query.split("+")[1]
+        
+        # get product reviews
         for product in products:
             product_reviews = product.product_reviews
             for review in product_reviews:
                 reviews.append(review.review_text)
             productWithReviews[product.name] = product_reviews
+        
+        ## failsafe for when no review found in db
+        if len(reviews) == 0:
+            publish(topic=PUBSUB_TOPICS["SCRAPING"], data={"id": id, "query": query})
+            return JSONResponse(content={"message": "No reviews found. Retrigged scraping."}, status_code=404)
+        # get product sentiment
         embedding_layer = next(l for l in model.layers if isinstance(l, Embedding))
         vocab_size = embedding_layer.input_dim
         tokenizer = Tokenizer(num_words=vocab_size, oov_token="<OOV>")
@@ -62,6 +74,7 @@ async def generate(query: str, id: str):
             for pred in predictions
         ]
 
+        # compress reviews
         reviews = [
             "product: "
             + product[:24]
@@ -145,4 +158,4 @@ async def generate(query: str, id: str):
             "response": response["output_text"],
             "file": url,
         }
-        return result
+        return JSONResponse(content=result, status_code=200)

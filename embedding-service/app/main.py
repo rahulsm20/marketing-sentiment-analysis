@@ -37,6 +37,7 @@ def _on_embedding_event(data: dict) -> None:
     company = data.get("company", "")
     category = data.get("category", "")
     query = data.get("query") or f"{company}+{category}"
+    query = query.lower()
     id = data.get("id")
     if not query.strip("+"):
         print("Embedding event received with no query/company/category — skipping.")

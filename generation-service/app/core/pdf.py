@@ -27,7 +27,7 @@ class ReportPDF(FPDF):
         self.image(f"{image_dir}/logo.png", 10, 8, 12)
 
         self.set_font("NotoSans", "B", 16)
-        self.cell(0, 8, self.report_title, align="L", new_x="LMARGIN", new_y="NEXT")
+        self.cell(0, 8, self.report_title, align="C", new_x="LMARGIN", new_y="NEXT")
 
         self.set_font("NotoSans", "", 9)
         self.set_text_color(120, 120, 120)
@@ -35,7 +35,7 @@ class ReportPDF(FPDF):
             0,
             5,
             "Generated Analytics Report",
-            align="L",
+            align="C",
             new_x="LMARGIN",
             new_y="NEXT",
         )
