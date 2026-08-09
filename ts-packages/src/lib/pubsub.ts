@@ -14,9 +14,7 @@ let pubSubClient;
 
 if (config.NODE_ENV === "production") {
   console.log("production!!!");
-  pubSubClient = new PubSub({
-    projectId: config.GOOGLE_PUBSUB_PROJECT_ID,
-  });
+  pubSubClient = new PubSub();
 } else {
   console.log("development!!!");
   pubSubClient = new PubSub({
@@ -36,8 +34,8 @@ export const pubSub = {
       await topicObj.publishMessage({ data: messageBuffer });
     } catch (err: any) {
       console.error("Publish failed: ", JSON.stringify(err));
-      console.error("cause:", err.cause);
-      console.error("errors:", err.errors);
+      console.error("cause:", JSON.stringify(err.cause));
+      console.error("errors:", JSON.stringify(err.errors));
 
       if (err.cause) {
         console.error({
