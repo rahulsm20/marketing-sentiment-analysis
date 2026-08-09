@@ -45,6 +45,7 @@ export const pubSub = {
           metadata: err.cause.metadata,
         });
       }
+      throw err;
     }
   },
 
