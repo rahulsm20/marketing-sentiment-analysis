@@ -89,14 +89,14 @@ export async function runScrape(data: { query: string; id: string }) {
       if (config.NODE_ENV === "development") {
         browser = await puppeteer.launch({
           executablePath:
-            process.env.CHROME_BIN ||
+            config.CHROME_BIN ||
             "/Users/rahul/.cache/puppeteer/chrome/mac_arm-148.0.7778.97/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
           headless: false,
           defaultViewport: null,
         });
       } else {
         browser = await puppeteer.launch({
-          executablePath: process.env.CHROME_BIN || "/usr/bin/chromium-browser",
+          executablePath: config.CHROME_BIN || "/usr/bin/chromium",
           args: ["--no-sandbox", "--disable-setuid-sandbox"],
         });
       }
