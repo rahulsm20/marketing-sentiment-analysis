@@ -28,6 +28,7 @@ const Navbar = () => {
             className="flex gap-1 items-center justify-center"
           >
             <GanttChart />
+            <span>Market Sentience</span>
           </Link>
         </li>
         {/* <li>
