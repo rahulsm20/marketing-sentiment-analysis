@@ -32,6 +32,17 @@ export function createLogger(service_name: string): winston.Logger {
     transports: [
       new winston.transports.File({ filename: "error.log", level: "error" }),
       new winston.transports.File({ filename: "combined.log" }),
+    ],
+  });
+
+  if (process.env.NODE_ENV !== "production") {
+    logger.add(
+      new winston.transports.Console({
+        format: combine(colorize(), logFormat(service_name)),
+      }),
+    );
+  } else {
+    logger.add(
       new LokiTransport({
         host: config.LOKI_HOST,
         labels: { service_name },
@@ -40,14 +51,6 @@ export function createLogger(service_name: string): winston.Logger {
         format: winston.format.json(),
         replaceTimestamp: true,
         onConnectionError: (err) => console.error("loki erro: ", err),
-      }),
-    ],
-  });
-
-  if (process.env.NODE_ENV !== "production") {
-    logger.add(
-      new winston.transports.Console({
-        format: combine(colorize(), logFormat(service_name)),
       }),
     );
   }
