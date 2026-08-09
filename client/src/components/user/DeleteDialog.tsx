@@ -70,9 +70,7 @@ export function DeleteDialog({
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             disabled={deleteMutation.isPending}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
+            onClick={() => {
               deleteMutation.mutate();
             }}
           >
