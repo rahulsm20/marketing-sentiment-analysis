@@ -3,6 +3,7 @@ import winston from "winston";
 import LokiTransport from "winston-loki";
 import { config } from "../config";
 const { combine, printf, timestamp, colorize } = winston.format;
+dotenv.config();
 
 const logFormat = (service_name: string) =>
   printf(({ level, message, timestamp, ...meta }) => {
@@ -20,7 +21,6 @@ const logFormat = (service_name: string) =>
  *   logger.info("hello");
  */
 export function createLogger(service_name: string): winston.Logger {
-  dotenv.config();
   const basicAuth = `${config.LOKI_USER_ID}:${config.LOKI_API_KEY}`;
 
   const logger = winston.createLogger({

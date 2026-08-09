@@ -1,12 +1,11 @@
 import { config, PUBSUB_TOPIC } from "@/shared/src/config";
-import { createLogger } from "@/shared/src/lib/logger";
 import { pubSub } from "@/shared/src/lib/pubsub";
 import express, { Request, Response } from "express";
 import { runScrape, scrapeProducts } from "./controllers/scrape";
+import { logger } from "./lib/logger";
 
 const app = express();
 const port = process.env.PORT || 3002;
-const logger = createLogger("scraping_service");
 
 if (config.NODE_ENV === "development") {
   console.log("development!! - scraper");
