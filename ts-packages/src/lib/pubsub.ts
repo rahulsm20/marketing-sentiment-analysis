@@ -8,48 +8,38 @@
 import { config } from "@/config";
 import { PubSub } from "@google-cloud/pubsub";
 
-//-----------------------------------------------------------------------------------
+const pubSubClient = new PubSub({
+  projectId: config.GOOGLE_PUBSUB_PROJECT_ID,
+});
 
-let pubSubClient;
-
-if (config.NODE_ENV === "production") {
-  console.log("production!!!");
-  pubSubClient = new PubSub();
-} else {
-  console.log("development!!!");
-  pubSubClient = new PubSub({
-    projectId: config.GOOGLE_PUBSUB_PROJECT_ID,
-    apiKey: config.GOOGLE_API_KEY,
-    apiEndpoint:
-      config.NODE_ENV === "production"
-        ? "pubsub.googleapis.com"
-        : "http://localhost:8085",
-  });
-}
 export const pubSub = {
-  publish: async (topic: string, data: any) => {
-    const messageBuffer = Buffer.from(JSON.stringify(data));
+  publish: async (topic: string, data: unknown) => {
     try {
-      console.log("publishing data: ", JSON.stringify(data), topic);
       const topicObj = pubSubClient.topic(topic);
-      await topicObj.publishMessage({ data: messageBuffer });
-    } catch (err: any) {
-      console.error("Publish failed: ", JSON.stringify(err));
-      console.error("cause:", JSON.stringify(err.cause));
-      console.error("errors:", JSON.stringify(err.errors));
 
-      if (err.cause) {
-        console.error({
-          code: err.cause.code,
-          details: err.cause.details,
-          message: err.cause.message,
-          metadata: err.cause.metadata,
-        });
-      }
+      const messageId = await topicObj.publishMessage({
+        data: Buffer.from(JSON.stringify(data)),
+      });
+
+      console.log(`Published ${messageId} -> ${topic}`);
+
+      return messageId;
+    } catch (err: any) {
+      console.error("Pub/Sub publish failed:", {
+        projectId: config.GOOGLE_PUBSUB_PROJECT_ID,
+        topic,
+        name: err?.name,
+        message: err?.message,
+        code: err?.code,
+        details: err?.details,
+        cause: err?.cause,
+        causeMessage: err?.cause?.message,
+        causeCode: err?.cause?.code,
+      });
+
       throw err;
     }
   },
-
   subscribe: async (topic: string, callback: (data: any) => void) => {
     const topicObj = pubSubClient.topic(topic);
     await topicObj.create().catch((err) => {
@@ -73,7 +63,7 @@ export const pubSub = {
         console.error("Failed to create subscription");
         return;
       }
-      console.log({ subscription });
+
       subscription.on("message", (message) => {
         console.log(`Received message for ${topic}:`, message.data.toString());
         callback(JSON.parse(message.data.toString()));

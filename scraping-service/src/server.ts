@@ -9,6 +9,7 @@ const port = process.env.PORT || 3002;
 const logger = createLogger("scraping_service");
 
 if (config.NODE_ENV === "development") {
+  console.log("development!! - scraper");
   pubSub.subscribe(PUBSUB_TOPIC.SCRAPING, async (data) => {
     logger.info("scraping data", JSON.stringify({ data }));
     await runScrape(data);
