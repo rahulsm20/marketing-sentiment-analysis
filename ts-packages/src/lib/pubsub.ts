@@ -30,6 +30,7 @@ export const pubSub = {
   publish: async (topic: string, data: any) => {
     const messageBuffer = Buffer.from(JSON.stringify(data));
     try {
+      console.log("publishing data: ", JSON.stringify(data), topic);
       const topicObj = pubSubClient.topic(topic);
       await topicObj.publishMessage({ data: messageBuffer });
     } catch (err: any) {
