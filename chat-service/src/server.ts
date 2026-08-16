@@ -44,6 +44,7 @@ app.get("/", async (_req: Request, res: Response) => {
 });
 
 app.get("*", async (_req: Request, res: Response) => {
+  console.error("Invalid route");
   return res.status(404).json({ error: "Invalid route" });
 });
 
