@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "bun --watch src/server.ts",
-    "build": "bun build src/server.ts --outdir ./dist --target node",
+    "build": "bun build src/server.ts --outdir ./dist --target node --external @google-cloud/*",
     "start": "bun dist/server.js",
     "generate": "bunx drizzle-kit generate --dialect=postgresql --schema src/lib/db/schema.ts --out ./drizzle",
     "migrate": "bunx drizzle-kit generate --dialect=postgresql --schema src/lib/db/schema.ts --out ./drizzle && bunx drizzle-kit push"

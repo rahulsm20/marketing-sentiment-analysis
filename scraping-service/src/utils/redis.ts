@@ -11,7 +11,7 @@ export const redisClient = createClient({
 redisClient.on("connect", () => console.log("Connected to Redis"));
 redisClient.on("disconnect", () => console.log("Disconnected from Redis"));
 redisClient.on("error", function (error) {
-  console.error(error);
+  console.error("failed to connect to redis: ", JSON.stringify(error));
 });
 
 const connectRedis = async () => {

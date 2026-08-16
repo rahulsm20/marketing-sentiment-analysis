@@ -21,7 +21,7 @@ const Conversation = () => {
 
   useEffect(() => {
     if (error && !conversation) {
-      toast(`Failed to fetch conversation ${id}`, {
+      toast(`Failed to fetch conversation ${id}: ${error.message}`, {
         position: "top-center",
         action: {
           label: "Dismiss",

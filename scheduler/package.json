@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "bun build src/server.ts --outdir ./dist --target node",
+    "build": "bun build src/server.ts --outdir ./dist --target node --external @google-cloud/*",
     "dev": "bun --watch src/server.ts",
-    "start": "node dist/server.js"
+    "start": "bun dist/server.js"
   },
   "keywords": [],
   "author": "",

@@ -363,7 +363,7 @@ export async function runScrape(data: { query: string; id: string }) {
             reviews: product.reviews,
           });
         } catch (error) {
-          console.error(error);
+          console.error(JSON.stringify(error));
           return { error, status: 500 };
         }
       }
@@ -383,12 +383,14 @@ export async function runScrape(data: { query: string; id: string }) {
       });
       return {
         data: { products: cardData, conversationId },
+        status: 200,
       };
     } catch (error) {
-      console.error(error);
+      console.error(JSON.stringify(error));
       if (error instanceof Error) {
         return {
           error: { message: error.message || "An error occurred." },
+          status: 400,
         };
       }
     } finally {
