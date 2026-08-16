@@ -10,7 +10,7 @@ export const rateLimiter = async (
 ) => {
   const address = ip.address();
   const encoded = Buffer.from(address).toString("base64");
-  const cacheKey = `ip:${encoded}`;
+  const cacheKey = `ip:market_sentience:${encoded}`;
   const data = await retrieveCachedData(cacheKey);
   if (data) {
     if (parseInt(data) > config.RATE_LIMIT) {
