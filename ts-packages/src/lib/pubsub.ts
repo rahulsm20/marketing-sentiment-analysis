@@ -10,12 +10,10 @@ import { PubSub } from "@google-cloud/pubsub";
 
 function createPubSubClient() {
   if (config.NODE_ENV === "production") {
-    console.log("production!!!");
     return new PubSub({
       projectId: config.GOOGLE_PUBSUB_PROJECT_ID,
     });
   }
-  console.log("development!!!");
   return new PubSub({
     projectId: config.GOOGLE_PUBSUB_PROJECT_ID,
     apiKey: config.GOOGLE_API_KEY,
@@ -28,20 +26,6 @@ function createPubSubClient() {
 
 let pubSubClient = createPubSubClient();
 
-// grpc-js sometimes resolves a call against a dead/reset HTTP2 channel with no
-// real status trailer (e.g. Cloud Run freezes CPU between requests and GFE
-// silently drops the idle connection). gax's built-in retry only retries codes
-// on its transient allowlist, and this shows up with no code at all, so it
-// never gets retried automatically. Recreating the client forces a fresh
-// channel on next attempt.
-function isDeadChannelError(err: any) {
-  return (
-    err?.code === undefined &&
-    typeof err?.message === "string" &&
-    err.message.includes("undefined undefined: undefined")
-  );
-}
-
 export const pubSub = {
   publish: async (
     topic: string,
@@ -49,19 +33,12 @@ export const pubSub = {
     _retried = false,
   ): Promise<string> => {
     try {
-      console.log("creating topic obj");
       const topicObj = pubSubClient.topic(topic);
-      console.log("created topic obj: ", topic);
       // const [exists] = await topicObj.exists();
-
       // console.log("Pub/Sub topic exists:", exists);
-
       const messageId = await topicObj.publishMessage({
         data: Buffer.from(JSON.stringify(data)),
       });
-
-      console.log(`Published ${messageId} -> ${topic}`);
-
       return messageId;
     } catch (err: any) {
       console.log({
@@ -85,14 +62,6 @@ export const pubSub = {
           errors: err?.errors,
         }),
       );
-
-      if (!_retried && isDeadChannelError(err)) {
-        console.log(
-          "Dead Pub/Sub channel detected, recreating client and retrying once",
-        );
-        pubSubClient = createPubSubClient();
-        return pubSub.publish(topic, data, true);
-      }
 
       throw err;
     }
