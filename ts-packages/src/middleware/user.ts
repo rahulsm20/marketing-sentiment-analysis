@@ -1,9 +1,9 @@
 import { config } from "@/config";
+import { getTokenFromHeader } from "@/lib/utils";
 import { JWKS } from "@/utils/jwt";
 import { NextFunction, Request, Response } from "express";
 import { AuthResult } from "express-oauth2-jwt-bearer";
 import { jwtVerify } from "jose";
-
 //-----------------------------------------------------------------------------------
 
 declare global {
@@ -53,7 +53,7 @@ export const jwtCheck = async (
   next: NextFunction,
 ) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
+    const token = getTokenFromHeader(req);
     if (!token) {
       return res.status(401).json({ message: "Unauthorized" });
     }
