@@ -13,7 +13,7 @@ from fastapi.security import HTTPBearer
 from py_packages.lib.mutex import acquire, is_processing, set_status, set_lock
 from py_packages.lib.pubsub import subscribe
 from app.core.generate import generate
-from py_packages.lib.types import  PubSubEvent
+from py_packages.lib.types import  PubSubEvent, PubSubPushRequest
 from py_packages.utils.constants import PUBSUB_TOPICS
 
 _IS_LOCAL = os.getenv("NODE_ENV", "development") == "development"
@@ -114,8 +114,13 @@ async def generate_strategies(request: Request):
     return await generate(query, id)
 
 @app.post("/trigger")
-async def trigger_generation(event: PubSubEvent):
+async def trigger_generation(request: PubSubPushRequest):
     """
     Endpoint to trigger an embedding for a specific query.
     """
-    return await on_generation_event(event.model_dump())
+    data = json.loads(
+        base64.b64decode(request.message.data).decode("utf-8")
+    )
+    await on_generation_event(data)
+    
+    return {"status": "ok"}

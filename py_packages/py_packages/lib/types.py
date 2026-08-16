@@ -6,3 +6,10 @@ class PubSubEvent(BaseModel):
     category: str | None = None
     query: str | None = None
     id: str
+
+class PubSubMessage(BaseModel):
+    data: str
+
+class PubSubPushRequest(BaseModel):
+    message: PubSubMessage
+    subscription: str | None = None

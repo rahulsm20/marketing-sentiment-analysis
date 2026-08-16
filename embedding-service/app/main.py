@@ -17,7 +17,7 @@ from fastapi.security import HTTPBearer
 from app.api.v1.embeddings import embed 
 from py_packages.lib.pubsub import subscribe
 from py_packages.lib.mutex import  is_processing, set_lock
-from py_packages.lib.types import PubSubEvent
+from py_packages.lib.types import PubSubEvent, PubSubPushRequest
 from py_packages.utils.constants import PUBSUB_TOPICS
 from pydantic import BaseModel
 
@@ -105,11 +105,14 @@ async def create_embedding(query: str):
     return response
 
 @app_router.post("/trigger")
-async def trigger_embedding(event: PubSubEvent):
-    """
-    Endpoint to trigger an embedding for a specific query.
-    """
-    return await on_embedding_event(event.model_dump())
+async def trigger_embedding(request: PubSubPushRequest):
+    data = json.loads(
+        base64.b64decode(request.message.data).decode("utf-8")
+    )
+
+    await on_embedding_event(data)
+
+    return {"status": "ok"}
 
 # @app_router.get("/clear")
 # async def clear():
