@@ -1,4 +1,5 @@
 import Body from "@/components/user/Body";
+import Footer from "@/components/user/Footer";
 import Navbar from "@/components/user/Navbar";
 import Sidebar from "@/components/user/Sidebar";
 
@@ -14,6 +15,7 @@ const Home = () => {
           <Body />
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
